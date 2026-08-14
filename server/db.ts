@@ -10,12 +10,13 @@ export async function getDb() {
   }
   return _db;
 }
+export function buildUserUpsertSet(values: InsertUser) { return { email: values.email, loginMethod: values.loginMethod, lastSignedIn: values.lastSignedIn, role: values.role }; }
 
 export async function upsertUser(user: InsertUser) {
   if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb(); if (!db) return;
   const values: InsertUser = { openId: user.openId, name: user.name ?? null, email: user.email ?? null, loginMethod: user.loginMethod ?? null, lastSignedIn: user.lastSignedIn ?? new Date(), role: user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user") };
-  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: { name: values.name, email: values.email, loginMethod: values.loginMethod, lastSignedIn: values.lastSignedIn, role: values.role } });
+  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: buildUserUpsertSet(values) });
 }
 export async function getUserByOpenId(openId: string) { const db = await getDb(); if (!db) return undefined; const rows = await db.select().from(users).where(eq(users.openId, openId)).limit(1); return rows[0]; }
 

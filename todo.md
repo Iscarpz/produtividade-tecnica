@@ -173,3 +173,15 @@
 - [x] Preservar atualização automática de Dashboard, filas, busca, atenção necessária, trocas e recusados sem F5
 - [x] Cobrir exclusão, acesso direto a chamado inexistente e ordem de cache/navegação com testes automatizados
 - [x] Validar check, testes, build e fluxo completo de exclusão; salvar checkpoint publicado
+
+# Rodada 9 — Navegação, filtros e persistência do técnico
+
+- [x] Alterar a sidebar para expandir e recolher por hover, sem deslocar ou ocultar o conteúdo principal
+- [x] Remover PP e Orçamento da navegação lateral, preservando suas consultas pelo filtro da central de Chamados
+- [x] Organizar visualmente operação, ferramentas externas e sistema no menu lateral
+- [x] Adicionar links externos Portal ATP e Posiflow em nova aba, mantendo Laudo Creator destacado
+- [x] Adicionar filtro de status à página Chamados, integrado à busca por número e serial
+- [x] Garantir Todos como padrão e filtros para Em andamento, PP, Orçamento, Zurich, Troca e Orçamento recusado
+- [x] Corrigir persistência do nome do técnico após salvar, recarregar, reiniciar e autenticar novamente
+- [x] Preservar exclusão e demais regras de negócio existentes sem regressões
+- [x] Cobrir menu, filtros, links e persistência com testes; validar check, testes, build e publicar checkpoint
