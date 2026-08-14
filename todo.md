@@ -156,3 +156,10 @@
 - [x] Retornar para a lista ou dashboard após excluir o chamado
 - [x] Adicionar testes de integridade da exclusão e da terminologia Zurich
 - [x] Validar a interface, o banco e os fluxos preservados; salvar checkpoint final da Rodada 8
+
+# Rodada 8 — Refinamento da exclusão
+
+- [x] Remover a área de aviso permanente e seus textos da ficha técnica, preservando apenas o botão Excluir chamado
+- [x] Manter a explicação completa, botões destrutivos e comportamento de cancelamento somente no modal centralizado
+- [x] Preservar integralmente a mutation e as invalidações já implementadas para a exclusão permanente
+- [x] Validar check, testes, build e aparência do botão e modal; salvar checkpoint publicado
