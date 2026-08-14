@@ -4,6 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { addRepair, createCall, getCallBundle, getCallByOs, listCalls, productivity, transitionCall } from "./db";
+import { extractCallFromImage } from "./ocr";
 
 const dateRange = z.object({ from: z.coerce.date(), to: z.coerce.date() });
 export const appRouter = router({
@@ -13,6 +14,7 @@ export const appRouter = router({
     logout: publicProcedure.mutation(({ ctx }) => { const cookieOptions = getSessionCookieOptions(ctx.req); ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 }); return { success: true } as const; }),
   }),
   calls: router({
+    extractFromImage: protectedProcedure.input(z.object({ imageDataUrl: z.string().min(32).max(12000000) })).mutation(({ input }) => extractCallFromImage(input.imageDataUrl)),
     list: protectedProcedure.input(z.object({ status: z.string().optional(), search: z.string().optional() }).optional()).query(({ ctx, input }) => listCalls(ctx.user.id, input?.status, input?.search)),
     detail: protectedProcedure.input(z.object({ id: z.number() })).query(({ ctx, input }) => getCallBundle(ctx.user.id, input.id)),
     findByOs: protectedProcedure.input(z.object({ numeroOs: z.string() })).query(({ ctx, input }) => getCallByOs(ctx.user.id, input.numeroOs)),

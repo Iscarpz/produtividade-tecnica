@@ -49,10 +49,11 @@ const transitions: Record<string, { status: any; event?: any; label: string; clo
   "Troca": { status: "TROCA", label: "Chamado marcado como troca", closed: true, from: ["AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "AGUARDANDO SEGURADORA"] },
   "Recusado": { status: "RECUSADO", label: "Chamado recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "AGUARDANDO SEGURADORA"] },
 };
+export function isAllowedTransition(currentStatus: string, action: string) { const transition = transitions[action]; return Boolean(transition && transition.from.includes(currentStatus)); }
 export async function transitionCall(userId: number, id: number, action: string) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const call = await getCall(userId, id); if (!call) throw new Error("Chamado não encontrado");
-  const transition = transitions[action]; if (!transition || !transition.from.includes(call.status)) throw new Error("Ação não disponível para o status atual");
+  const transition = transitions[action]; if (!isAllowedTransition(call.status, action)) throw new Error("Ação não disponível para o status atual");
   const now = new Date();
   await db.update(calls).set({ status: transition.status, dataFinalizacao: transition.closed ? now : null, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
   await db.insert(history).values({ chamadoId: id, userId, evento: transition.label, statusAnterior: call.status, statusNovo: transition.status, createdAt: now });
