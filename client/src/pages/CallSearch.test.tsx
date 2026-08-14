@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import React from "react";
 import "@testing-library/jest-dom/vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocked = vi.hoisted(() => ({ list: vi.fn() }));
 const setLocation = vi.fn();
@@ -16,20 +16,24 @@ vi.mock("wouter", () => ({ useLocation: () => ["/chamados", setLocation] }));
 import CallSearch from "./CallSearch";
 
 describe("CallSearch UI", () => {
+  afterEach(cleanup);
   beforeEach(() => { setLocation.mockClear(); mocked.list.mockImplementation(() => ({ data: rows, isLoading: false })); });
   it("mostra todos por padrão e combina filtro de status com busca por serial", () => {
     render(<CallSearch />);
-    expect(mocked.list).toHaveBeenLastCalledWith({ status: undefined, search: undefined }, expect.any(Object));
+    expect(mocked.list).toHaveBeenLastCalledWith(undefined, expect.any(Object));
+    expect(screen.getByRole("button", { name: "Todos, 2 chamados" })).toHaveTextContent("2");
+    expect(screen.getByRole("button", { name: "Em andamento, 1 chamados" })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: "PP, 1 chamados" })).toHaveTextContent("1");
     expect(screen.getByText("Chamado 60006454345")).toBeInTheDocument();
     expect(screen.getByText("Chamado 60006454346")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "PP" }));
-    expect(mocked.list).toHaveBeenLastCalledWith({ status: "AGUARDANDO PP", search: undefined }, expect.any(Object));
+    fireEvent.click(screen.getByRole("button", { name: "PP, 1 chamados" }));
+    expect(mocked.list).toHaveBeenLastCalledWith(undefined, expect.any(Object));
     expect(screen.queryByText("Chamado 60006454345")).not.toBeInTheDocument();
     expect(screen.getByText("Chamado 60006454346")).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("Pesquisar por número do chamado ou serial"), { target: { value: "PP123" } });
-    expect(mocked.list).toHaveBeenLastCalledWith({ status: "AGUARDANDO PP", search: "PP123" }, expect.any(Object));
+    expect(screen.getByRole("button", { name: "Todos, 2 chamados" })).toHaveTextContent("2");
     expect(screen.getByText("Chamado 60006454346")).toBeInTheDocument();
   });
 

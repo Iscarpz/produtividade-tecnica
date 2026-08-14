@@ -185,3 +185,9 @@
 - [x] Corrigir persistência do nome do técnico após salvar, recarregar, reiniciar e autenticar novamente
 - [x] Preservar exclusão e demais regras de negócio existentes sem regressões
 - [x] Cobrir menu, filtros, links e persistência com testes; validar check, testes, build e publicar checkpoint
+
+# Rodada 9 — Contadores nos filtros
+
+- [x] Exibir a quantidade total de chamados em um badge ao lado de Todos e de cada filtro de status
+- [x] Manter as contagens independentes da busca digitada e atualizá-las junto com a lista
+- [x] Cobrir contagens por filtro com testes e validar check, testes, build e checkpoint publicado
