@@ -14,7 +14,7 @@ const rows = [
 vi.mock("@/lib/trpc", () => ({ trpc: { calls: { list: { useQuery: mocked.list } } } }));
 vi.mock("wouter", () => ({ useLocation: () => ["/chamados", setLocation] }));
 
-import CallSearch, { FILTER_BADGE_CLASS, STATUS_FILTERS } from "./CallSearch";
+import CallSearch, { buildFinalizedCallsCsv, FILTER_BADGE_CLASS, STATUS_FILTERS } from "./CallSearch";
 
 describe("CallSearch UI", () => {
   afterEach(cleanup);
@@ -51,5 +51,13 @@ describe("CallSearch UI", () => {
     expect(FILTER_BADGE_CLASS["AGUARDANDO PP"]).toContain("amber");
     expect(FILTER_BADGE_CLASS.Zurich).toContain("rose");
     expect(FILTER_BADGE_CLASS.RECUSADO).toContain("red");
+  });
+
+  it("gera CSV UTF-8 compatível com Excel para os chamados finalizados", () => {
+    const csv = buildFinalizedCallsCsv(rows.filter((call) => call.status === "FINALIZADO"));
+    expect(csv.startsWith("\ufeff")).toBe(true);
+    expect(csv).toContain('"Número do chamado";"Serial";"Modelo"');
+    expect(csv).toContain('"60006454347";"DONE123";"Modelo finalizado"');
+    expect(csv).toContain('"FINALIZADO"');
   });
 });

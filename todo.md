@@ -199,3 +199,9 @@
 - [x] Aplicar cores semânticas aos badges para diferenciar status normais, de atenção e críticos
 - [x] Preservar busca, contagens independentes e filtros existentes sem regressões
 - [x] Cobrir Finalizados e estilos de criticidade com testes; validar check, testes, build e checkpoint publicado
+
+# Rodada 10 — Exportação de Finalizados
+
+- [x] Definir colunas e gerar CSV UTF-8 compatível com Excel para chamados Finalizados
+- [x] Adicionar botão de exportação somente quando o filtro Finalizados estiver selecionado
+- [x] Cobrir a geração do CSV e validar check, testes, build e checkpoint publicado
