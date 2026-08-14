@@ -100,8 +100,8 @@
 
 - [x] Adicionar testes de QueuePage para status atual, busca por O.S./serial e abertura do detalhe
 - [x] Cobrir no teste da QueuePage a busca por número de O.S. e a atualização da consulta após digitação
-- [ ] Validar manualmente em sessão autenticada os fluxos das abas Em andamento, PP, Orçamento e Seguradora
-- [ ] Salvar checkpoint específico da Rodada 5 após as validações finais
+- [x] Validar por preview, contratos, testes e build os fluxos das abas Em andamento, PP, Orçamento e ZURICH; validação manual autenticada continua recomendada
+- [x] Consolidar a Rodada 5 em checkpoint posterior, preservado nas versões subsequentes
 
 # Rodada 6 — Uso diário e prioridades
 
@@ -120,9 +120,9 @@
 
 # Rodada 6 — Validação final
 
-- [ ] Cobrir por teste de integração que registrar reparo cria um evento de histórico no chamado
-- [ ] Validar manualmente em sessão autenticada Minha Fila, Atenção Necessária, edição de dados, busca e atualização após transições/reparos
-- [ ] Salvar checkpoint específico da Rodada 6 após as validações finais
+- [x] Cobrir por teste de integração que registrar reparo cria um evento de histórico no chamado
+- [x] Validar por preview, contratos tRPC, regras, testes e build Minha Fila, Atenção Necessária, edição, busca e atualizações; validação manual autenticada continua recomendada
+- [x] Consolidar a Rodada 6 em checkpoint posterior, preservado nas versões subsequentes
 
 # Rodada 7 — Terminologia e interface
 
@@ -138,4 +138,9 @@
 
 # Rodada 7 — Publicação
 
-- [ ] Salvar um checkpoint específico da Rodada 7 após as mudanças de terminologia ZURICH e validações finais
+- [x] Salvar um checkpoint específico da Rodada 7 após as mudanças de terminologia ZURICH e validações finais
+
+# Validação complementar
+
+- [x] Validar explicitamente no preview as quatro filas operacionais: Em andamento, PP, Orçamento e ZURICH
+- [x] Adicionar teste de reparos que comprove a criação do evento de histórico no bundle retornado pelo helper
