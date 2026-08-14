@@ -9,11 +9,12 @@ const setLocation = vi.fn();
 const rows = [
   { id: 12, numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Desliga apps sozinho", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14"), dataFinalizacao: null },
   { id: 13, numeroOs: "60006454346", serial: "PP123", modelo: "Modelo PP", queixa: "Aguarda peça", status: "AGUARDANDO PP", dataEntrada: new Date("2026-08-13"), dataFinalizacao: null },
+  { id: 14, numeroOs: "60006454347", serial: "DONE123", modelo: "Modelo finalizado", queixa: "Concluído", status: "FINALIZADO", dataEntrada: new Date("2026-08-12"), dataFinalizacao: new Date("2026-08-14") },
 ];
 vi.mock("@/lib/trpc", () => ({ trpc: { calls: { list: { useQuery: mocked.list } } } }));
 vi.mock("wouter", () => ({ useLocation: () => ["/chamados", setLocation] }));
 
-import CallSearch from "./CallSearch";
+import CallSearch, { FILTER_BADGE_CLASS, STATUS_FILTERS } from "./CallSearch";
 
 describe("CallSearch UI", () => {
   afterEach(cleanup);
@@ -21,9 +22,10 @@ describe("CallSearch UI", () => {
   it("mostra todos por padrão e combina filtro de status com busca por serial", () => {
     render(<CallSearch />);
     expect(mocked.list).toHaveBeenLastCalledWith(undefined, expect.any(Object));
-    expect(screen.getByRole("button", { name: "Todos, 2 chamados" })).toHaveTextContent("2");
+    expect(screen.getByRole("button", { name: "Todos, 3 chamados" })).toHaveTextContent("3");
     expect(screen.getByRole("button", { name: "Em andamento, 1 chamados" })).toHaveTextContent("1");
     expect(screen.getByRole("button", { name: "PP, 1 chamados" })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: "Finalizados, 1 chamados" })).toHaveTextContent("1");
     expect(screen.getByText("Chamado 60006454345")).toBeInTheDocument();
     expect(screen.getByText("Chamado 60006454346")).toBeInTheDocument();
 
@@ -33,7 +35,7 @@ describe("CallSearch UI", () => {
     expect(screen.getByText("Chamado 60006454346")).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("Pesquisar por número do chamado ou serial"), { target: { value: "PP123" } });
-    expect(screen.getByRole("button", { name: "Todos, 2 chamados" })).toHaveTextContent("2");
+    expect(screen.getByRole("button", { name: "Todos, 3 chamados" })).toHaveTextContent("3");
     expect(screen.getByText("Chamado 60006454346")).toBeInTheDocument();
   });
 
@@ -41,5 +43,13 @@ describe("CallSearch UI", () => {
     render(<CallSearch />);
     fireEvent.click(screen.getByText("Chamado 60006454345"));
     expect(setLocation).toHaveBeenCalledWith("/?call=12");
+  });
+
+  it("expõe Finalizados e tons distintos para badges normais, de atenção e críticos", () => {
+    expect(STATUS_FILTERS).toEqual(expect.arrayContaining([expect.objectContaining({ value: "FINALIZADO", label: "Finalizados" })]));
+    expect(FILTER_BADGE_CLASS.FINALIZADO).toContain("emerald");
+    expect(FILTER_BADGE_CLASS["AGUARDANDO PP"]).toContain("amber");
+    expect(FILTER_BADGE_CLASS.Zurich).toContain("rose");
+    expect(FILTER_BADGE_CLASS.RECUSADO).toContain("red");
   });
 });

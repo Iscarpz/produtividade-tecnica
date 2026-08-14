@@ -191,3 +191,11 @@
 - [x] Exibir a quantidade total de chamados em um badge ao lado de Todos e de cada filtro de status
 - [x] Manter as contagens independentes da busca digitada e atualizá-las junto com a lista
 - [x] Cobrir contagens por filtro com testes e validar check, testes, build e checkpoint publicado
+
+# Rodada 10 — Habilidade, Finalizados e criticidade visual
+
+- [x] Criar e validar uma habilidade reutilizável para evoluções seguras de sistemas internos de produtividade técnica
+- [x] Adicionar o filtro Finalizados à central de Chamados com badge de quantidade total
+- [x] Aplicar cores semânticas aos badges para diferenciar status normais, de atenção e críticos
+- [x] Preservar busca, contagens independentes e filtros existentes sem regressões
+- [x] Cobrir Finalizados e estilos de criticidade com testes; validar check, testes, build e checkpoint publicado
