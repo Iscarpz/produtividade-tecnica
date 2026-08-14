@@ -28,12 +28,15 @@ export async function listCalls(userId: number, status?: string, search?: string
 }
 export async function getCall(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const row = await db.select().from(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))).limit(1); return row[0]; }
 export async function getCallByOs(userId: number, numeroOs: string) { const db = await getDb(); if (!db) return undefined; const row = await db.select().from(calls).where(and(eq(calls.userId, userId), eq(calls.numeroOs, numeroOs))).limit(1); return row[0]; }
+export async function updateUserProfile(userId: number, name: string) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.update(users).set({ name: name.trim(), updatedAt: new Date() }).where(eq(users.id, userId)); return db.select().from(users).where(eq(users.id, userId)).limit(1).then((rows) => rows[0]); }
+export async function listHistoricalCalls(userId: number, status: "TROCA" | "RECUSADO", search?: string) { const db = await getDb(); if (!db) return []; const rows = await listCalls(userId, status, search); return Promise.all(rows.map(async (call) => { const events = await db.select().from(history).where(and(eq(history.chamadoId, call.id), eq(history.statusNovo, status))).orderBy(desc(history.createdAt)).limit(1); const event = events[0]; return { ...call, dataMovimento: event?.createdAt ?? null, origem: event?.statusAnterior ?? null }; })); }
 export async function getCallBundle(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const call = await getCall(userId, id); if (!call) return undefined; const [repairRows, historyRows] = await Promise.all([db.select().from(repairs).where(eq(repairs.chamadoId, id)).orderBy(desc(repairs.createdAt)), db.select().from(history).where(eq(history.chamadoId, id)).orderBy(desc(history.createdAt))]); return { call, repairs: repairRows, history: historyRows }; }
 
+export function buildNewCallValues(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string }, now = new Date()) { return { userId, ...data, status: "EM ANDAMENTO" as const, dataEntrada: now, dataFinalizacao: null, createdAt: now, updatedAt: now }; }
 export async function createCall(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const now = new Date();
-  const result = await db.insert(calls).values({ userId, ...data, status: "EM ANDAMENTO", dataEntrada: now, createdAt: now, updatedAt: now });
+  const result = await db.insert(calls).values(buildNewCallValues(userId, data, now));
   const id = Number(result[0].insertId);
   await db.insert(history).values({ chamadoId: id, userId, evento: "Chamado recebido", statusNovo: "EM ANDAMENTO", createdAt: now });
   await db.insert(productivityEvents).values({ chamadoId: id, userId, tipoEvento: "RECEBIDO", createdAt: now });

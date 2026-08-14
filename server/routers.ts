@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addRepair, createCall, getCallBundle, getCallByOs, listCalls, productivity, transitionCall } from "./db";
+import { addRepair, createCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, productivity, transitionCall, updateUserProfile } from "./db";
 import { extractCallFromImage } from "./ocr";
 
 const dateRange = z.object({ from: z.coerce.date(), to: z.coerce.date() });
@@ -12,6 +12,7 @@ export const appRouter = router({
   auth: router({
     me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => { const cookieOptions = getSessionCookieOptions(ctx.req); ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 }); return { success: true } as const; }),
+    updateProfile: protectedProcedure.input(z.object({ name: z.string().min(1).max(120) })).mutation(({ ctx, input }) => updateUserProfile(ctx.user.id, input.name)),
   }),
   calls: router({
     extractFromImage: protectedProcedure.input(z.object({ imageDataUrl: z.string().min(32).max(12000000) })).mutation(({ input }) => extractCallFromImage(input.imageDataUrl)),
@@ -23,5 +24,6 @@ export const appRouter = router({
     addRepair: protectedProcedure.input(z.object({ chamadoId: z.number(), peca: z.string().min(1), codigo: z.string().optional(), serialRetirada: z.string().optional(), serialInstalada: z.string().optional(), observacao: z.string().optional() })).mutation(({ ctx, input }) => addRepair(ctx.user.id, input)),
   }),
   productivity: router({ range: protectedProcedure.input(dateRange).query(({ ctx, input }) => productivity(ctx.user.id, input.from, input.to)) }),
+  historical: router({ troca: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "TROCA", input?.search)), recusado: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "RECUSADO", input?.search)) }),
 });
 export type AppRouter = typeof appRouter;

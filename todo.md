@@ -39,3 +39,23 @@
 - [x] Validar no preview a interface desktop corrigida e o fluxo de cadastro; a validação manual com imagem real depende da sessão do usuário
 - [x] Registrar evidência visual do dashboard/sidebar corrigidos no preview desktop
 - [x] Cobrir o fluxo de print até a mutation e conferência com testes de contrato; interação manual de arquivo permanece recomendada
+
+# Rodada 3 — Correções e melhorias
+
+- [x] Corrigir parser para o formato tabular real e extrair O.S., serial, modelo e queixa exatamente
+- [x] Garantir criação persistente com status EM ANDAMENTO e dataFinalizacao NULL
+- [x] Testar efetivamente o texto real fornecido no prompt com teste automatizado de parser
+- [x] Implementar Ctrl+V de imagem no modal de cadastro, coexistindo com upload tradicional
+- [x] Manter OCR com conferência explícita antes da criação
+- [x] Garantir atualização automática das listas após criação e transições sem F5
+- [x] Reorganizar sidebar para Dashboard, Chamados, Trocas, Orçamentos recusados, Laudo Creator e Configurações
+- [x] Abrir Laudo Creator em nova aba com URL configurável em um único ponto
+- [x] Criar página histórica de Trocas com origem e datas relevantes
+- [x] Criar página histórica de Orçamentos recusados com origem e datas relevantes
+- [x] Reduzir repetição visual da página principal e separar produtividade de acompanhamento
+- [x] Criar página simples de configurações com nome, preferências básicas e logout
+- [x] Garantir opção clara de Sair/Logout
+- [x] Adicionar rodapé discreto com “Desenvolvido por Vinicius Scarpeta”
+- [x] Adicionar testes de parser, persistência, OCR/mutation, transições e consultas históricas tRPC
+- [ ] Validar fluxo real completo com sessão autenticada e salvar novo checkpoint
+- [x] Adicionar testes Vitest para historical.troca e historical.recusado, incluindo pesquisa e origem/data do evento
