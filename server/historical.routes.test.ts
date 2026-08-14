@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 const { listHistoricalCalls } = vi.hoisted(() => ({ listHistoricalCalls: vi.fn() }));
-vi.mock("./db", () => ({ addRepair: vi.fn(), createCall: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), listCalls: vi.fn(), listHistoricalCalls, productivity: vi.fn(), transitionCall: vi.fn(), updateUserProfile: vi.fn() }));
+vi.mock("./db", () => ({ addRepair: vi.fn(), createCall: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), listCalls: vi.fn(), listHistoricalCalls, productivity: vi.fn(), transitionCall: vi.fn(), updateCallData: vi.fn(), updateUserProfile: vi.fn() }));
 
 import { appRouter } from "./routers";
 

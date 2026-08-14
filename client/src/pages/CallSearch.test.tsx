@@ -15,10 +15,11 @@ describe("CallSearch UI", () => {
   beforeEach(() => setLocation.mockClear());
   it("mostra resultado ao pesquisar e abre os detalhes ao selecionar", () => {
     render(<CallSearch />);
-    const input = screen.getByPlaceholderText("Digite a O.S. ou o serial...");
+    const input = screen.getByPlaceholderText("Pesquisar por número do chamado ou serial");
     fireEvent.change(input, { target: { value: "5A538SY82" } });
-    expect(screen.getByText("60006454345")).toBeInTheDocument();
-    fireEvent.click(screen.getByText("60006454345"));
+    expect(screen.getByText("Chamado 60006454345")).toBeInTheDocument();
+    expect(screen.getByText("com o técnico")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Chamado 60006454345"));
     expect(setLocation).toHaveBeenCalledWith("/?call=12");
   });
 });

@@ -82,3 +82,60 @@
 - [x] Salvar checkpoint específico após concluir e validar a Rodada 4
 - [x] Adicionar teste de UI da página CallSearch cobrindo busca, resultado e abertura do detalhe
 - [x] Salvar checkpoint final específico da Rodada 4 após a cobertura de UI
+
+# Rodada 5 — Layout, filas e ficha técnica
+
+- [x] Eliminar rolagem horizontal e adaptar todo o conteúdo à largura disponível no desktop
+- [x] Tornar a sidebar recolhível, mantendo ícones, expansão por botão e espaço reservado para o conteúdo
+- [x] Adicionar PP, Orçamento, Seguradora e Em andamento como filas navegáveis no menu
+- [x] Implementar páginas de fila com busca por O.S./serial e atualização automática por status atual
+- [x] Formalizar a queixa de forma técnica sem diagnóstico e manter a versão original disponível para conferência
+- [x] Reformular o detalhe do chamado como ficha técnica, com ações contextuais, reparos e timeline organizada
+- [x] Garantir retorno simples à fila de origem após tratar um chamado
+- [x] Preservar a regra de produtividade por eventos e as atualizações sem F5
+- [x] Adicionar e executar testes para formalização, filtros de fila e ações contextuais
+- [x] Validar layout desktop, navegação e fluxos da Rodada 5 e salvar checkpoint
+
+# Rodada 5 — Cobertura final
+
+- [x] Adicionar testes de QueuePage para status atual, busca por O.S./serial e abertura do detalhe
+- [x] Cobrir no teste da QueuePage a busca por número de O.S. e a atualização da consulta após digitação
+- [ ] Validar manualmente em sessão autenticada os fluxos das abas Em andamento, PP, Orçamento e Seguradora
+- [ ] Salvar checkpoint específico da Rodada 5 após as validações finais
+
+# Rodada 6 — Uso diário e prioridades
+
+- [x] Diferenciar visualmente os ícones de Chamados e Em andamento e tornar logo/nome do sistema um atalho para o Dashboard
+- [x] Preservar sidebar recolhível sem esconder conteúdo nem gerar rolagem horizontal
+- [x] Criar Minha Fila de Em andamento com ordenação Todos, Mais antigos e Mais recentes, padrão em Mais antigos
+- [x] Criar Atenção Necessária com grupos exclusivos: Seguradora, Próximos de 10 dias e Próximos de 30 dias
+- [x] Ordenar Atenção Necessária por tempo total com o técnico, mantendo seguradora acima dos demais
+- [x] Não incluir PP e Orçamento na seção Atenção Necessária
+- [x] Tornar Queixa e dados relevantes do chamado editáveis sem alterar a queixa original
+- [x] Melhorar ficha técnica, reparos e timeline permanente de eventos
+- [x] Confirmar busca geral independente por O.S./serial com prévia de status e dias com o técnico
+- [x] Preservar produtividade baseada em eventos, status atual separado e atualização automática sem F5
+- [x] Adicionar testes de prioridades, ordenação de fila, edição de chamado e atualização de timeline
+- [x] Validar visualmente e funcionalmente a Rodada 6 com check, 20 testes, build e preview desktop; validação manual autenticada permanece recomendada
+
+# Rodada 6 — Validação final
+
+- [ ] Cobrir por teste de integração que registrar reparo cria um evento de histórico no chamado
+- [ ] Validar manualmente em sessão autenticada Minha Fila, Atenção Necessária, edição de dados, busca e atualização após transições/reparos
+- [ ] Salvar checkpoint específico da Rodada 6 após as validações finais
+
+# Rodada 7 — Terminologia e interface
+
+- [x] Substituir Seguradora por ZURICH em status, rotas, menu, dashboard, ações, históricos e textos da interface
+- [x] Preservar as regras do fluxo ZURICH, produtividade, eventos, tempo, finalização, troca, recusado, busca e atualização automática
+- [x] Remover explicação textual da prioridade interna de Atenção Necessária, mantendo grupos e ordenação corretos
+- [x] Mostrar dinamicamente na sidebar o nome definido em Configurações e refletir atualizações sem recarregar
+- [x] Destacar Laudo Creator de forma sutil, mantendo a abertura em nova aba no endereço oficial
+- [x] Substituir a linguagem de O.S. por Chamado nas telas, cards, busca e detalhe, mantendo parser compatível com Número O.S.
+- [x] Não alterar o nome atual do sistema nem vincular a identidade a um equipamento específico
+- [x] Adicionar testes de terminologia ZURICH, perfil dinâmico e linguagem de Chamado
+- [x] Validar interface e fluxos preservados com 22 testes, check, build e revisão visual desktop; salvar checkpoint da Rodada 7
+
+# Rodada 7 — Publicação
+
+- [ ] Salvar um checkpoint específico da Rodada 7 após as mudanças de terminologia ZURICH e validações finais
