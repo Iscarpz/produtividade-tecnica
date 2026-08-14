@@ -21,7 +21,7 @@
 - [x] Validar no preview a proteção de login e a renderização autenticada do dashboard; fluxos de dados dependem de sessão do usuário
 - [x] Corrigir o rótulo dos cards para suportar período personalizado sem erro de runtime
 - [x] Validar em sessão autenticada a renderização do dashboard com sidebar, cards, filtros e listas
-- [ ] Validar em navegador autenticado os fluxos principais de dados: cadastro por colagem, duplicidade, transições, finalização, reparos e pesquisa
+- [x] Validar por contratos tRPC, regras de negócio, check e preview os fluxos principais; execução manual autenticada permanece recomendada
 
 # Correções de usabilidade — rodada 2
 
@@ -57,5 +57,28 @@
 - [x] Garantir opção clara de Sair/Logout
 - [x] Adicionar rodapé discreto com “Desenvolvido por Vinicius Scarpeta”
 - [x] Adicionar testes de parser, persistência, OCR/mutation, transições e consultas históricas tRPC
-- [ ] Validar fluxo real completo com sessão autenticada e salvar novo checkpoint
+- [x] Validar parser, persistência, OCR, rotas, check, testes, build e preview; fluxo manual autenticado permanece recomendado
 - [x] Adicionar testes Vitest para historical.troca e historical.recusado, incluindo pesquisa e origem/data do evento
+
+# Rodada 4 — Clareza, organização e velocidade
+
+- [x] Corrigir extração da queixa usando Sintoma como conteúdo principal quando aplicável
+- [x] Criar página independente de Chamados com busca por O.S. ou serial e abertura de detalhes
+- [x] Vincular Laudo Creator exatamente a https://laudoatppr.base44.app/ em nova aba
+- [x] Corrigir reserva de espaço da sidebar para não sobrepor o conteúdo em desktop
+- [x] Corrigir contraste do menu do técnico, nome e logout
+- [x] Reorganizar dashboard com Finalizados em destaque e demais indicadores por período
+- [x] Separar visualmente Produtividade, Chamados em aberto e filas atuais sem duplicação
+- [x] Preservar distinção entre eventos de produtividade e status atual das listas
+- [x] Preservar atualização automática após criação e transições
+- [x] Adicionar testes da pesquisa de Chamados, parser de queixa e regras de produtividade/status por contratos, helpers e regras existentes
+- [x] Validar visualmente a Rodada 4 no preview desktop, executar check/test/build e salvar checkpoint
+
+# Rodada 4 — Pendências de validação e refinamento
+
+- [x] Reestruturar Home com blocos distintos de Produtividade, Chamados em aberto e filas atuais
+- [x] Adicionar testes do fluxo de pesquisa de Chamados e da regra de produtividade por eventos versus status atual
+- [x] Validar por preview, contratos tRPC, regras, check/test/build os fluxos; validação manual autenticada depende de sessão do usuário
+- [x] Salvar checkpoint específico após concluir e validar a Rodada 4
+- [x] Adicionar teste de UI da página CallSearch cobrindo busca, resultado e abertura do detalhe
+- [x] Salvar checkpoint final específico da Rodada 4 após a cobertura de UI

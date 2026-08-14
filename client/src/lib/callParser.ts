@@ -10,9 +10,11 @@ function fieldValue(text: string, label: string, nextLabels: string[]) {
 }
 
 function cleanComplaint(description: string, cause: string) {
-  let result = description;
-  result = result.replace(/^.*?\bSintoma\s*:\s*/i, "");
+  let result = compact(description);
+  const symptom = result.match(/(?:^|\s)Sintoma\s*[:：-]\s*([\s\S]*)$/i);
+  if (symptom?.[1]) result = symptom[1];
   if (cause) result = result.replace(new RegExp(`^${cause.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*`, "i"), "");
+  result = result.replace(/^DESLIGANDO\s+/i, "");
   return compact(result);
 }
 
