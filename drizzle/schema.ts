@@ -20,7 +20,7 @@ export const calls = mysqlTable("calls", {
   modelo: varchar("modelo", { length: 255 }).notNull(),
   queixa: text("queixa").notNull(),
   queixaOriginal: text("queixaOriginal"),
-  status: mysqlEnum("status", ["EM ANDAMENTO", "AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "ZURICH", "FINALIZADO", "TROCA", "RECUSADO"]).notNull().default("EM ANDAMENTO"),
+  status: mysqlEnum("status", ["EM ANDAMENTO", "AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "Zurich", "FINALIZADO", "TROCA", "RECUSADO"]).notNull().default("EM ANDAMENTO"),
   dataEntrada: timestamp("dataEntrada").notNull().defaultNow(),
   dataFinalizacao: timestamp("dataFinalizacao"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
@@ -53,7 +53,7 @@ export const productivityEvents = mysqlTable("productivityEvents", {
   id: int("id").autoincrement().primaryKey(),
   chamadoId: int("chamadoId").notNull(),
   userId: int("userId").notNull(),
-  tipoEvento: mysqlEnum("tipoEvento", ["RECEBIDO", "FINALIZADO", "ENVIADO_PP", "ENVIADO_ORCAMENTO", "ENVIADO_SEGURADORA"]).notNull(),
+  tipoEvento: mysqlEnum("tipoEvento", ["RECEBIDO", "FINALIZADO", "ENVIADO_PP", "ENVIADO_ORCAMENTO", "ENVIADO_Zurich"]).notNull(),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 

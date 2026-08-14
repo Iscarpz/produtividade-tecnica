@@ -144,3 +144,15 @@
 
 - [x] Validar explicitamente no preview as quatro filas operacionais: Em andamento, PP, Orçamento e ZURICH
 - [x] Adicionar teste de reparos que comprove a criação do evento de histórico no bundle retornado pelo helper
+
+# Rodada 8 — Ajustes finais
+
+- [x] Padronizar Zurich em status, ações, menu, dashboard, listas, históricos, filtros e textos de interface
+- [x] Preservar integralmente os fluxos e regras atuais ao renomear ZURICH para Zurich
+- [x] Implementar exclusão permanente de chamado no backend, removendo chamado, histórico, eventos e reparos sem dados órfãos
+- [x] Garantir que a exclusão atualize produtividade, buscas, filas, dashboard, históricos, trocas e recusados automaticamente
+- [x] Adicionar ação Excluir chamado na ficha técnica em área secundária/perigosa
+- [x] Exigir confirmação explícita com Cancelar e Excluir permanentemente antes de apagar dados
+- [x] Retornar para a lista ou dashboard após excluir o chamado
+- [x] Adicionar testes de integridade da exclusão e da terminologia Zurich
+- [x] Validar a interface, o banco e os fluxos preservados; salvar checkpoint final da Rodada 8

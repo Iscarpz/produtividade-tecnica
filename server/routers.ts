@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addRepair, createCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, productivity, transitionCall, updateCallData, updateUserProfile } from "./db";
+import { addRepair, createCall, deleteCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, productivity, transitionCall, updateCallData, updateUserProfile } from "./db";
 import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
 
@@ -23,7 +23,8 @@ export const appRouter = router({
     findByOs: protectedProcedure.input(z.object({ numeroOs: z.string() })).query(({ ctx, input }) => getCallByOs(ctx.user.id, input.numeroOs)),
     create: protectedProcedure.input(z.object({ numeroOs: z.string().min(1), serial: z.string().min(1), modelo: z.string().min(1), queixa: z.string().min(1), queixaOriginal: z.string().optional() })).mutation(({ ctx, input }) => createCall(ctx.user.id, input)),
     updateData: protectedProcedure.input(z.object({ id: z.number(), modelo: z.string().min(1).max(255), serial: z.string().min(1).max(128), queixa: z.string().min(1).max(3000) })).mutation(({ ctx, input }) => updateCallData(ctx.user.id, input.id, { modelo: input.modelo, serial: input.serial, queixa: input.queixa })),
-    transition: protectedProcedure.input(z.object({ id: z.number(), action: z.enum(["Enviar para PP", "Enviar para Orçamento", "Enviar para ZURICH", "Retornar para Andamento", "Peça recebida", "Orçamento aprovado", "Orçamento recusado", "Finalizar", "Troca", "Recusado"]) })).mutation(({ ctx, input }) => transitionCall(ctx.user.id, input.id, input.action)),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => deleteCall(ctx.user.id, input.id)),
+    transition: protectedProcedure.input(z.object({ id: z.number(), action: z.enum(["Enviar para PP", "Enviar para Orçamento", "Enviar para Zurich", "Retornar para Andamento", "Peça recebida", "Orçamento aprovado", "Orçamento recusado", "Finalizar", "Troca", "Recusado"]) })).mutation(({ ctx, input }) => transitionCall(ctx.user.id, input.id, input.action)),
     addRepair: protectedProcedure.input(z.object({ chamadoId: z.number(), peca: z.string().min(1), codigo: z.string().optional(), serialRetirada: z.string().optional(), serialInstalada: z.string().optional(), observacao: z.string().optional() })).mutation(({ ctx, input }) => addRepair(ctx.user.id, input)),
   }),
   productivity: router({ range: protectedProcedure.input(dateRange).query(({ ctx, input }) => productivity(ctx.user.id, input.from, input.to)) }),

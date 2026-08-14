@@ -8,8 +8,8 @@ describe("regras de transição dos chamados", () => {
     expect(isAllowedTransition("AGUARDANDO PP", "Peça recebida")).toBe(true);
     expect(isAllowedTransition("AGUARDANDO ORÇAMENTO", "Recusado")).toBe(true);
     expect(isAllowedTransition("AGUARDANDO ORÇAMENTO", "Orçamento aprovado")).toBe(true);
-    expect(isAllowedTransition("ZURICH", "Orçamento recusado")).toBe(true);
-    expect(isAllowedTransition("ZURICH", "Retornar para Andamento")).toBe(true);
+    expect(isAllowedTransition("Zurich", "Orçamento recusado")).toBe(true);
+    expect(isAllowedTransition("Zurich", "Retornar para Andamento")).toBe(true);
   });
   it("bloqueia ações impossíveis e estados encerrados", () => {
     expect(isAllowedTransition("FINALIZADO", "Finalizar")).toBe(false);

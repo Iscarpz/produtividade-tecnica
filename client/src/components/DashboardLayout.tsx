@@ -10,13 +10,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 export const LAUDO_CREATOR_URL = "https://laudoatppr.base44.app/";
 
-const menuItems = [
+export const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: Search, label: "Chamados", path: "/chamados" },
   { icon: Wrench, label: "Em andamento", path: "/fila/em-andamento" },
   { icon: Package, label: "PP", path: "/fila/pp" },
   { icon: FileText, label: "Orçamento", path: "/fila/orcamento" },
-  { icon: ShieldCheck, label: "ZURICH", path: "/fila/zurich" },
+  { icon: ShieldCheck, label: "Zurich", path: "/fila/zurich" },
   { icon: RefreshCcw, label: "Trocas", path: "/trocas" },
   { icon: FileText, label: "Orçamentos recusados", path: "/recusados" },
   { icon: FileSignature, label: "Laudo Creator", path: "laudo", highlight: true },

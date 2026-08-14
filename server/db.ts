@@ -54,17 +54,38 @@ export async function updateCallData(userId: number, id: number, data: { modelo:
   return getCallBundle(userId, id);
 }
 
+export async function deleteCallWithRelations(operations: { findCall: () => Promise<unknown>; deleteRepairs: () => Promise<unknown>; deleteHistory: () => Promise<unknown>; deleteProductivityEvents: () => Promise<unknown>; deleteCall: () => Promise<unknown> }) {
+  if (!(await operations.findCall())) throw new Error("Chamado não encontrado");
+  await operations.deleteRepairs();
+  await operations.deleteHistory();
+  await operations.deleteProductivityEvents();
+  await operations.deleteCall();
+  return { success: true } as const;
+}
+
+export async function deleteCall(userId: number, id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco indisponível");
+  return db.transaction(async (tx) => deleteCallWithRelations({
+    findCall: async () => (await tx.select({ id: calls.id }).from(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))).limit(1))[0],
+    deleteRepairs: () => tx.delete(repairs).where(eq(repairs.chamadoId, id)),
+    deleteHistory: () => tx.delete(history).where(eq(history.chamadoId, id)),
+    deleteProductivityEvents: () => tx.delete(productivityEvents).where(eq(productivityEvents.chamadoId, id)),
+    deleteCall: () => tx.delete(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))),
+  }));
+}
+
 const transitions: Record<string, { status: any; event?: any; label: string; closed?: boolean; from: string[] }> = {
   "Enviar para PP": { status: "AGUARDANDO PP", event: "ENVIADO_PP", label: "Enviado para PP", from: ["EM ANDAMENTO"] },
   "Enviar para Orçamento": { status: "AGUARDANDO ORÇAMENTO", event: "ENVIADO_ORCAMENTO", label: "Enviado para orçamento", from: ["EM ANDAMENTO"] },
-  "Enviar para ZURICH": { status: "ZURICH", event: "ENVIADO_SEGURADORA", label: "Enviado para ZURICH", from: ["EM ANDAMENTO"] },
-  "Retornar para Andamento": { status: "EM ANDAMENTO", label: "Retornou para andamento", from: ["AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "ZURICH"] },
+  "Enviar para Zurich": { status: "Zurich", event: "ENVIADO_Zurich", label: "Enviado para Zurich", from: ["EM ANDAMENTO"] },
+  "Retornar para Andamento": { status: "EM ANDAMENTO", label: "Retornou para andamento", from: ["AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "Zurich"] },
   "Peça recebida": { status: "EM ANDAMENTO", label: "Peça recebida", from: ["AGUARDANDO PP"] },
-  "Orçamento aprovado": { status: "EM ANDAMENTO", label: "Orçamento aprovado", from: ["AGUARDANDO ORÇAMENTO", "ZURICH"] },
-  "Orçamento recusado": { status: "RECUSADO", label: "Orçamento recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "ZURICH"] },
+  "Orçamento aprovado": { status: "EM ANDAMENTO", label: "Orçamento aprovado", from: ["AGUARDANDO ORÇAMENTO", "Zurich"] },
+  "Orçamento recusado": { status: "RECUSADO", label: "Orçamento recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "Zurich"] },
   "Finalizar": { status: "FINALIZADO", event: "FINALIZADO", label: "Chamado finalizado", closed: true, from: ["EM ANDAMENTO"] },
-  "Troca": { status: "TROCA", label: "Chamado marcado como troca", closed: true, from: ["AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "ZURICH"] },
-  "Recusado": { status: "RECUSADO", label: "Chamado recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "ZURICH"] },
+  "Troca": { status: "TROCA", label: "Chamado marcado como troca", closed: true, from: ["AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "Zurich"] },
+  "Recusado": { status: "RECUSADO", label: "Chamado recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "Zurich"] },
 };
 export function isAllowedTransition(currentStatus: string, action: string) { const transition = transitions[action]; return Boolean(transition && transition.from.includes(currentStatus)); }
 export async function transitionCall(userId: number, id: number, action: string) {
@@ -89,4 +110,4 @@ export async function persistRepairWithHistory(operations: { getCall: () => Prom
   return bundle;
 }
 export async function addRepair(userId: number, data: { chamadoId: number; peca: string; codigo?: string; serialRetirada?: string; serialInstalada?: string; observacao?: string }) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); return persistRepairWithHistory({ getCall: () => getCall(userId, data.chamadoId), insertRepair: () => db.insert(repairs).values(data), insertHistory: (event) => db.insert(history).values(event), getBundle: () => getCallBundle(userId, data.chamadoId) }, userId, data); }
-export async function productivity(userId: number, from: Date, to: Date) { const db = await getDb(); if (!db) return { RECEBIDO: 0, FINALIZADO: 0, ENVIADO_PP: 0, ENVIADO_ORCAMENTO: 0, ENVIADO_SEGURADORA: 0 }; const rows = await db.select({ type: productivityEvents.tipoEvento, count: sql<number>`count(*)` }).from(productivityEvents).where(and(eq(productivityEvents.userId, userId), gte(productivityEvents.createdAt, from), lte(productivityEvents.createdAt, to))).groupBy(productivityEvents.tipoEvento); return Object.fromEntries(rows.map((r) => [r.type, Number(r.count)])); }
+export async function productivity(userId: number, from: Date, to: Date) { const db = await getDb(); if (!db) return { RECEBIDO: 0, FINALIZADO: 0, ENVIADO_PP: 0, ENVIADO_ORCAMENTO: 0, ENVIADO_Zurich: 0 }; const rows = await db.select({ type: productivityEvents.tipoEvento, count: sql<number>`count(*)` }).from(productivityEvents).where(and(eq(productivityEvents.userId, userId), gte(productivityEvents.createdAt, from), lte(productivityEvents.createdAt, to))).groupBy(productivityEvents.tipoEvento); return Object.fromEntries(rows.map((r) => [r.type, Number(r.count)])); }

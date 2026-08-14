@@ -8,7 +8,7 @@ import { daysOpen } from "@/lib/callParser";
 
 export function matchesCallSearch(call: { numeroOs?: string; serial?: string }, term: string) { const value = term.trim().toLowerCase(); if (!value) return true; return `${call.numeroOs || ""} ${call.serial || ""}`.toLowerCase().includes(value); }
 
-const statusClass: Record<string, string> = { "EM ANDAMENTO": "bg-blue-50 text-blue-700 border-blue-200", "AGUARDANDO PP": "bg-amber-50 text-amber-700 border-amber-200", "AGUARDANDO ORÇAMENTO": "bg-violet-50 text-violet-700 border-violet-200", ZURICH: "bg-rose-50 text-rose-700 border-rose-200", FINALIZADO: "bg-emerald-50 text-emerald-700 border-emerald-200", TROCA: "bg-slate-100 text-slate-700 border-slate-200", RECUSADO: "bg-red-50 text-red-700 border-red-200" };
+const statusClass: Record<string, string> = { "EM ANDAMENTO": "bg-blue-50 text-blue-700 border-blue-200", "AGUARDANDO PP": "bg-amber-50 text-amber-700 border-amber-200", "AGUARDANDO ORÇAMENTO": "bg-violet-50 text-violet-700 border-violet-200", Zurich: "bg-rose-50 text-rose-700 border-rose-200", FINALIZADO: "bg-emerald-50 text-emerald-700 border-emerald-200", TROCA: "bg-slate-100 text-slate-700 border-slate-200", RECUSADO: "bg-red-50 text-red-700 border-red-200" };
 
 export default function CallSearch() {
   const [search, setSearch] = useState("");

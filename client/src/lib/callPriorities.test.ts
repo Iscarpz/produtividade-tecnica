@@ -6,15 +6,15 @@ const ago = (days: number) => new Date(now.getTime() - days * 86_400_000);
 
 describe("prioridades de operação", () => {
   const calls = [
-    { id: 1, status: "ZURICH", dataEntrada: ago(3) },
-    { id: 2, status: "ZURICH", dataEntrada: ago(15) },
+    { id: 1, status: "Zurich", dataEntrada: ago(3) },
+    { id: 2, status: "Zurich", dataEntrada: ago(15) },
     { id: 3, status: "EM ANDAMENTO", dataEntrada: ago(9) },
     { id: 4, status: "EM ANDAMENTO", dataEntrada: ago(8) },
     { id: 5, status: "EM ANDAMENTO", dataEntrada: ago(29) },
     { id: 6, status: "EM ANDAMENTO", dataEntrada: ago(27) },
     { id: 7, status: "AGUARDANDO PP", dataEntrada: ago(9) },
   ];
-  it("prioriza ZURICH e não repete chamados nos grupos por dias", () => {
+  it("prioriza Zurich e não repete chamados nos grupos por dias", () => {
     const groups = attentionGroups(calls, now);
     expect(groups.zurich.map((call) => call.id)).toEqual([2, 1]);
     expect(groups.nearTen.map((call) => call.id)).toEqual([3, 4]);

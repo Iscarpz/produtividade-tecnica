@@ -5,11 +5,11 @@ import { trpc } from "@/lib/trpc";
 import { Search, Wrench, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
-const queues = {
+export const queues = {
   "em-andamento": { status: "EM ANDAMENTO", title: "Em andamento", description: "Chamados disponíveis para diagnóstico e encaminhamento.", color: "bg-blue-500" },
   pp: { status: "AGUARDANDO PP", title: "PP", description: "Chamados aguardando peça; registre o recebimento para retornar ao andamento.", color: "bg-amber-500" },
   orcamento: { status: "AGUARDANDO ORÇAMENTO", title: "Orçamento", description: "Chamados aguardando retorno do orçamento.", color: "bg-violet-500" },
-  zurich: { status: "ZURICH", title: "ZURICH", description: "Chamados em tratativa com a ZURICH.", color: "bg-rose-500" },
+  zurich: { status: "Zurich", title: "Zurich", description: "Chamados em tratativa com a Zurich.", color: "bg-rose-500" },
 } as const;
 
 export default function QueuePage({ queue }: { queue: keyof typeof queues }) {
