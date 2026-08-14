@@ -163,3 +163,13 @@
 - [x] Manter a explicação completa, botões destrutivos e comportamento de cancelamento somente no modal centralizado
 - [x] Preservar integralmente a mutation e as invalidações já implementadas para a exclusão permanente
 - [x] Validar check, testes, build e aparência do botão e modal; salvar checkpoint publicado
+
+# Rodada 8 — Correção de exclusão, cache e navegação
+
+- [x] Impedir que calls.detail retorne undefined para um chamado inexistente
+- [x] Exibir estado Chamado não encontrado com retorno para Chamados no acesso direto a um registro removido
+- [x] Cancelar e remover a query de detalhes do cache antes de fechar a ficha após excluir
+- [x] Fechar a ficha antes de invalidar listas e impedir qualquer nova consulta do chamado excluído
+- [x] Preservar atualização automática de Dashboard, filas, busca, atenção necessária, trocas e recusados sem F5
+- [x] Cobrir exclusão, acesso direto a chamado inexistente e ordem de cache/navegação com testes automatizados
+- [x] Validar check, testes, build e fluxo completo de exclusão; salvar checkpoint publicado

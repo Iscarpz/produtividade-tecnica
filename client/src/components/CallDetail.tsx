@@ -2,11 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { getQueryKey } from "@trpc/react-query";
 import { trpc } from "@/lib/trpc";
 import { daysOpen } from "@/lib/callParser";
 import { CheckCircle2, Clock3, Package, Pencil, Save, Trash2, Wrench, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 const statusTone: Record<string, string> = {
   "EM ANDAMENTO": "bg-blue-50 text-blue-700 ring-blue-200",
@@ -19,7 +22,11 @@ const statusTone: Record<string, string> = {
 };
 
 export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: () => void; onRefresh: () => void }) {
-  const { data, isLoading } = trpc.calls.detail.useQuery({ id });
+  const [deleted, setDeleted] = useState(false);
+  const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+  const detailQueryKey = getQueryKey(trpc.calls.detail, { id }, "query");
+  const { data, isLoading, isError } = trpc.calls.detail.useQuery({ id }, { enabled: !deleted, retry: false });
   const utils = trpc.useUtils();
   const [editing, setEditing] = useState(false);
   const [fields, setFields] = useState({ modelo: "", serial: "", queixa: "" });
@@ -27,13 +34,22 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
   const transition = trpc.calls.transition.useMutation({ onSuccess: () => { toast.success("Status atualizado"); onRefresh(); }, onError: (error) => toast.error(error.message) });
   const updateData = trpc.calls.updateData.useMutation({ onSuccess: () => { toast.success("Dados atualizados"); setEditing(false); onRefresh(); }, onError: (error) => toast.error(error.message) });
   const addRepair = trpc.calls.addRepair.useMutation({ onSuccess: () => { toast.success("Registro de reparo adicionado"); setRepair({ peca: "", codigo: "", serialRetirada: "", serialInstalada: "", observacao: "" }); onRefresh(); }, onError: (error) => toast.error(error.message) });
-  const removeCall = trpc.calls.delete.useMutation({ onSuccess: async () => { await Promise.all([utils.calls.list.invalidate(), utils.productivity.range.invalidate(), utils.historical.troca.invalidate(), utils.historical.recusado.invalidate()]); toast.success("Chamado excluído permanentemente"); onRefresh(); onClose(); }, onError: (error) => toast.error(error.message) });
+  const removeCall = trpc.calls.delete.useMutation({ onSuccess: async () => {
+    setDeleted(true);
+    await queryClient.cancelQueries({ queryKey: detailQueryKey, exact: true });
+    queryClient.removeQueries({ queryKey: detailQueryKey, exact: true });
+    onClose();
+    await Promise.all([utils.calls.list.invalidate(), utils.productivity.range.invalidate(), utils.historical.troca.invalidate(), utils.historical.recusado.invalidate()]);
+    onRefresh();
+    toast.success("Chamado excluído permanentemente");
+  }, onError: (error) => toast.error(error.message) });
 
   useEffect(() => {
     if (data?.call) setFields({ modelo: data.call.modelo, serial: data.call.serial, queixa: data.call.queixa });
   }, [data?.call?.id, data?.call?.updatedAt]);
 
-  if (isLoading || !data) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4"><div className="rounded-xl bg-white p-8 text-sm shadow-xl">Carregando chamado...</div></div>;
+  if (isLoading) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4"><div className="rounded-xl bg-white p-8 text-sm shadow-xl">Carregando chamado...</div></div>;
+  if (isError || !data) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><section className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"><h2 className="text-xl font-bold text-slate-950">Chamado não encontrado</h2><p className="mt-2 text-sm leading-relaxed text-slate-600">Este chamado não existe mais ou não está disponível para sua conta.</p><Button className="mt-6 bg-[#173f5f] text-white hover:bg-[#102d43]" onClick={() => { onClose(); setLocation("/chamados"); }}>Voltar para Chamados</Button></section></div>;
 
   const call: any = data.call;
   const actions = call.status === "EM ANDAMENTO"

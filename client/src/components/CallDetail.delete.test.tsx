@@ -13,5 +13,11 @@ describe("CallDetail — exclusão", () => {
     expect(source).toContain("Essa ação não pode ser desfeita.");
     expect(source).toContain(">Cancelar<");
     expect(source).toContain("Excluir permanentemente");
+    expect(source).toContain("cancelQueries({ queryKey: detailQueryKey, exact: true })");
+    expect(source).toContain("removeQueries({ queryKey: detailQueryKey, exact: true })");
+    expect(source.indexOf("onClose();")).toBeLessThan(source.indexOf("utils.calls.list.invalidate()"));
+    expect(source).toContain("Chamado não encontrado");
+    expect(source).toContain("Voltar para Chamados");
+    expect(source).toContain('setLocation("/chamados")');
   });
 });
