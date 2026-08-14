@@ -6,6 +6,7 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
+import { AccountAccessNotice } from "./AccountAccessNotice";
 
 export const LAUDO_CREATOR_URL = "https://laudoatppr.base44.app/";
 export const PORTAL_ATP_URL = "https://portalatp.positivo.tech/login";
@@ -37,6 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (loading) return <DashboardLayoutSkeleton />;
   if (!user) return <div className="flex min-h-screen items-center justify-center bg-[#f5f7fa]"><div className="w-full max-w-sm rounded-2xl border bg-white p-10 text-center shadow-sm"><div className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-xl bg-[#173f5f] font-bold text-white">PT</div><h1 className="text-2xl font-semibold text-slate-900">Produtividade Técnica</h1><p className="mb-7 mt-2 text-sm text-slate-500">Entre com sua conta para acessar seus chamados.</p><Button className="w-full bg-[#173f5f] text-white hover:bg-[#0f2f49]" onClick={startLogin}>Entrar com Manus</Button></div></div>;
+  if (user.accountStatus && user.accountStatus !== "ACTIVE") return <AccountAccessNotice status={user.accountStatus as "PENDING_AUTHORIZATION" | "REFUSED" | "REVOKED"} onLogout={logout}/>;
 
   const go = (path: string) => setLocation(path);
   const openExternal = (url: string) => window.open(url, "_blank", "noopener,noreferrer");

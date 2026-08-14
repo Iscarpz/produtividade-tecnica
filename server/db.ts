@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { calls, history, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
+import { calls, history, invitations, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -19,6 +19,15 @@ export async function upsertUser(user: InsertUser) {
   await db.insert(users).values(values).onDuplicateKeyUpdate({ set: buildUserUpsertSet(values) });
 }
 export async function getUserByOpenId(openId: string) { const db = await getDb(); if (!db) return undefined; const rows = await db.select().from(users).where(eq(users.openId, openId)).limit(1); return rows[0]; }
+export async function getUserByEmail(email: string) { const db = await getDb(); if (!db) return undefined; const rows = await db.select().from(users).where(eq(users.email, email.trim().toLowerCase())).limit(1); return rows[0]; }
+export async function listUsersForAdmin() { const db = await getDb(); if (!db) return []; return db.select({ id: users.id, name: users.name, email: users.email, role: users.role, accountStatus: users.accountStatus, createdAt: users.createdAt, lastSignedIn: users.lastSignedIn }).from(users).orderBy(desc(users.createdAt)); }
+export async function listInvitationsForAdmin() { const db = await getDb(); if (!db) return []; return db.select().from(invitations).orderBy(desc(invitations.createdAt)); }
+export async function findInvitationByHash(tokenHash: string) { const db = await getDb(); if (!db) return undefined; return (await db.select().from(invitations).where(eq(invitations.tokenHash, tokenHash)).limit(1))[0]; }
+export function isInvitationAvailable(invitation: { status: string; expiresAt: Date }, now = new Date()) { return invitation.status === "PENDING" && invitation.expiresAt.getTime() > now.getTime(); }
+export async function insertInvitation(data: { tokenHash: string; inviteeName: string; email: string; invitedByUserId: number; expiresAt: Date }) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); const result = await db.insert(invitations).values({ ...data, email: data.email.trim().toLowerCase() }); return Number(result[0].insertId); }
+export async function revokeInvitation(invitationId: number) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.update(invitations).set({ status: "REVOKED", revokedAt: new Date() }).where(and(eq(invitations.id, invitationId), eq(invitations.status, "PENDING"))); }
+export async function createInvitedUser(data: { invitationId: number; name: string; email: string; passwordHash: string; openId: string }) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); return db.transaction(async (tx) => { const invitation = (await tx.select().from(invitations).where(eq(invitations.id, data.invitationId)).limit(1))[0]; if (!invitation || !isInvitationAvailable(invitation)) throw new Error("Convite inválido, expirado ou já utilizado"); const existing = (await tx.select({ id: users.id }).from(users).where(eq(users.email, data.email.trim().toLowerCase())).limit(1))[0]; if (existing) throw new Error("Já existe uma conta para este e-mail"); const result = await tx.insert(users).values({ openId: data.openId, name: data.name.trim(), email: data.email.trim().toLowerCase(), loginMethod: "invite-password", role: "user", accountStatus: "PENDING_AUTHORIZATION", passwordHash: data.passwordHash, lastSignedIn: new Date() }); const userId = Number(result[0].insertId); await tx.update(invitations).set({ status: "ACCEPTED", acceptedByUserId: userId, acceptedAt: new Date() }).where(eq(invitations.id, invitation.id)); return userId; }); }
+export async function setUserAccountStatus(userId: number, accountStatus: "ACTIVE" | "REFUSED" | "REVOKED") { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.update(users).set({ accountStatus }).where(eq(users.id, userId)); }
 
 export async function listCalls(userId: number, status?: string, search?: string) {
   const db = await getDb(); if (!db) return [];

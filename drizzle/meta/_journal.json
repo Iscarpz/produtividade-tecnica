@@ -43,6 +43,20 @@
       "when": 1786736440943,
       "tag": "0005_slim_silhouette",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1786741152917,
+      "tag": "0006_slim_dakota_north",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1786741542788,
+      "tag": "0007_first_hobgoblin",
+      "breakpoints": true
     }
   ]
 }

@@ -205,3 +205,22 @@
 - [x] Definir colunas e gerar CSV UTF-8 compatível com Excel para chamados Finalizados
 - [x] Adicionar botão de exportação somente quando o filtro Finalizados estiver selecionado
 - [x] Cobrir a geração do CSV e validar check, testes, build e checkpoint publicado
+
+# Rodada 11 — Usuários, convites e autorização
+
+- [x] Remover a exportação CSV de Finalizados e todas as funções, testes e textos relacionados
+- [x] Remover as cores específicas dos indicadores de quantidade dos filtros, mantendo badges neutros e legíveis
+- [x] Preservar os chamados existentes e sua propriedade vinculada ao administrador inicial
+- [x] Criar esquema de usuários com papéis Administrador/Técnico e estados pendente, aguardando autorização, ativo, recusado e revogado
+- [x] Criar convites únicos, expirados e revogáveis, com token seguro, nome e e-mail do técnico
+- [x] Criar procedures protegidas para gerenciamento administrativo de usuários, convites, autorização, recusa e revogação
+- [x] Aplicar autorização no backend para bloquear contas não ativas e impedir ações administrativas por técnicos
+- [x] Garantir isolamento de chamados, reparos, histórico e produtividade por usuário autenticado
+- [x] Criar rota pública de aceite de convite e cadastro do técnico com e-mail vinculado ao convite
+- [x] Criar área Configurações → Usuários exclusiva do administrador, com usuários, pendências e convites
+- [x] Criar telas de acesso aguardando autorização, recusado e revogado
+- [x] Validar os fluxos operacionais existentes em sessão autenticada após a introdução da autorização multiusuário
+- [x] Cobrir o fluxo multiusuário completo, incluindo autorização e primeiro login do técnico aprovado
+- [x] Cobrir isolamento real com dois usuários distintos para chamados, detalhes, históricos, produtividade e buscas
+- [x] Preservar todas as funcionalidades operacionais existentes sem painel ou relatórios de equipe
+- [x] Cobrir fluxo completo de convite, autorização, bloqueios e isolamento com testes; validar check, testes, build e checkpoint publicado

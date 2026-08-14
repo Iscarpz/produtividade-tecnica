@@ -8,8 +8,11 @@ import CallSearch from "./pages/CallSearch";
 import QueuePage from "./pages/QueuePage";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import InviteAccept from "./pages/InviteAccept";
+import PasswordLogin from "./pages/PasswordLogin";
+import UsersPage from "./pages/UsersPage";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster/><DashboardLayout><Switch><Route path="/" component={Home}/><Route path="/chamados" component={CallSearch}/><Route path="/fila/em-andamento"><QueuePage queue="em-andamento"/></Route><Route path="/fila/pp"><QueuePage queue="pp"/></Route><Route path="/fila/orcamento"><QueuePage queue="orcamento"/></Route><Route path="/fila/zurich"><QueuePage queue="zurich"/></Route><Route path="/trocas"><HistoricalCalls kind="TROCA"/></Route><Route path="/recusados"><HistoricalCalls kind="RECUSADO"/></Route><Route path="/configuracoes" component={Settings}/><Route path="/404" component={NotFound}/><Route component={NotFound}/></Switch></DashboardLayout></TooltipProvider></ThemeProvider></ErrorBoundary>; }
+function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster/><Switch><Route path="/convite/:token" component={InviteAccept}/><Route path="/entrar" component={PasswordLogin}/><Route><DashboardLayout><Switch><Route path="/" component={Home}/><Route path="/chamados" component={CallSearch}/><Route path="/fila/em-andamento"><QueuePage queue="em-andamento"/></Route><Route path="/fila/pp"><QueuePage queue="pp"/></Route><Route path="/fila/orcamento"><QueuePage queue="orcamento"/></Route><Route path="/fila/zurich"><QueuePage queue="zurich"/></Route><Route path="/trocas"><HistoricalCalls kind="TROCA"/></Route><Route path="/recusados"><HistoricalCalls kind="RECUSADO"/></Route><Route path="/configuracoes/usuarios" component={UsersPage}/><Route path="/configuracoes" component={Settings}/><Route path="/404" component={NotFound}/><Route component={NotFound}/></Switch></DashboardLayout></Route></Switch></TooltipProvider></ThemeProvider></ErrorBoundary>; }
 export default App;

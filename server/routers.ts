@@ -7,6 +7,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { addRepair, createCall, deleteCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, productivity, transitionCall, updateCallData, updateUserProfile } from "./db";
 import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
+import { usersRouter } from "./userRouter";
 
 const dateRange = z.object({ from: z.coerce.date(), to: z.coerce.date() });
 export const appRouter = router({
@@ -16,6 +17,7 @@ export const appRouter = router({
     logout: publicProcedure.mutation(({ ctx }) => { const cookieOptions = getSessionCookieOptions(ctx.req); ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 }); return { success: true } as const; }),
     updateProfile: protectedProcedure.input(z.object({ name: z.string().min(1).max(120) })).mutation(({ ctx, input }) => updateUserProfile(ctx.user.id, input.name)),
   }),
+  users: usersRouter,
   calls: router({
     extractFromImage: protectedProcedure.input(z.object({ imageDataUrl: z.string().min(32).max(12000000) })).mutation(({ input }) => extractCallFromImage(input.imageDataUrl)),
     formalizeComplaint: protectedProcedure.input(z.object({ queixaOriginal: z.string().min(1).max(3000) })).mutation(({ input }) => formalizeComplaint(input.queixaOriginal)),
