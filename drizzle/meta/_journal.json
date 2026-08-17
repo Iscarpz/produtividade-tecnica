@@ -71,6 +71,13 @@
       "when": 1786983912818,
       "tag": "0009_faithful_mole_man",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1786985104274,
+      "tag": "0010_absurd_vermin",
+      "breakpoints": true
     }
   ]
 }

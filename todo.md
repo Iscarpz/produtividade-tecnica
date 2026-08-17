@@ -295,3 +295,14 @@
 - [x] Incorporar as regras específicas do Script.AI fornecidas pelo usuário, incluindo NPI, lentidão, INFINIX HOT 11S e tratamento de seriais
 - [x] Criar Configurações → Imagens / BIOS, busca e operações administrativas de cadastro, edição, ativação e exclusão
 - [x] Cobrir migrações, regras de script, acesso administrativo, persistência e interface com testes, check e build
+
+# Rodada 16 — Interface e base administrativa de Imagem/BIOS
+
+- [x] Mover Opções disponíveis para o final da ficha, mantendo as ações funcionais e discretamente organizadas
+- [x] Corrigir a capitalização de Peça e títulos relacionados sem alterar a lógica de reparos
+- [x] Adicionar o papel GESTOR de forma segura, preservando OWNER, técnicos, convites e permissões existentes
+- [x] Autorizar OWNER e GESTOR no backend e na interface para visualizar e administrar Imagens/BIOS
+- [x] Manter Técnicos bloqueados da rota e das procedures de Imagens/BIOS mesmo por acesso direto
+- [x] Aprimorar a tabela para atualização frequente, busca, edição, ativação/desativação e persistência após recarga
+- [x] Validar a resolução automática da versão atualizada e o fallback de modelo não cadastrado
+- [x] Cobrir papéis, CRUD, persistência, interface, TypeScript, testes e build antes do checkpoint

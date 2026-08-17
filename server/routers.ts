@@ -3,7 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { imageBiosManagerProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { addRepair, createCall, createImageBiosCatalog, deleteCall, deleteImageBiosCatalog, deleteRepair, generateScriptForCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, listImageBiosCatalog, productivity, transitionCall, updateCallData, updateCallTechnicalData, updateImageBiosCatalog, updateRepair, updateUserProfile } from "./db";
 import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
@@ -41,10 +41,10 @@ export const appRouter = router({
     deleteRepair: protectedProcedure.input(z.object({ id: z.number(), chamadoId: z.number() })).mutation(({ ctx, input }) => deleteRepair(ctx.user.id, input)),
   }),
   imageBios: router({
-    list: adminProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ input }) => listImageBiosCatalog(input?.search)),
-    create: adminProcedure.input(imageBiosInput).mutation(({ input }) => createImageBiosCatalog(input)),
-    update: adminProcedure.input(imageBiosInput.extend({ id: z.number() })).mutation(({ input }) => updateImageBiosCatalog(input.id, input)),
-    delete: adminProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => deleteImageBiosCatalog(input.id)),
+    list: imageBiosManagerProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ input }) => listImageBiosCatalog(input?.search)),
+    create: imageBiosManagerProcedure.input(imageBiosInput).mutation(({ input }) => createImageBiosCatalog(input)),
+    update: imageBiosManagerProcedure.input(imageBiosInput.extend({ id: z.number() })).mutation(({ input }) => updateImageBiosCatalog(input.id, input)),
+    delete: imageBiosManagerProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => deleteImageBiosCatalog(input.id)),
   }),
   productivity: router({ range: protectedProcedure.input(dateRange).query(({ ctx, input }) => productivity(ctx.user.id, input.from, input.to)) }),
   historical: router({ troca: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "TROCA", input?.search)), recusado: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "RECUSADO", input?.search)) }),

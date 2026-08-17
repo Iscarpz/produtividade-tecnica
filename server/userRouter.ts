@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import { createInvitationToken, hashInvitationToken, hashPassword, verifyPassword } from "./credentials";
-import { createInvitedUser, findInvitationByHash, getUserByEmail, insertInvitation, isInvitationAvailable, listInvitationsForAdmin, listUsersForAdmin, revokeInvitation, setUserAccountStatus } from "./db";
+import { createInvitedUser, findInvitationByHash, getUserByEmail, getUserById, insertInvitation, isInvitationAvailable, listInvitationsForAdmin, listUsersForAdmin, revokeInvitation, setUserAccountStatus, setUserRole } from "./db";
 
 const inviteInput = z.object({ name: z.string().trim().min(2).max(120), email: z.string().trim().email().max(320) });
 const tokenInput = z.object({ token: z.string().min(32).max(256) });
@@ -53,5 +53,12 @@ export const usersRouter = router({
   revoke: adminProcedure.input(z.object({ userId: z.number().int().positive() })).mutation(({ ctx, input }) => {
     if (ctx.user.id === input.userId) throw new TRPCError({ code: "BAD_REQUEST", message: "Sua própria conta não pode ser alterada nesta tela" });
     return setUserAccountStatus(input.userId, "REVOKED");
+  }),
+  setRole: adminProcedure.input(z.object({ userId: z.number().int().positive(), role: z.enum(["user", "manager"]) })).mutation(async ({ ctx, input }) => {
+    if (ctx.user.id === input.userId) throw new TRPCError({ code: "BAD_REQUEST", message: "Sua própria conta não pode ser alterada nesta tela" });
+    const target = await getUserById(input.userId);
+    if (!target) throw new TRPCError({ code: "NOT_FOUND", message: "Usuário não encontrado" });
+    if (target.role === "admin") throw new TRPCError({ code: "FORBIDDEN", message: "A conta Owner não pode ser alterada" });
+    return setUserRole(input.userId, input.role);
   }),
 });

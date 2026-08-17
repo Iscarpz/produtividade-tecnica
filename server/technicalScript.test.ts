@@ -45,4 +45,11 @@ describe("gerador técnico estruturado", () => {
     expect(result.analysis).toContain("MODELO SEM IMAGEM CADASTRADA.");
     expect(result.script).toContain("IMAGEM ATUALIZADA - VERSAO NAO CADASTRADA (PENDENTE DE TABELA)");
   });
+
+  it("usa a versão atual fornecida pela base a cada nova geração", () => {
+    const updatedCatalog: CatalogEntry[] = [{ modelo: "INFINIX HOT 50I", marca: "INFINIX", tipo: "IMAGEM", versao: "VERSAO NOVA DA BASE", ativo: true }];
+    const result = generateTechnicalScript(complete, [], updatedCatalog);
+    expect(result.script).toContain("IMAGEM ATUALIZADA - VERSAO NOVA DA BASE");
+    expect(result.script).not.toContain("X6531B-V631BEAFAHAIAJAKAMANANOP-U-OP-260314V1118");
+  });
 });

@@ -8,6 +8,7 @@ vi.mock("./db", () => db);
 import { appRouter } from "./routers";
 
 const admin = { user: { id: 1, openId: "admin", name: "Administrador", email: "admin@example.com", loginMethod: "manus", role: "admin", accountStatus: "ACTIVE", createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date() }, req: {} as any, res: {} as any };
+const manager = { user: { id: 3, openId: "manager", name: "Gestor", email: "manager@example.com", loginMethod: "invite-password", role: "manager", accountStatus: "ACTIVE", createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date() }, req: {} as any, res: {} as any };
 const technician = { user: { id: 2, openId: "tech", name: "Técnico", email: "tech@example.com", loginMethod: "invite-password", role: "user", accountStatus: "ACTIVE", createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date() }, req: {} as any, res: {} as any };
 
 describe("catálogo de Imagens/BIOS e Script.AI", () => {
@@ -34,5 +35,13 @@ describe("catálogo de Imagens/BIOS e Script.AI", () => {
     db.generateScriptForCall.mockResolvedValueOnce(result);
     await expect(appRouter.createCaller(technician).calls.generateScript({ id: 44 })).resolves.toEqual(result);
     expect(db.generateScriptForCall).toHaveBeenCalledWith(2, 44);
+  });
+
+  it("permite ao Gestor atualizar e ativar/desativar registros do catálogo", async () => {
+    const entry = { id: 8, modelo: "INFINIX HOT 50I", marca: "INFINIX", tipo: "IMAGEM", versao: "VERSAO NOVA", ativo: false };
+    db.updateImageBiosCatalog.mockResolvedValueOnce(entry);
+    const input = { id: 8, modelo: "INFINIX HOT 50I", marca: "INFINIX", tipo: "IMAGEM" as const, versao: "VERSAO NOVA", ativo: false };
+    await expect(appRouter.createCaller(manager).imageBios.update(input)).resolves.toEqual(entry);
+    expect(db.updateImageBiosCatalog).toHaveBeenCalledWith(8, input);
   });
 });
