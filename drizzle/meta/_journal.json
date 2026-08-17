@@ -64,6 +64,13 @@
       "when": 1786970088587,
       "tag": "0008_mute_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1786983912818,
+      "tag": "0009_faithful_mole_man",
+      "breakpoints": true
     }
   ]
 }

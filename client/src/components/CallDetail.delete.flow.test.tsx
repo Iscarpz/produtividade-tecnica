@@ -14,6 +14,8 @@ const mocked = vi.hoisted(() => ({
   transitionMutate: vi.fn(),
   updateRepairMutate: vi.fn(),
   deleteRepairMutate: vi.fn(),
+  updateTechnicalMutate: vi.fn(),
+  scriptState: { data: { errors: ["Informe o diagnóstico do equipamento."], analysis: ["MODELO NORMALIZADO: MODELO TESTE."], equipmentType: "SMARTPHONE/TABLET" }, isLoading: false, isError: false } as any,
   deleteSuccess: null as null | (() => Promise<void>),
   queryState: { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], history: [] } as any, isLoading: false, isError: false },
 }));
@@ -21,14 +23,16 @@ const mocked = vi.hoisted(() => ({
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     useUtils: () => ({
-      calls: { list: { invalidate: mocked.invalidate }, detail: { invalidate: mocked.invalidate } },
+      calls: { list: { invalidate: mocked.invalidate }, detail: { invalidate: mocked.invalidate }, generateScript: { invalidate: mocked.invalidate } },
       productivity: { range: { invalidate: mocked.invalidate } },
       historical: { troca: { invalidate: mocked.invalidate }, recusado: { invalidate: mocked.invalidate } },
     }),
     calls: {
       detail: { useQuery: (...args: unknown[]) => { mocked.detailQuery(...args); return mocked.queryState; } },
+      generateScript: { useQuery: () => mocked.scriptState },
       transition: { useMutation: () => ({ isPending: false, mutate: mocked.transitionMutate }) },
       updateData: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
+      updateTechnicalData: { useMutation: () => ({ isPending: false, mutate: mocked.updateTechnicalMutate }) },
       addRepair: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
       updateRepair: { useMutation: () => ({ isPending: false, mutate: mocked.updateRepairMutate }) },
       deleteRepair: { useMutation: () => ({ isPending: false, mutate: mocked.deleteRepairMutate }) },
@@ -59,7 +63,9 @@ afterEach(() => {
   mocked.transitionMutate.mockReset();
   mocked.updateRepairMutate.mockReset();
   mocked.deleteRepairMutate.mockReset();
+  mocked.updateTechnicalMutate.mockReset();
   mocked.deleteSuccess = null;
+  mocked.scriptState = { data: { errors: ["Informe o diagnóstico do equipamento."], analysis: ["MODELO NORMALIZADO: MODELO TESTE."], equipmentType: "SMARTPHONE/TABLET" }, isLoading: false, isError: false };
   mocked.queryState = { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], history: [] }, isLoading: false, isError: false };
 });
 
@@ -130,5 +136,23 @@ describe("CallDetail — laudo e peças", () => {
     const dialog = screen.getByRole("alertdialog");
     fireEvent.click(dialog.querySelector("button:last-child") as HTMLButtonElement);
     expect(mocked.deleteRepairMutate).toHaveBeenCalledWith({ id: 44, chamadoId: 12 });
+  });
+
+  it("exige diagnóstico e uma única inspeção antes de salvar os dados técnicos", () => {
+    renderDetail();
+    const save = screen.getByRole("button", { name: "Salvar dados técnicos" });
+    expect(save).toBeDisabled();
+    fireEvent.change(screen.getByRole("textbox", { name: "Diagnóstico" }), { target: { value: "Falha no display." } });
+    fireEvent.click(screen.getByLabelText("SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA."));
+    expect(save).toBeEnabled();
+    fireEvent.click(save);
+    expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, diagnostico: "Falha no display.", inspecaoVisual: "SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA." });
+  });
+
+  it("explica quais campos impedem a geração quando o script está incompleto", () => {
+    renderDetail();
+    fireEvent.click(screen.getByRole("button", { name: "GERAR SCRIPT TÉCNICO" }));
+    expect(screen.getByText("NÃO É POSSÍVEL GERAR O SCRIPT")).toBeInTheDocument();
+    expect(screen.getByText("Informe o diagnóstico do equipamento.")).toBeInTheDocument();
   });
 });

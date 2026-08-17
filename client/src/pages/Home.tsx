@@ -43,7 +43,7 @@ export default function Home() {
   });
   const refresh = () => { utils.calls.list.invalidate(); utils.productivity.range.invalidate(); if (selectedId) utils.calls.detail.invalidate({ id: selectedId }); };
   const create = trpc.calls.create.useMutation({
-    onSuccess: (call) => { toast.success("Chamado adicionado"); setNewOpen(false); setPaste(""); setParsed(null); setQueixaOriginal(""); refresh(); if (call) setSelectedId(call.id); },
+    onSuccess: () => { toast.success("Chamado adicionado"); setNewOpen(false); setPaste(""); setParsed(null); setQueixaOriginal(""); refresh(); },
     onError: async (error, variables) => {
       if (/duplicate/i.test(error.message)) {
         toast.error("Este chamado já está cadastrado.");

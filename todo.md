@@ -282,3 +282,16 @@
 - [x] Permitir excluir uma peça com confirmação, persistência e registro no histórico existente
 - [x] Cobrir os quatro cenários de laudo e os fluxos de edição/exclusão de peça com testes automatizados
 - [x] Validar interface, persistência após recarga, check, testes, build e checkpoint publicado
+
+# Rodada 15 — Estrutura técnica do chamado e Script.AI
+
+- [x] Preservar a abertura de chamado apenas com Chamado, serial, modelo e queixas por texto ou OCR, fechando o modal após a criação sem abrir a ficha
+- [x] Adicionar diagnóstico obrigatório e inspeção visual exclusiva obrigatória, preservando integralmente queixa e queixaOriginal
+- [x] Criar a tabela administrativa de Imagem/BIOS com modelo, marca, tipo, versão, ativo e observação, com isolamento e gestão exclusiva do administrador
+- [x] Resolver Imagem/BIOS automaticamente pelo modelo, informando ausência de cadastro sem inventar versão
+- [x] Implementar a regra de garantia derivada da inspeção visual sem campo manual
+- [x] Manter a seção única de Reparos/Peças e incorporá-la ao script sem duplicidade de registros ou de fluxo
+- [x] Criar gerador determinístico com análise, validação dos campos obrigatórios, caixa alta e estruturas Smartphone/Tablet e Computador/Notebook
+- [x] Incorporar as regras específicas do Script.AI fornecidas pelo usuário, incluindo NPI, lentidão, INFINIX HOT 11S e tratamento de seriais
+- [x] Criar Configurações → Imagens / BIOS, busca e operações administrativas de cadastro, edição, ativação e exclusão
+- [x] Cobrir migrações, regras de script, acesso administrativo, persistência e interface com testes, check e build

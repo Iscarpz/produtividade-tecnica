@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -36,6 +36,8 @@ export const calls = mysqlTable("calls", {
   modelo: varchar("modelo", { length: 255 }).notNull(),
   queixa: text("queixa").notNull(),
   queixaOriginal: text("queixaOriginal"),
+  diagnostico: text("diagnostico"),
+  inspecaoVisual: mysqlEnum("inspecaoVisual", ["SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA.", "MAU USO CONSTATADO - EQUIPAMENTO COM AVARIAS E/OU DANOS FÍSICOS", "CONSTATADO ABERTURA PRÉVIA POR PESSOAL NÃO AUTORIZADO"]),
   status: mysqlEnum("status", ["EM ANDAMENTO", "AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "Zurich", "FINALIZADO", "TROCA", "RECUSADO"]).notNull().default("EM ANDAMENTO"),
   dataEntrada: timestamp("dataEntrada").notNull().defaultNow(),
   dataFinalizacao: timestamp("dataFinalizacao"),
@@ -53,6 +55,18 @@ export const repairs = mysqlTable("repairs", {
   observacao: text("observacao"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
+
+export const imageBiosCatalog = mysqlTable("imageBiosCatalog", {
+  id: int("id").autoincrement().primaryKey(),
+  modelo: varchar("modelo", { length: 255 }).notNull(),
+  marca: varchar("marca", { length: 120 }).notNull(),
+  tipo: mysqlEnum("tipo", ["IMAGEM", "BIOS"]).notNull(),
+  versao: text("versao").notNull(),
+  ativo: boolean("ativo").notNull().default(true),
+  observacao: text("observacao"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
+}, (table) => [uniqueIndex("image_bios_catalog_modelo_tipo_unique").on(table.modelo, table.tipo)]);
 
 export const history = mysqlTable("history", {
   id: int("id").autoincrement().primaryKey(),
@@ -79,5 +93,6 @@ export type Invitation = typeof invitations.$inferSelect;
 export type InsertInvitation = typeof invitations.$inferInsert;
 export type Call = typeof calls.$inferSelect;
 export type Repair = typeof repairs.$inferSelect;
+export type ImageBiosCatalog = typeof imageBiosCatalog.$inferSelect;
 export type History = typeof history.$inferSelect;
 export type ProductivityEvent = typeof productivityEvents.$inferSelect;
