@@ -241,3 +241,4 @@
 - [x] Corrigir a sincronização do papel do OWNER para impedir que a sessão autenticada seja rebaixada para Técnico
 - [ ] Validar que o OWNER autenticado retorna role admin e acessa Configurações → Usuários
 - [x] Preservar papéis e bloqueios dos técnicos durante a correção de sincronização do OWNER
+- [ ] Fazer a página Usuários confirmar autorização administrativa no backend, sem depender exclusivamente do cache de perfil do navegador
