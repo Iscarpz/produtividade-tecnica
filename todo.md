@@ -252,8 +252,8 @@
 - [x] Preservar userId do usuário autenticado e o isolamento multiusuário na criação
 - [x] Ajustar o layout da confirmação OCR para manter Confirmar chamado acessível em 100% de zoom
 - [x] Permitir scroll somente no conteúdo da confirmação, mantendo ações visíveis e legíveis
-- [ ] Testar criação real por OCR/print e por texto, incluindo atualização imediata das filas e dashboard
-- [ ] Cobrir persistência, dataFinalizacao, queixaOriginal e responsividade com testes; validar check, testes, build e checkpoint publicado
+- [x] Testar criação real por OCR/print e por texto, incluindo atualização imediata das filas e dashboard
+- [x] Cobrir persistência, dataFinalizacao, queixaOriginal e responsividade com testes; validar check, testes, build e checkpoint publicado
 
 # Correção crítica — Parser de entrada por texto
 
@@ -263,4 +263,11 @@
 - [x] Manter OCR independente e preservar queixaOriginal e queixa formalizada no fluxo textual
 - [x] Exibir e exigir o preenchimento manual do Chamado quando o parser não o identificar
 - [x] Criar testes para as cinco variações de Número O.S. e o texto completo do sistema oficial
-- [ ] Validar check, testes, build, conferência e atualização do chamado criado; salvar checkpoint publicado
+- [x] Validar check, testes, build, conferência e atualização do chamado criado; salvar checkpoint publicado
+
+# Correção crítica — Persistência do chamado textual
+
+- [x] Investigar o desalinhamento apresentado na inspeção do chamado 60006451515, preservando o registro real sem alteração
+- [x] Proteger a criação para gravar somente Chamado, serial, modelo, queixas, status, datas e userId em suas colunas corretas
+- [x] Criar teste de persistência da criação textual com todos os campos e não alterar o registro real de validação
+- [x] Validar o fluxo real, check, testes, build e checkpoint publicado
