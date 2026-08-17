@@ -179,4 +179,14 @@ describe("CallDetail — laudo e peças", () => {
     expect(screen.getByText("NÃO É POSSÍVEL GERAR O SCRIPT")).toBeInTheDocument();
     expect(screen.getByText("Informe o diagnóstico do equipamento.")).toBeInTheDocument();
   });
+
+  it("exibe somente o script técnico final sem análise ou cabeçalhos intermediários", () => {
+    mocked.scriptState = { data: { errors: [], analysis: ["CHAMADO: 60006454345."], equipmentType: "SMARTPHONE/TABLET", script: "[MODELO:]\nMODELO TESTE\n/\n[REPARO:]\nCOMPONENTES SUBSTITUIDOS:\nLCD - SERIAL INSTALADO: NEW\n/" }, isLoading: false, isError: false } as any;
+    renderDetail();
+    fireEvent.click(screen.getByRole("button", { name: "GERAR SCRIPT TÉCNICO" }));
+    expect(screen.getByText(/COMPONENTES SUBSTITUIDOS:/)).toBeInTheDocument();
+    expect(screen.queryByText("ANALISE DO CHAMADO")).not.toBeInTheDocument();
+    expect(screen.queryByText("SCRIPT PREENCHIDO")).not.toBeInTheDocument();
+    expect(screen.queryByText("CHAMADO: 60006454345.")).not.toBeInTheDocument();
+  });
 });

@@ -42,7 +42,7 @@ export function buildRepairText(repairs: RepairForScript[], fallback?: string) {
     const serials = [repair.serialRetirada && `SERIAL RETIRADO: ${repair.serialRetirada}`, repair.serialInstalada && `SERIAL INSTALADO: ${repair.serialInstalada}`].filter(Boolean);
     return `${repair.peca}${serials.length ? ` - ${serials.join(" - ")}` : "."}`;
   });
-  return ["REALIZADA A TROCA DE:", ...items].join("\n");
+  return ["COMPONENTES SUBSTITUIDOS:", ...items].join("\n");
 }
 
 function normalizeScriptValue(value: string) { return value.split("\n").map(normalizeSpace).join("\n"); }

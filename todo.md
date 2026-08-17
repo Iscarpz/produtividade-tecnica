@@ -326,3 +326,11 @@
 - [x] Garantir atualização automática em PP, Orçamento, Zurich, Finalizados e retornos para Em andamento, sem F5
 - [x] Cobrir finalização, reabertura, cache, múltiplas telas e isolamento multiusuário com testes automatizados
 - [x] Validar interface, TypeScript, suíte completa, build e checkpoint publicado
+
+# Rodada 19 — Saída simplificada do Script.AI
+
+- [x] Remover da interface a análise do chamado, cabeçalhos, separadores e explicações que antecedem o script final
+- [x] Exibir apenas o conteúdo técnico final ao gerar e copiar o script
+- [x] Alterar o início do bloco [REPARO:] para COMPONENTES SUBSTITUIDOS: quando houver peças
+- [x] Preservar seriais reais, ausência de código interno, reparo automático sem peças e toda a estrutura restante do script
+- [x] Cobrir conteúdo do script, interface simplificada, TypeScript, testes e build antes do checkpoint
