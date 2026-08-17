@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { AccountAccessNotice } from "./AccountAccessNotice";
 
-export const LAUDO_CREATOR_URL = "https://laudoatppr.base44.app/";
+export const LAUDO_CREATOR_URL = "/laudos/novo";
 export const PORTAL_ATP_URL = "https://portalatp.positivo.tech/login";
 export const POSIFLOW_URL = "https://posiflow.positivotecnologia.com.br/services/formularios";
 
@@ -21,8 +21,8 @@ export const menuItems = [
   { icon: FileText, label: "Orçamentos recusados", path: "/recusados" },
 ];
 
-export const toolItems = [
-  { icon: FileSignature, label: "Laudo Creator", url: LAUDO_CREATOR_URL, highlight: true },
+export const toolItems: Array<{ icon: typeof FileSignature; label: string; url: string; internal?: boolean; highlight?: boolean }> = [
+  { icon: FileSignature, label: "Laudo Creator", url: LAUDO_CREATOR_URL, internal: true, highlight: true },
   { icon: Globe2, label: "Portal ATP", url: PORTAL_ATP_URL },
   { icon: Globe2, label: "Posiflow", url: POSIFLOW_URL },
 ];
@@ -51,7 +51,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex h-16 items-center border-b border-white/10 px-3"><button onClick={() => go("/")} title="Ir para Dashboard" className="flex min-w-0 items-center gap-3 rounded-md text-left outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f2b134]"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#f2b134] font-extrabold text-[#102d43]">PT</div><div className={`min-w-0 transition-opacity duration-150 ${expanded ? "opacity-100" : "pointer-events-none w-0 overflow-hidden opacity-0"}`}><p className="truncate font-semibold">Produtividade</p><p className="text-xs text-slate-300">Controle técnico</p></div></button></div>
       <nav className="flex-1 overflow-y-auto px-2 py-4">
         <NavigationGroup title="Operação" expanded={expanded}>{menuItems.map((item) => <button key={item.label} title={expanded ? undefined : item.label} onClick={() => go(item.path)} className={navButtonClass(isActive(item.path))}><item.icon className="h-4 w-4 shrink-0"/><span className={`ml-3 truncate transition-opacity duration-150 ${expanded ? "opacity-100" : "pointer-events-none w-0 overflow-hidden opacity-0"}`}>{item.label}</span></button>)}</NavigationGroup>
-        <NavigationGroup title="Ferramentas" expanded={expanded}>{toolItems.map((item) => <button key={item.label} title={expanded ? undefined : item.label} onClick={() => openExternal(item.url)} className={navButtonClass(false, item.highlight)}><item.icon className="h-4 w-4 shrink-0"/><span className={`ml-3 truncate transition-opacity duration-150 ${expanded ? "opacity-100" : "pointer-events-none w-0 overflow-hidden opacity-0"}`}>{item.label}</span>{expanded && <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-70"/>}</button>)}</NavigationGroup>
+        <NavigationGroup title="Ferramentas" expanded={expanded}>{toolItems.map((item) => <button key={item.label} title={expanded ? undefined : item.label} onClick={() => item.internal ? go(item.url) : openExternal(item.url)} className={navButtonClass(Boolean(item.internal && isActive(item.url)), item.highlight)}><item.icon className="h-4 w-4 shrink-0"/><span className={`ml-3 truncate transition-opacity duration-150 ${expanded ? "opacity-100" : "pointer-events-none w-0 overflow-hidden opacity-0"}`}>{item.label}</span>{expanded && !item.internal && <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-70"/>}</button>)}</NavigationGroup>
         <NavigationGroup title="Sistema" expanded={expanded}><button title={expanded ? undefined : "Configurações"} onClick={() => go("/configuracoes")} className={navButtonClass(isActive("/configuracoes"))}><Settings className="h-4 w-4 shrink-0"/><span className={`ml-3 truncate transition-opacity duration-150 ${expanded ? "opacity-100" : "pointer-events-none w-0 overflow-hidden opacity-0"}`}>Configurações</span></button><button title={expanded ? undefined : "Sair"} onClick={logout} className={navButtonClass(false)}><LogOut className="h-4 w-4 shrink-0"/><span className={`ml-3 truncate transition-opacity duration-150 ${expanded ? "opacity-100" : "pointer-events-none w-0 overflow-hidden opacity-0"}`}>Sair</span></button></NavigationGroup>
       </nav>
       <div className="border-t border-white/10 p-2"><div title={expanded ? undefined : (user.name || "Definir nome")} className="flex items-center gap-3 rounded-lg p-2"><Avatar className="h-8 w-8 shrink-0"><AvatarFallback className="bg-[#f2b134] font-bold text-[#102d43]">{user.name?.slice(0, 1)?.toUpperCase() || "?"}</AvatarFallback></Avatar><div className={`min-w-0 transition-opacity duration-150 ${expanded ? "opacity-100" : "pointer-events-none w-0 overflow-hidden opacity-0"}`}><p className="truncate text-sm font-medium text-white">{user.name || "Definir nome"}</p><p className="text-xs text-slate-300">Sessão ativa</p></div></div></div>

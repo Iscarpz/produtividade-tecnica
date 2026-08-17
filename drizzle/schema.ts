@@ -1,4 +1,4 @@
-import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { boolean, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -9,6 +9,7 @@ export const users = mysqlTable("users", {
   role: mysqlEnum("role", ["user", "manager", "admin"]).default("user").notNull(),
   accountStatus: mysqlEnum("accountStatus", ["ACTIVE", "PENDING_AUTHORIZATION", "REFUSED", "REVOKED"]).default("ACTIVE").notNull(),
   passwordHash: varchar("passwordHash", { length: 255 }),
+  cargo: varchar("cargo", { length: 160 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -70,6 +71,55 @@ export const imageBiosCatalog = mysqlTable("imageBiosCatalog", {
   updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
 }, (table) => [uniqueIndex("image_bios_catalog_modelo_tipo_unique").on(table.modelo, table.tipo)]);
 
+export const laudos = mysqlTable("laudos", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  chamadoId: int("chamadoId"),
+  numeroChamado: varchar("numeroChamado", { length: 64 }).notNull(),
+  dataEmissao: varchar("dataEmissao", { length: 10 }).notNull(),
+  marca: mysqlEnum("marca", ["Positivo", "Infinix", "Vaio", "Compaq"]).notNull(),
+  nomeCliente: varchar("nomeCliente", { length: 255 }).notNull(),
+  contato: varchar("contato", { length: 255 }).notNull(),
+  enderecoCliente: text("enderecoCliente").notNull(),
+  cidadeCliente: varchar("cidadeCliente", { length: 160 }).notNull(),
+  estadoCliente: varchar("estadoCliente", { length: 2 }).notNull(),
+  produto: varchar("produto", { length: 255 }).notNull(),
+  tipoProduto: varchar("tipoProduto", { length: 160 }).notNull(),
+  numeroSerie: varchar("numeroSerie", { length: 128 }).notNull(),
+  bilheteSeguro: varchar("bilheteSeguro", { length: 128 }),
+  defeitoReclamado: text("defeitoReclamado").notNull(),
+  avaliacaoTecnica: text("avaliacaoTecnica").notNull(),
+  conclusao: text("conclusao").notNull(),
+  mauUso: boolean("mauUso").notNull().default(false),
+  responsavelTecnico: varchar("responsavelTecnico", { length: 255 }).notNull(),
+  cargoTecnico: varchar("cargoTecnico", { length: 160 }).notNull(),
+  fotos: text("fotos").notNull(),
+  status: mysqlEnum("status", ["rascunho", "finalizado"]).notNull().default("rascunho"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
+}, (table) => [index("laudos_user_created_idx").on(table.userId, table.createdAt), index("laudos_chamado_idx").on(table.chamadoId)]);
+
+export const laudoAuditLogs = mysqlTable("laudoAuditLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  laudoId: int("laudoId").notNull(),
+  userId: int("userId").notNull(),
+  acao: varchar("acao", { length: 128 }).notNull(),
+  numeroChamado: varchar("numeroChamado", { length: 64 }).notNull(),
+  tecnicoResponsavel: varchar("tecnicoResponsavel", { length: 255 }).notNull(),
+  detalhes: text("detalhes"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+}, (table) => [index("laudo_audit_laudo_idx").on(table.laudoId, table.createdAt)]);
+
+export const laudoSettings = mysqlTable("laudoSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  logoPositivo: text("logoPositivo"),
+  logoInfinix: text("logoInfinix"),
+  logoVaio: text("logoVaio"),
+  logoCompaq: text("logoCompaq"),
+  updatedByUserId: int("updatedByUserId"),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
+});
+
 export const history = mysqlTable("history", {
   id: int("id").autoincrement().primaryKey(),
   chamadoId: int("chamadoId").notNull(),
@@ -96,5 +146,8 @@ export type InsertInvitation = typeof invitations.$inferInsert;
 export type Call = typeof calls.$inferSelect;
 export type Repair = typeof repairs.$inferSelect;
 export type ImageBiosCatalog = typeof imageBiosCatalog.$inferSelect;
+export type Laudo = typeof laudos.$inferSelect;
+export type LaudoAuditLog = typeof laudoAuditLogs.$inferSelect;
+export type LaudoSettings = typeof laudoSettings.$inferSelect;
 export type History = typeof history.$inferSelect;
 export type ProductivityEvent = typeof productivityEvents.$inferSelect;

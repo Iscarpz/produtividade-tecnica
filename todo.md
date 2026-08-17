@@ -343,3 +343,14 @@
 - [x] Exibir o evento Reparo realizado de forma operacional sem detalhar edições de Peça, diagnóstico ou campos internos
 - [x] Cobrir script, seriais vazios/parciais, PP, Orçamento, Zurich, reabertura e timeline limpa com testes
 - [x] Validar TypeScript, suíte completa, build e checkpoint publicado
+
+# Rodada 21 — Incorporação do Laudo Creator
+
+- [x] Obter a documentação e a estrutura atual do Laudo Creator como referência funcional obrigatória
+- [x] Preservar as funções existentes de formulário, histórico, busca, filtros, duplicação, exclusão, auditoria, logos, fotos, anotações e PDF A4 de 2 páginas
+- [x] Integrar autenticação e permissões existentes do Laudo Creator sem criar fluxos novos
+- [x] Pré-preencher de forma segura número, produto, serial, queixa, diagnóstico, inspeção e técnico a partir do chamado sem criar campos operacionais adicionais
+- [x] Derivar marca e produto pelo modelo quando houver identificação confiável, preservando preenchimento manual para dados ausentes
+- [x] Abrir o Laudo Creator em nova aba após SIM na decisão de Orçamento ou Zurich, mantendo NÃO e demais transições inalterados
+- [x] Vincular internamente o laudo ao chamado apenas quando possível, sem criar nova interface de histórico
+- [x] Validar formulário, fotos, PDF, auditoria, permissões e os quatro fluxos Orçamento/Zurich com e sem laudo

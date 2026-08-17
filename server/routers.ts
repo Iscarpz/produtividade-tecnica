@@ -9,9 +9,11 @@ import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
 import { VISUAL_INSPECTIONS } from "./technicalScript";
 import { usersRouter } from "./userRouter";
+import { createLaudo, deleteLaudo, duplicateLaudo, getLaudo, getLaudoPrefill, getLaudoSettings, LAUDO_BRANDS, listLaudoAudit, listLaudos, recordLaudoPdf, updateLaudoProfile, updateLaudoSettings, uploadLaudoImage } from "./laudoDb";
 
 const dateRange = z.object({ from: z.coerce.date(), to: z.coerce.date() });
 const imageBiosInput = z.object({ modelo: z.string().min(1).max(255), marca: z.string().min(1).max(120), tipo: z.enum(["IMAGEM", "BIOS"]), versao: z.string().min(1).max(3000), ativo: z.boolean().optional(), observacao: z.string().max(3000).optional() });
+const laudoInput = z.object({ chamadoId: z.number().optional().nullable(), numeroChamado: z.string().min(1).max(64), dataEmissao: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), marca: z.enum(LAUDO_BRANDS), nomeCliente: z.string().min(1).max(255), contato: z.string().min(1).max(255), enderecoCliente: z.string().min(1).max(3000), cidadeCliente: z.string().min(1).max(160), estadoCliente: z.string().length(2), produto: z.string().min(1).max(255), tipoProduto: z.string().min(1).max(160), numeroSerie: z.string().min(5).max(128), bilheteSeguro: z.string().max(128).optional(), defeitoReclamado: z.string().min(1).max(3000), avaliacaoTecnica: z.string().min(1).max(3000), conclusao: z.string().min(1).max(5000), mauUso: z.boolean(), responsavelTecnico: z.string().min(1).max(255), cargoTecnico: z.string().min(1).max(160), fotos: z.array(z.string().min(1)).min(2).max(4), status: z.enum(["rascunho", "finalizado"]) });
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -45,6 +47,22 @@ export const appRouter = router({
     create: imageBiosManagerProcedure.input(imageBiosInput).mutation(({ input }) => createImageBiosCatalog(input)),
     update: imageBiosManagerProcedure.input(imageBiosInput.extend({ id: z.number() })).mutation(({ input }) => updateImageBiosCatalog(input.id, input)),
     delete: imageBiosManagerProcedure.input(z.object({ id: z.number() })).mutation(({ input }) => deleteImageBiosCatalog(input.id)),
+  }),
+  laudos: router({
+    prefill: protectedProcedure.input(z.object({ chamadoId: z.number() })).query(({ ctx, input }) => getLaudoPrefill(ctx.user.id, input.chamadoId)),
+    list: protectedProcedure.input(z.object({ search: z.string().optional(), marca: z.enum(LAUDO_BRANDS).optional() }).optional()).query(({ ctx, input }) => listLaudos(ctx.user.id, input?.search, input?.marca)),
+    detail: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => { const laudo = await getLaudo(ctx.user.id, input.id); if (!laudo) throw new TRPCError({ code: "NOT_FOUND", message: "Laudo não encontrado" }); return laudo; }),
+    create: protectedProcedure.input(laudoInput).mutation(({ ctx, input }) => createLaudo(ctx.user.id, input)),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => deleteLaudo(ctx.user.id, input.id)),
+    duplicate: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => duplicateLaudo(ctx.user.id, input.id)),
+    recordPdf: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => recordLaudoPdf(ctx.user.id, input.id)),
+    audit: protectedProcedure.input(z.object({ laudoId: z.number() })).query(({ ctx, input }) => listLaudoAudit(ctx.user.id, input.laudoId)),
+    uploadImage: protectedProcedure.input(z.object({ dataUrl: z.string().min(32).max(15000000), kind: z.enum(["foto", "logo"]) })).mutation(({ ctx, input }) => uploadLaudoImage(ctx.user.id, input.dataUrl, input.kind)),
+    profile: protectedProcedure.input(z.object({ name: z.string().min(1).max(120), cargo: z.string().min(1).max(160) })).mutation(({ ctx, input }) => updateLaudoProfile(ctx.user.id, input.name, input.cargo)),
+    settings: router({
+      get: protectedProcedure.query(() => getLaudoSettings()),
+      update: imageBiosManagerProcedure.input(z.object({ logoPositivo: z.string().optional(), logoInfinix: z.string().optional(), logoVaio: z.string().optional(), logoCompaq: z.string().optional() })).mutation(({ ctx, input }) => updateLaudoSettings(ctx.user.id, input)),
+    }),
   }),
   productivity: router({ range: protectedProcedure.input(dateRange).query(({ ctx, input }) => productivity(ctx.user.id, input.from, input.to)) }),
   historical: router({ troca: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "TROCA", input?.search)), recusado: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "RECUSADO", input?.search)) }),
