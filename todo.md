@@ -386,3 +386,11 @@
 - [x] Manter o download do PDF somente após a confirmação do usuário na pré-visualização
 - [x] Preservar documento A4 em duas páginas, logos, fotos, histórico e fluxo de geração existentes
 - [x] Validar pré-visualização, download, TypeScript, testes e build
+
+# Rodada 26 — Indicador de chamados excluídos
+
+- [x] Registrar cada exclusão de chamado de forma persistente, com técnico e data/hora
+- [x] Manter a exclusão permanente dos dados operacionais sem recriar chamados ou filas
+- [x] Incluir Excluídos nos indicadores de produtividade, respeitando filtros de período e técnico
+- [x] Atualizar o indicador de exclusões automaticamente após a confirmação de exclusão
+- [x] Cobrir persistência, isolamento, filtros e atualização do dashboard com testes

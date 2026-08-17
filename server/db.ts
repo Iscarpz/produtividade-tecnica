@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, gte, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { calls, history, imageBiosCatalog, invitations, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
+import { callDeletionLogs, calls, history, imageBiosCatalog, invitations, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { generateTechnicalScript, resolveCatalog, type VisualInspection } from "./technicalScript";
 
@@ -99,12 +99,13 @@ export async function updateImageBiosCatalog(id: number, data: ImageBiosInput) {
 export async function deleteImageBiosCatalog(id: number) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.delete(imageBiosCatalog).where(eq(imageBiosCatalog.id, id)); return { success: true } as const; }
 export async function generateScriptForCall(userId: number, id: number) { const bundle = await getCallBundle(userId, id); if (!bundle) throw new Error("Chamado não encontrado"); const catalog = await listActiveImageBiosCatalog(); return generateTechnicalScript(bundle.call, bundle.repairs, catalog); }
 
-export async function deleteCallWithRelations(operations: { findCall: () => Promise<unknown>; deleteRepairs: () => Promise<unknown>; deleteHistory: () => Promise<unknown>; deleteProductivityEvents: () => Promise<unknown>; deleteCall: () => Promise<unknown> }) {
+export async function deleteCallWithRelations(operations: { findCall: () => Promise<unknown>; deleteRepairs: () => Promise<unknown>; deleteHistory: () => Promise<unknown>; deleteProductivityEvents: () => Promise<unknown>; deleteCall: () => Promise<unknown>; recordDeletion: () => Promise<unknown> }) {
   if (!(await operations.findCall())) throw new Error("Chamado não encontrado");
   await operations.deleteRepairs();
   await operations.deleteHistory();
   await operations.deleteProductivityEvents();
   await operations.deleteCall();
+  await operations.recordDeletion();
   return { success: true } as const;
 }
 
@@ -117,6 +118,7 @@ export async function deleteCall(userId: number, id: number) {
     deleteHistory: () => tx.delete(history).where(eq(history.chamadoId, id)),
     deleteProductivityEvents: () => tx.delete(productivityEvents).where(eq(productivityEvents.chamadoId, id)),
     deleteCall: () => tx.delete(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))),
+    recordDeletion: () => tx.insert(callDeletionLogs).values({ userId, deletedAt: new Date() }),
   }));
 }
 
@@ -161,4 +163,5 @@ export function buildRepairUpdatedHistoryEvent(userId: number, chamadoId: number
 export function buildRepairDeletedHistoryEvent(userId: number, chamadoId: number, repair: { peca: string; codigo?: string | null; serialRetirada?: string | null; serialInstalada?: string | null; observacao?: string | null }, now = new Date()) { return { chamadoId, userId, evento: `Peça excluída: ${repair.peca}`, observacao: buildRepairHistoryDetails({ codigo: repair.codigo ?? undefined, serialRetirada: repair.serialRetirada ?? undefined, serialInstalada: repair.serialInstalada ?? undefined, observacao: repair.observacao ?? undefined }) || null, createdAt: now }; }
 export async function updateRepair(userId: number, data: RepairInput & { id: number; chamadoId: number }) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); return db.transaction(async (tx) => { if (!(await getCall(userId, data.chamadoId))) throw new Error("Chamado não encontrado"); const current = (await tx.select().from(repairs).where(and(eq(repairs.id, data.id), eq(repairs.chamadoId, data.chamadoId))).limit(1))[0]; if (!current) throw new Error("Peça não encontrada"); const next: RepairInput = { peca: data.peca.trim(), codigo: data.codigo?.trim() || undefined, serialRetirada: data.serialRetirada?.trim() || undefined, serialInstalada: data.serialInstalada?.trim() || undefined, observacao: data.observacao?.trim() || undefined }; const now = new Date(); await tx.update(repairs).set({ peca: next.peca, codigo: next.codigo ?? null, serialRetirada: next.serialRetirada ?? null, serialInstalada: next.serialInstalada ?? null, observacao: next.observacao ?? null }).where(and(eq(repairs.id, data.id), eq(repairs.chamadoId, data.chamadoId))); await tx.insert(history).values(buildRepairUpdatedHistoryEvent(userId, data.chamadoId, current, next, now)); return getCallBundle(userId, data.chamadoId); }); }
 export async function deleteRepair(userId: number, data: { id: number; chamadoId: number }) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); return db.transaction(async (tx) => { if (!(await getCall(userId, data.chamadoId))) throw new Error("Chamado não encontrado"); const current = (await tx.select().from(repairs).where(and(eq(repairs.id, data.id), eq(repairs.chamadoId, data.chamadoId))).limit(1))[0]; if (!current) throw new Error("Peça não encontrada"); const now = new Date(); await tx.delete(repairs).where(and(eq(repairs.id, data.id), eq(repairs.chamadoId, data.chamadoId))); await tx.insert(history).values(buildRepairDeletedHistoryEvent(userId, data.chamadoId, current, now)); return getCallBundle(userId, data.chamadoId); }); }
-export async function productivity(userId: number, from: Date, to: Date) { const db = await getDb(); if (!db) return { RECEBIDO: 0, FINALIZADO: 0, ENVIADO_PP: 0, ENVIADO_ORCAMENTO: 0, ENVIADO_Zurich: 0 }; const rows = await db.select({ type: productivityEvents.tipoEvento, count: sql<number>`count(*)` }).from(productivityEvents).where(and(eq(productivityEvents.userId, userId), gte(productivityEvents.createdAt, from), lte(productivityEvents.createdAt, to))).groupBy(productivityEvents.tipoEvento); return Object.fromEntries(rows.map((r) => [r.type, Number(r.count)])); }
+export function buildProductivitySummary(rows: Array<{ type: string; count: number }>, deletedCount = 0) { return { ...Object.fromEntries(rows.map((row) => [row.type, Number(row.count)])), EXCLUIDO: Number(deletedCount) }; }
+export async function productivity(userId: number, from: Date, to: Date) { const db = await getDb(); if (!db) return { RECEBIDO: 0, FINALIZADO: 0, ENVIADO_PP: 0, ENVIADO_ORCAMENTO: 0, ENVIADO_Zurich: 0, EXCLUIDO: 0 }; const [rows, deleted] = await Promise.all([db.select({ type: productivityEvents.tipoEvento, count: sql<number>`count(*)` }).from(productivityEvents).where(and(eq(productivityEvents.userId, userId), gte(productivityEvents.createdAt, from), lte(productivityEvents.createdAt, to))).groupBy(productivityEvents.tipoEvento), db.select({ count: sql<number>`count(*)` }).from(callDeletionLogs).where(and(eq(callDeletionLogs.userId, userId), gte(callDeletionLogs.deletedAt, from), lte(callDeletionLogs.deletedAt, to)))]); return buildProductivitySummary(rows.map((row) => ({ type: row.type, count: Number(row.count) })), Number(deleted[0]?.count || 0)); }

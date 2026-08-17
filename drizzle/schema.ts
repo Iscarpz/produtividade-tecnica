@@ -139,6 +139,12 @@ export const productivityEvents = mysqlTable("productivityEvents", {
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
 
+export const callDeletionLogs = mysqlTable("callDeletionLogs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  deletedAt: timestamp("deletedAt").notNull().defaultNow(),
+}, (table) => [index("call_deletion_user_deleted_idx").on(table.userId, table.deletedAt)]);
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
@@ -151,3 +157,4 @@ export type LaudoAuditLog = typeof laudoAuditLogs.$inferSelect;
 export type LaudoSettings = typeof laudoSettings.$inferSelect;
 export type History = typeof history.$inferSelect;
 export type ProductivityEvent = typeof productivityEvents.$inferSelect;
+export type CallDeletionLog = typeof callDeletionLogs.$inferSelect;
