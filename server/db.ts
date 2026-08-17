@@ -47,13 +47,13 @@ export async function updateUserProfile(userId: number, name: string) { const db
 export async function listHistoricalCalls(userId: number, status: "TROCA" | "RECUSADO", search?: string) { const db = await getDb(); if (!db) return []; const rows = await listCalls(userId, status, search); return Promise.all(rows.map(async (call) => { const events = await db.select().from(history).where(and(eq(history.chamadoId, call.id), eq(history.statusNovo, status))).orderBy(desc(history.createdAt)).limit(1); const event = events[0]; return { ...call, dataMovimento: event?.createdAt ?? null, origem: event?.statusAnterior ?? null }; })); }
 export async function getCallBundle(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const call = await getCall(userId, id); if (!call) return undefined; const [repairRows, historyRows] = await Promise.all([db.select().from(repairs).where(eq(repairs.chamadoId, id)).orderBy(desc(repairs.createdAt)), db.select().from(history).where(eq(history.chamadoId, id)).orderBy(desc(history.createdAt))]); return { call, repairs: repairRows, history: historyRows }; }
 
-export function buildNewCallValues(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string }, now = new Date()) { return { userId, ...data, status: "EM ANDAMENTO" as const, dataEntrada: now, dataFinalizacao: null, createdAt: now, updatedAt: now }; }
-export async function createCall(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string }) {
+export function buildNewCallValues(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }, now = new Date()) { const { dataRecebimento, ...callData } = data; return { userId, ...callData, status: "RECEBIDO" as const, dataEntrada: dataRecebimento, dataInicioAndamento: null, dataFinalizacao: null, createdAt: now, updatedAt: now }; }
+export async function createCall(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const now = new Date();
   const result = await db.insert(calls).values(buildNewCallValues(userId, data, now));
   const id = Number(result[0].insertId);
-  await db.insert(history).values({ chamadoId: id, userId, evento: "Chamado recebido", statusNovo: "EM ANDAMENTO", createdAt: now });
+  await db.insert(history).values({ chamadoId: id, userId, evento: "Chamado recebido no setor", statusNovo: "RECEBIDO", observacao: `Data de recebimento: ${data.dataRecebimento.toLocaleDateString("pt-BR")}`, createdAt: now });
   await db.insert(productivityEvents).values({ chamadoId: id, userId, tipoEvento: "RECEBIDO", createdAt: now });
   return getCall(userId, id);
 }
@@ -122,7 +122,8 @@ export async function deleteCall(userId: number, id: number) {
   }));
 }
 
-const transitions: Record<string, { status: any; event?: any; label: string; closed?: boolean; from: string[] }> = {
+const transitions: Record<string, { status: any; event?: any; label: string; closed?: boolean; startsWork?: boolean; from: string[] }> = {
+  "Iniciar andamento": { status: "EM ANDAMENTO", label: "Início do andamento", startsWork: true, from: ["RECEBIDO"] },
   "Enviar para PP": { status: "AGUARDANDO PP", event: "ENVIADO_PP", label: "Enviado para PP", from: ["EM ANDAMENTO"] },
   "Enviar para Orçamento": { status: "AGUARDANDO ORÇAMENTO", event: "ENVIADO_ORCAMENTO", label: "Enviado para orçamento", from: ["EM ANDAMENTO"] },
   "Enviar para Zurich": { status: "Zurich", event: "ENVIADO_Zurich", label: "Enviado para Zurich", from: ["EM ANDAMENTO"] },
@@ -141,7 +142,7 @@ export async function transitionCall(userId: number, id: number, action: string)
   const call = await getCall(userId, id); if (!call) throw new Error("Chamado não encontrado");
   const transition = transitions[action]; if (!isAllowedTransition(call.status, action)) throw new Error("Ação não disponível para o status atual");
   const now = new Date();
-  await db.update(calls).set({ status: transition.status, dataFinalizacao: transition.closed ? now : null, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
+  await db.update(calls).set({ status: transition.status, dataInicioAndamento: transition.startsWork && !call.dataInicioAndamento ? now : call.dataInicioAndamento, dataFinalizacao: transition.closed ? now : null, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
   await db.insert(history).values({ chamadoId: id, userId, evento: transition.label, statusAnterior: call.status, statusNovo: transition.status, createdAt: now });
   if (transition.event) await db.insert(productivityEvents).values({ chamadoId: id, userId, tipoEvento: transition.event, createdAt: now });
   return getCallBundle(userId, id);

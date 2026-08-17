@@ -1,9 +1,13 @@
-export type OpenCall = { id: number; status: string; dataEntrada: Date | string | number; dataFinalizacao?: Date | string | number | null };
+export type OpenCall = { id: number; status: string; dataEntrada: Date | string | number; dataInicioAndamento?: Date | string | number | null; dataFinalizacao?: Date | string | number | null };
 export type QueueOrder = "all" | "oldest" | "newest";
 
 export function callAgeInDays(call: OpenCall, now = new Date()) {
-  const end = call.dataFinalizacao ? new Date(call.dataFinalizacao) : now;
-  return Math.max(0, Math.floor((end.getTime() - new Date(call.dataEntrada).getTime()) / 86_400_000));
+  return Math.max(0, Math.floor((now.getTime() - new Date(call.dataEntrada).getTime()) / 86_400_000));
+}
+
+export function workAgeInDays(call: OpenCall, now = new Date()) {
+  if (!call.dataInicioAndamento) return null;
+  return Math.max(0, Math.floor((now.getTime() - new Date(call.dataInicioAndamento).getTime()) / 86_400_000));
 }
 
 export function sortMyQueue<T extends OpenCall>(calls: T[], order: QueueOrder, now = new Date()) {

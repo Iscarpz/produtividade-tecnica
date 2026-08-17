@@ -30,7 +30,7 @@ describe("parseCallText", () => {
 });
 
 describe("daysOpen", () => {
-  it("conta dias corridos incluindo o dia inicial", () => {
-    expect(daysOpen(new Date("2026-08-12T08:00:00Z"), new Date("2026-08-14T09:00:00Z"))).toBe(3);
+  it("conta o tempo corrido entre recebimento e data atual sem duplicar o dia inicial", () => {
+    expect(daysOpen(new Date("2026-08-12T08:00:00Z"), new Date("2026-08-14T09:00:00Z"))).toBe(2);
   });
 });

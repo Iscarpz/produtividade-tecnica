@@ -6,6 +6,7 @@ import { Search, Wrench, ChevronRight } from "lucide-react";
 import { useState } from "react";
 
 export const queues = {
+  recebidos: { status: "RECEBIDO", title: "Recebidos", description: "Chamados que chegaram ao setor e aguardam início de andamento em bancada.", color: "bg-slate-500" },
   "em-andamento": { status: "EM ANDAMENTO", title: "Em andamento", description: "Chamados disponíveis para diagnóstico e encaminhamento.", color: "bg-blue-500" },
   pp: { status: "AGUARDANDO PP", title: "PP", description: "Chamados aguardando peça; registre o recebimento para retornar ao andamento.", color: "bg-amber-500" },
   orcamento: { status: "AGUARDANDO ORÇAMENTO", title: "Orçamento", description: "Chamados aguardando retorno do orçamento.", color: "bg-violet-500" },

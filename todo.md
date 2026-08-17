@@ -394,3 +394,12 @@
 - [x] Incluir Excluídos nos indicadores de produtividade, respeitando filtros de período e técnico
 - [x] Atualizar o indicador de exclusões automaticamente após a confirmação de exclusão
 - [x] Cobrir persistência, isolamento, filtros e atualização do dashboard com testes
+
+# Rodada 27 — Recebimento e início do andamento
+
+- [x] Exigir Data de recebimento no setor ao criar chamado e preservar a informação de forma independente
+- [x] Registrar Data de início do andamento apenas quando o chamado for efetivamente assumido em bancada
+- [x] Exibir Tempo desde o recebimento e Tempo em andamento de forma independente em ficha e dashboard
+- [x] Calcular prioridades exclusivamente pela data de recebimento e manter os fluxos PP, Orçamento, Zurich, Troca, Finalização, Reabertura e Exclusão
+- [x] Registrar recebimento e início do andamento no histórico, com atualização automática das contagens e prioridades
+- [x] Cobrir migração, tempos, prioridade, transições e compatibilidade multiusuário com testes

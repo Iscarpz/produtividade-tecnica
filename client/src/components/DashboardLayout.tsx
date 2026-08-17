@@ -1,6 +1,6 @@
 import { startLogin } from "@/const";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { ExternalLink, FileSignature, FileText, Globe2, LayoutDashboard, LogOut, RefreshCcw, Search, Settings, ShieldCheck, Wrench } from "lucide-react";
+import { ExternalLink, FileSignature, FileText, Globe2, Inbox, LayoutDashboard, LogOut, RefreshCcw, Search, Settings, ShieldCheck, Wrench } from "lucide-react";
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
@@ -15,6 +15,7 @@ export const POSIFLOW_URL = "https://posiflow.positivotecnologia.com.br/services
 export const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: Search, label: "Chamados", path: "/chamados" },
+  { icon: Inbox, label: "Recebidos", path: "/fila/recebidos" },
   { icon: Wrench, label: "Em andamento", path: "/fila/em-andamento" },
   { icon: ShieldCheck, label: "Zurich", path: "/fila/zurich" },
   { icon: RefreshCcw, label: "Trocas", path: "/trocas" },

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useLocation } from "wouter";
 
 const statusTone: Record<string, string> = {
+  RECEBIDO: "bg-slate-100 text-slate-700 ring-slate-200",
   "EM ANDAMENTO": "bg-blue-50 text-blue-700 ring-blue-200",
   "AGUARDANDO PP": "bg-amber-50 text-amber-700 ring-amber-200",
   "AGUARDANDO ORÇAMENTO": "bg-violet-50 text-violet-700 ring-violet-200",
@@ -26,7 +27,7 @@ const emptyRepair = () => ({ peca: "", codigo: "", serialRetirada: "", serialIns
 
 type TimelineEvent = { id: number | string; evento: string; statusNovo?: string | null; statusAnterior?: string | null; observacao?: string | null; createdAt: Date | string };
 export function getOperationalTimeline(history: TimelineEvent[], repairs: Array<{ id: number }>) {
-  const movements = history.filter((event) => Boolean(event.statusNovo) || event.evento === "Chamado recebido");
+  const movements = history.filter((event) => Boolean(event.statusNovo) || event.evento === "Chamado recebido no setor" || event.evento === "Início do andamento");
   const firstRepair = repairs.length ? history.find((event) => event.evento.startsWith("Peça adicionada:")) : undefined;
   const timeline = firstRepair ? [...movements, { id: `repair-${firstRepair.id}`, evento: "Reparo realizado", createdAt: firstRepair.createdAt }] : movements;
   return timeline.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -34,6 +35,7 @@ export function getOperationalTimeline(history: TimelineEvent[], repairs: Array<
 
 export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: () => void; onRefresh: () => void }) {
   const [deleted, setDeleted] = useState(false);
+  const [clock, setClock] = useState(() => Date.now());
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const detailQueryKey = getQueryKey(trpc.calls.detail, { id }, "query");
@@ -89,12 +91,16 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
     return () => window.clearTimeout(timeout);
   }, [data?.call?.id, id, technicalFields.diagnostico]);
 
+  useEffect(() => { const interval = window.setInterval(() => setClock(Date.now()), 60_000); return () => window.clearInterval(interval); }, []);
+
   if (isLoading) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4"><div className="rounded-xl bg-white p-8 text-sm shadow-xl">Carregando chamado...</div></div>;
   if (isError || !data) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><section className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"><h2 className="text-xl font-bold text-slate-950">Chamado não encontrado</h2><p className="mt-2 text-sm leading-relaxed text-slate-600">Este chamado não existe mais ou não está disponível para sua conta.</p><Button className="mt-6 bg-[#173f5f] text-white hover:bg-[#102d43]" onClick={() => { onClose(); setLocation("/chamados"); }}>Voltar para Chamados</Button></section></div>;
 
   const call: any = data.call;
   const operationalTimeline = getOperationalTimeline(data.history, data.repairs);
-  const actions = call.status === "EM ANDAMENTO"
+  const actions = call.status === "RECEBIDO"
+    ? ["Iniciar andamento"]
+    : call.status === "EM ANDAMENTO"
     ? ["Finalizar", "Enviar para PP", "Enviar para Orçamento", "Enviar para Zurich"]
     : call.status === "AGUARDANDO PP"
       ? ["Peça recebida", "Troca"]
@@ -151,7 +157,7 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
           <div className="min-w-0 flex-1"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#e09f18]">Central técnica do chamado</p><div className="mt-3 flex flex-wrap items-center gap-3"><div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm"><p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Chamado</p><h2 className="mt-1 font-mono text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{call.numeroOs}</h2></div><span className={`rounded-full px-3 py-1.5 text-xs font-bold ring-1 ${statusTone[call.status] || "bg-slate-100 text-slate-700 ring-slate-200"}`}>{call.status}</span></div><div className="mt-4 grid gap-3 sm:grid-cols-2"><Info label="Modelo" value={call.modelo}/><Info label="Serial" value={call.serial}/></div></div>
           <button aria-label="Fechar ficha" onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X className="h-5 w-5"/></button>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3"><Info label="Entrada" value={new Date(call.dataEntrada).toLocaleDateString()}/><Info label="Status atual" value={call.status}/><div className="rounded-xl bg-[#173f5f] p-3 text-white"><p className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Tempo com o chamado</p><p className="mt-1 text-lg font-bold">{daysOpen(call.dataEntrada, call.dataFinalizacao)} dias</p></div></div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Info label="Recebimento no setor" value={new Date(call.dataEntrada).toLocaleDateString()}/><Info label="Início do andamento" value={call.dataInicioAndamento ? new Date(call.dataInicioAndamento).toLocaleDateString() : "Ainda não iniciado"}/><div className="rounded-xl bg-[#173f5f] p-3 text-white"><p className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Tempo desde recebimento</p><p className="mt-1 text-lg font-bold">{daysOpen(call.dataEntrada, new Date(clock))} dias</p></div><div className="rounded-xl bg-blue-600 p-3 text-white"><p className="text-[11px] font-semibold uppercase tracking-wider text-white/60">Tempo em andamento</p><p className="mt-1 text-lg font-bold">{call.dataInicioAndamento ? `${daysOpen(call.dataInicioAndamento, new Date(clock))} dias` : "Não iniciado"}</p></div></div>
       </header>
       <div className="grid gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_340px] sm:p-8">
         <main className="min-w-0 space-y-6">

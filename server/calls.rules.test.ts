@@ -3,6 +3,7 @@ import { isAllowedTransition } from "./db";
 
 describe("regras de transição dos chamados", () => {
   it("permite apenas ações compatíveis com a fila atual", () => {
+    expect(isAllowedTransition("RECEBIDO", "Iniciar andamento")).toBe(true);
     expect(isAllowedTransition("EM ANDAMENTO", "Enviar para PP")).toBe(true);
     expect(isAllowedTransition("AGUARDANDO PP", "Troca")).toBe(true);
     expect(isAllowedTransition("AGUARDANDO PP", "Peça recebida")).toBe(true);
@@ -14,6 +15,7 @@ describe("regras de transição dos chamados", () => {
   });
   it("bloqueia ações impossíveis e estados encerrados", () => {
     expect(isAllowedTransition("FINALIZADO", "Finalizar")).toBe(false);
+    expect(isAllowedTransition("RECEBIDO", "Enviar para PP")).toBe(false);
     expect(isAllowedTransition("TROCA", "Reabrir chamado")).toBe(false);
     expect(isAllowedTransition("TROCA", "Retornar para Andamento")).toBe(false);
     expect(isAllowedTransition("AGUARDANDO PP", "Recusado")).toBe(false);

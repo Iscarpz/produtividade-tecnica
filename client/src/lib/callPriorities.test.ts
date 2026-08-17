@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { attentionGroups, sortMyQueue } from "./callPriorities";
+import { attentionGroups, sortMyQueue, workAgeInDays } from "./callPriorities";
 
 const now = new Date("2026-08-14T12:00:00Z");
 const ago = (days: number) => new Date(now.getTime() - days * 86_400_000);
@@ -24,5 +24,12 @@ describe("prioridades de operação", () => {
   it("ordena Minha Fila por mais antigos ou mais recentes sem mudar status", () => {
     expect(sortMyQueue(calls, "oldest", now).map((call) => call.id)).toEqual([5, 6, 3, 4]);
     expect(sortMyQueue(calls, "newest", now).map((call) => call.id)).toEqual([4, 3, 6, 5]);
+  });
+
+  it("mantém prioridade pelo recebimento mesmo quando o andamento começou depois", () => {
+    const call = { id: 8, status: "EM ANDAMENTO", dataEntrada: ago(20), dataInicioAndamento: ago(1) };
+    expect(attentionGroups([call], now).nearTen).toEqual([]);
+    expect(workAgeInDays(call, now)).toBe(1);
+    expect(sortMyQueue([call, { id: 9, status: "EM ANDAMENTO", dataEntrada: ago(8), dataInicioAndamento: ago(8) }], "oldest", now).map((item) => item.id)).toEqual([8, 9]);
   });
 });

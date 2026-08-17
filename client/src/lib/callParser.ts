@@ -60,5 +60,5 @@ export function daysOpen(start: Date | string, end?: Date | string | null) {
   const from = new Date(start); const to = end ? new Date(end) : new Date();
   const startDay = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime();
   const endDay = new Date(to.getFullYear(), to.getMonth(), to.getDate()).getTime();
-  return Math.max(1, Math.floor((endDay - startDay) / 86400000) + 1);
+  return Math.max(0, Math.floor((endDay - startDay) / 86400000));
 }

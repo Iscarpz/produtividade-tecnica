@@ -1,10 +1,10 @@
-import { attentionGroups, callAgeInDays, sortMyQueue, type QueueOrder } from "@/lib/callPriorities";
+import { attentionGroups, callAgeInDays, sortMyQueue, workAgeInDays, type QueueOrder } from "@/lib/callPriorities";
 import { AlertTriangle, ArrowUpDown, ChevronRight, Clock3, ShieldCheck, Wrench } from "lucide-react";
 import { useMemo, useState } from "react";
 
 function CallRow({ call, onSelect, accent = "bg-blue-500" }: { call: any; onSelect: (id: number) => void; accent?: string }) {
-  const days = callAgeInDays(call);
-  return <button onClick={() => onSelect(call.id)} className="flex w-full min-w-0 items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"><span className={`h-2.5 w-2.5 shrink-0 rounded-full ${accent}`}/><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="font-mono text-xs font-bold text-slate-900">{call.numeroOs}</span><span className="truncate text-xs text-slate-500">{call.modelo}</span></div><p className="mt-1 truncate text-[11px] text-slate-400">Serial {call.serial} · {call.queixa}</p></div><div className="shrink-0 text-right"><p className="text-sm font-bold text-slate-800">{days}</p><p className="text-[10px] uppercase tracking-wide text-slate-400">dias</p></div><ChevronRight className="h-4 w-4 shrink-0 text-slate-300"/></button>;
+  const receiptDays = callAgeInDays(call); const progressDays = workAgeInDays(call);
+  return <button onClick={() => onSelect(call.id)} className="flex w-full min-w-0 items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"><span className={`h-2.5 w-2.5 shrink-0 rounded-full ${accent}`}/><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="font-mono text-xs font-bold text-slate-900">{call.numeroOs}</span><span className="truncate text-xs text-slate-500">{call.modelo}</span></div><p className="mt-1 truncate text-[11px] text-slate-400">Serial {call.serial} · {call.queixa}</p></div><div className="shrink-0 text-right text-[10px]"><p className="font-semibold text-slate-700">Receb. {receiptDays}d</p><p className="mt-1 text-slate-400">And. {progressDays === null ? "—" : `${progressDays}d`}</p></div><ChevronRight className="h-4 w-4 shrink-0 text-slate-300"/></button>;
 }
 
 function AttentionGroup({ title, calls, onSelect, accent, icon: Icon }: { title: string; calls: any[]; onSelect: (id: number) => void; accent: string; icon: typeof AlertTriangle }) {
