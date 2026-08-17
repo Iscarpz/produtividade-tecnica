@@ -311,6 +311,7 @@ class SDKServer {
       throw ForbiddenError("User not found");
     }
 
+    user = await db.ensureOwnerAdmin(user);
     await db.upsertUser({
       openId: user.openId,
       lastSignedIn: signedInAt,

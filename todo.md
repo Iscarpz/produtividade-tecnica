@@ -224,3 +224,20 @@
 - [x] Cobrir isolamento real com dois usuários distintos para chamados, detalhes, históricos, produtividade e buscas
 - [x] Preservar todas as funcionalidades operacionais existentes sem painel ou relatórios de equipe
 - [x] Cobrir fluxo completo de convite, autorização, bloqueios e isolamento com testes; validar check, testes, build e checkpoint publicado
+
+# Rodada 11 — Validação real multiusuário
+
+- [ ] Registrar e-mail controlado pelo usuário para o convite de validação, mantendo expiração de 7 dias
+- [ ] Gerar convite real e validar aceite, cadastro e bloqueio enquanto a conta estiver pendente
+- [ ] Validar autorização pelo OWNER e primeiro acesso do técnico autorizado
+- [ ] Validar configuração e persistência do nome do técnico após F5
+- [ ] Validar criação, movimentação e produtividade de chamado pertencente somente ao técnico
+- [ ] Validar pelo banco e pela interface o isolamento bilateral entre os dados do OWNER e do técnico
+- [ ] Validar bloqueios de pendente, recusado e revogado quando possível, sem alterar a arquitetura
+- [ ] Registrar o resultado do protocolo sem criar dashboard gerencial, relatórios de equipe ou exportação
+
+# Correção de validação — Papel do OWNER
+
+- [x] Corrigir a sincronização do papel do OWNER para impedir que a sessão autenticada seja rebaixada para Técnico
+- [ ] Validar que o OWNER autenticado retorna role admin e acessa Configurações → Usuários
+- [x] Preservar papéis e bloqueios dos técnicos durante a correção de sincronização do OWNER
