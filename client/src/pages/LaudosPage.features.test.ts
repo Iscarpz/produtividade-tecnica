@@ -23,6 +23,16 @@ describe("Laudo Creator nativo — recursos preservados", () => {
     expect(source).toContain("settings.data?.logoPositivo");
   });
 
+  it("gera o PDF em visor antes de permitir o download", () => {
+    expect(documentSource).toContain("createLaudoPdfPreviewUrl");
+    expect(documentSource).toContain('pdf.output("blob")');
+    expect(source).toContain("Pré-visualização do PDF");
+    expect(source).toContain('title="Pré-visualização do PDF do Laudo Técnico"');
+    expect(source).toContain("Pré-visualizar PDF");
+    expect(source).toContain("Baixar PDF");
+    expect(source).toContain("disabled={!url}");
+  });
+
   it("compõe logos proporcionais no documento e oferece estados claros na configuração", () => {
     expect(documentSource).toContain("object-contain");
     expect(documentSource).toContain("logoPositivo");

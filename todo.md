@@ -379,3 +379,10 @@
 - [x] Padronizar a segunda página fotográfica com a identidade documental da primeira página
 - [x] Refinar os quatro cartões de configuração de logos com preview, estado e substituição clara
 - [x] Validar preview, PDF em duas páginas, proporções de logos, TypeScript, testes e build sem regressões
+
+# Rodada 25 — Pré-visualização de PDF do Laudo Técnico
+
+- [x] Exibir uma pré-visualização fiel do PDF antes de iniciar o download
+- [x] Manter o download do PDF somente após a confirmação do usuário na pré-visualização
+- [x] Preservar documento A4 em duas páginas, logos, fotos, histórico e fluxo de geração existentes
+- [x] Validar pré-visualização, download, TypeScript, testes e build
