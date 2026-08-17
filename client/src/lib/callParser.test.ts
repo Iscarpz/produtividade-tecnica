@@ -11,6 +11,16 @@ Causa:\tDESLIGANDO
 Descrição:\tDESLIGANDO Sintoma: Desliga apps sozinho. Desliga sozinho. Trava durante utilização`;
 
 describe("parseCallText", () => {
+  it.each([
+    ["Número O.S.: 60006454345", "60006454345"],
+    ["Número O.S.:    60006454345    Abertura:", "60006454345"],
+    ["Número O.S.:\n60006454345", "60006454345"],
+    ["Numero O.S.: 60006454345", "60006454345"],
+    ["Nº O.S.: 60006454345", "60006454345"],
+  ])("extrai o chamado de forma determinística em variações de Número O.S.", (text, numeroOs) => {
+    expect(parseCallText(text).numeroOs).toBe(numeroOs);
+  });
+
   it("extrai o formato tabular real e limpa causa/sintoma da queixa", () => {
     expect(parseCallText(officialText)).toEqual({ numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Desliga apps sozinho. Desliga sozinho. Trava durante utilização" });
   });

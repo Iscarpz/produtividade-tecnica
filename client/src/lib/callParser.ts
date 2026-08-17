@@ -1,12 +1,38 @@
 export type ParsedCall = { numeroOs: string; serial: string; modelo: string; queixa: string };
 
-const fold = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const compact = (value: string) => value.replace(/\u00a0/g, " ").replace(/[ \t]+/g, " ").replace(/^[-–—]\s*/, "").trim();
 
-function fieldValue(text: string, label: string, nextLabels: string[]) {
-  const labels = [label, ...nextLabels].map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-  const match = text.match(new RegExp(`${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*[:：]?\\s*([\\s\\S]*?)(?=\\s+(?:${labels.slice(1).join("|")})\\s*[:：]?|$)`, "i"));
+const FIELD_PATTERNS = {
+  numeroOs: "(?:n[uú]mero|n[ºo])\\s*o\\.?\\s*s\\.?",
+  serial: "(?:serial|s\\s*\\/\\s*n)",
+  modelo: "(?:modelo|produto)",
+  abertura: "abertura",
+  situacao: "situa[cç][aã]o",
+  textoBreve: "texto\\s+breve",
+  sla: "sla",
+  dataLimite: "data\\s+limite",
+  codigo: "c[oó]digo",
+  material: "material",
+  garantia: "garantia",
+  contrato: "contrato",
+  cliente: "cliente",
+  telefone: "telefone",
+  causa: "causa",
+  descricao: "descri[cç][aã]o",
+  defeito: "defeito",
+  sintoma: "sintoma",
+} as const;
+
+const ALL_FIELD_PATTERNS = Object.values(FIELD_PATTERNS).join("|");
+
+function fieldValue(text: string, pattern: string) {
+  const match = text.match(new RegExp(`(?:^|\\s)${pattern}\\s*[:：-]\\s*([\\s\\S]*?)(?=\\s+(?:${ALL_FIELD_PATTERNS})\\s*[:：-]|$)`, "i"));
   return compact(match?.[1] || "");
+}
+
+function requiredNumber(text: string) {
+  const match = text.match(new RegExp(`(?:^|\\s)${FIELD_PATTERNS.numeroOs}\\s*[:：-]?\\s*([0-9]+)`, "i"));
+  return match?.[1] || "";
 }
 
 function cleanComplaint(description: string, cause: string) {
@@ -19,14 +45,14 @@ function cleanComplaint(description: string, cause: string) {
 }
 
 export function parseCallText(text: string): ParsedCall {
-  const normalized = text.replace(/[|;]/g, "\n").replace(/\r/g, "\n");
-  const labels = ["Número O.S.", "Numero OS", "O.S.", "Abertura", "Serial", "S/N", "Situação", "Texto Breve", "SLA", "Data Limite", "Modelo", "Produto", "Código", "Material", "Garantia", "Contrato", "Cliente", "Telefone", "Causa", "Descrição", "Defeito", "Sintoma"];
-  const next = (label: string) => labels.filter((item) => item !== label);
-  const numeroOs = fieldValue(normalized, "Número O.S.", next("Número O.S.")) || fieldValue(normalized, "Numero OS", next("Numero OS")) || fieldValue(normalized, "O.S.", next("O.S."));
-  const serial = fieldValue(normalized, "Serial", next("Serial")) || fieldValue(normalized, "S/N", next("S/N"));
-  const modelo = fieldValue(normalized, "Modelo", next("Modelo")) || fieldValue(normalized, "Produto", next("Produto"));
-  const cause = fieldValue(normalized, "Causa", next("Causa"));
-  const description = fieldValue(normalized, "Descrição", next("Descrição").filter((item) => item !== "Sintoma")) || fieldValue(normalized, "Defeito", next("Defeito").filter((item) => item !== "Sintoma"));
+  const normalized = text.replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n");
+  const numeroOs = requiredNumber(normalized);
+  const serial = fieldValue(normalized, FIELD_PATTERNS.serial);
+  const modelo = fieldValue(normalized, FIELD_PATTERNS.modelo);
+  const cause = fieldValue(normalized, FIELD_PATTERNS.causa);
+  const description = fieldValue(normalized, FIELD_PATTERNS.sintoma)
+    || fieldValue(normalized, FIELD_PATTERNS.descricao)
+    || fieldValue(normalized, FIELD_PATTERNS.defeito);
   return { numeroOs, serial, modelo, queixa: cleanComplaint(description, cause) };
 }
 

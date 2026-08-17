@@ -254,3 +254,13 @@
 - [x] Permitir scroll somente no conteúdo da confirmação, mantendo ações visíveis e legíveis
 - [ ] Testar criação real por OCR/print e por texto, incluindo atualização imediata das filas e dashboard
 - [ ] Cobrir persistência, dataFinalizacao, queixaOriginal e responsividade com testes; validar check, testes, build e checkpoint publicado
+
+# Correção crítica — Parser de entrada por texto
+
+- [x] Extrair Número O.S., Numero O.S. e Nº O.S. como número obrigatório de Chamado, tolerando espaços, TABs e quebras de linha
+- [x] Extrair serial, modelo e descrição/sintoma sem depender da posição ou ordem dos campos
+- [x] Preservar somente a parte relevante do Sintoma/Descrição como queixa antes da formalização existente
+- [x] Manter OCR independente e preservar queixaOriginal e queixa formalizada no fluxo textual
+- [x] Exibir e exigir o preenchimento manual do Chamado quando o parser não o identificar
+- [x] Criar testes para as cinco variações de Número O.S. e o texto completo do sistema oficial
+- [ ] Validar check, testes, build, conferência e atualização do chamado criado; salvar checkpoint publicado
