@@ -10,6 +10,10 @@ describe("autorização de conta", () => {
     await expect(appRouter.createCaller(context("PENDING_AUTHORIZATION", "user")).calls.list()).rejects.toMatchObject({ code: "FORBIDDEN", message: "Acesso aguardando autorização" });
   });
 
+  it.each(["REFUSED", "REVOKED"] as const)("bloqueia dados operacionais de conta %s", async (accountStatus) => {
+    await expect(appRouter.createCaller(context(accountStatus, "user")).calls.list()).rejects.toMatchObject({ code: "FORBIDDEN", message: "Acesso aguardando autorização" });
+  });
+
   it("impede técnicos ativos de acessar os procedures administrativos", async () => {
     await expect(appRouter.createCaller(context("ACTIVE", "user")).users.list()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
