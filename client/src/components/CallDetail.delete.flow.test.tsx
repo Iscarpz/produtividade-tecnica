@@ -44,7 +44,7 @@ vi.mock("@/lib/trpc", () => ({
 vi.mock("@trpc/react-query", () => ({ getQueryKey: () => ["calls", "detail", { id: 12 }] }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", mocked.setLocation] }));
 
-import { CallDetail } from "./CallDetail";
+import { CallDetail, getOperationalTimeline } from "./CallDetail";
 
 function renderDetail() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -92,6 +92,21 @@ describe("CallDetail — fluxo de exclusão", () => {
     fireEvent.click(screen.getByRole("button", { name: "Voltar para Chamados" }));
     expect(mocked.close).toHaveBeenCalledTimes(1);
     expect(mocked.setLocation).toHaveBeenCalledWith("/chamados");
+  });
+});
+
+describe("CallDetail — timeline operacional", () => {
+  it("oculta auditorias internas e sintetiza o reparo realizado sem apagar os dados de origem", () => {
+    const timeline = getOperationalTimeline([
+      { id: 1, evento: "Chamado recebido", statusNovo: "EM ANDAMENTO", createdAt: new Date("2026-08-01T08:00:00Z") },
+      { id: 2, evento: "Dados técnicos atualizados", createdAt: new Date("2026-08-01T09:00:00Z") },
+      { id: 3, evento: "Peça adicionada: LCD", createdAt: new Date("2026-08-01T10:00:00Z") },
+      { id: 4, evento: "Enviado para PP", statusAnterior: "EM ANDAMENTO", statusNovo: "AGUARDANDO PP", createdAt: new Date("2026-08-01T11:00:00Z") },
+      { id: 5, evento: "Chamado reaberto", statusAnterior: "FINALIZADO", statusNovo: "EM ANDAMENTO", createdAt: new Date("2026-08-02T08:00:00Z") },
+    ], [{ id: 40 }]);
+    expect(timeline.map((event) => event.evento)).toEqual(["Chamado recebido", "Reparo realizado", "Enviado para PP", "Chamado reaberto"]);
+    expect(timeline.some((event) => event.evento === "Dados técnicos atualizados")).toBe(false);
+    expect(timeline.some((event) => event.evento.startsWith("Peça adicionada"))).toBe(false);
   });
 });
 

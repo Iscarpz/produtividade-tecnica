@@ -8,7 +8,7 @@ export type VisualInspection = (typeof VISUAL_INSPECTIONS)[number];
 export type CatalogEntry = { modelo: string; marca: string; tipo: "IMAGEM" | "BIOS"; versao: string; ativo: boolean };
 export type RepairForScript = { peca: string; codigo?: string | null; serialRetirada?: string | null; serialInstalada?: string | null; observacao?: string | null };
 export type ScriptCall = { numeroOs: string; modelo: string; serial: string; queixa: string; diagnostico?: string | null; inspecaoVisual?: VisualInspection | null };
-export type ScriptResult = { errors: string[]; analysis: string[]; script?: string; equipmentType: "SMARTPHONE/TABLET" | "COMPUTADOR/NOTEBOOK"; resolvedCatalog?: CatalogEntry };
+export type ScriptResult = { errors: string[]; script?: string; equipmentType: "SMARTPHONE/TABLET" | "COMPUTADOR/NOTEBOOK"; resolvedCatalog?: CatalogEntry };
 
 const INFINIX_MODELS = ["SMART 6", "SMART 7", "SMART 8", "SMART 10", "HOT 11", "HOT 11S", "HOT 20I", "HOT 20 5G", "HOT 30", "HOT 30I", "HOT 40I", "HOT 50I", "NOTE 10 PRO NFC", "NOTE 10 PRO", "NOTE 12 PRO", "NOTE 30 5G", "NOTE 40 5G", "NOTE 50X", "GT 30 PRO", "ZERO 5G"];
 const POSITIVO_MODELS = ["T3010D", "T3011D", "T307F", "T307G", "T780F", "T780G"];
@@ -39,8 +39,10 @@ export function warrantyForInspection(inspection?: VisualInspection | null) {
 export function buildRepairText(repairs: RepairForScript[], fallback?: string) {
   if (!repairs.length) return fallback || "REPARO NÃO INFORMADO.";
   const items = repairs.map((repair) => {
-    const serials = [repair.serialRetirada && `SERIAL RETIRADO: ${repair.serialRetirada}`, repair.serialInstalada && `SERIAL INSTALADO: ${repair.serialInstalada}`].filter(Boolean);
-    return `${repair.peca}${serials.length ? ` - ${serials.join(" - ")}` : "."}`;
+    const serialRetirada = normalizeSpace(repair.serialRetirada || "");
+    const serialInstalada = normalizeSpace(repair.serialInstalada || "");
+    const serials = [serialRetirada && `SERIAL RETIRADO: ${serialRetirada}`, serialInstalada && `SERIAL INSTALADO: ${serialInstalada}`].filter(Boolean);
+    return `${repair.peca}${serials.length ? ` - ${serials.join(" - ")}` : ""}`;
   });
   return ["COMPONENTES SUBSTITUIDOS:", ...items].join("\n");
 }
@@ -69,16 +71,7 @@ export function generateTechnicalScript(call: ScriptCall, repairs: RepairForScri
   const version = resolvedCatalog?.versao || (usesBios ? "VERSÃO DA BIOS NÃO CADASTRADA (PENDENTE DE TABELA)" : "IMAGEM ATUALIZADA - VERSAO NAO CADASTRADA (PENDENTE DE TABELA)");
   const versionLabel = usesBios ? "VERSÃO DA BIOS" : "VERSAO DA IMAGEM INSTALADA";
   const imageValue = usesBios ? version : resolvedCatalog ? `IMAGEM ATUALIZADA - ${version}` : version;
-  const analysis = [
-    `CHAMADO: ${call.numeroOs || "NÃO INFORMADO"}.`,
-    `TIPO IDENTIFICADO: ${equipmentType}.`,
-    `MODELO NORMALIZADO: ${model}.`,
-    `SERIAL DO EQUIPAMENTO: ${call.serial || "NÃO INFORMADO"}.`,
-    `GARANTIA: ${warrantyForInspection(call.inspecaoVisual)}.`,
-    resolvedCatalog ? `${usesBios ? "BIOS" : "IMAGEM"} RESOLVIDA PELA TABELA: ${normalizeSpace(resolvedCatalog.versao)}.` : `MODELO SEM ${usesBios ? "BIOS" : "IMAGEM"} CADASTRADA.`,
-    repairs.length ? `${repairs.length} REGISTRO(S) DE REPARO INCORPORADO(S) AO SCRIPT.` : automatic ? "REGRA TÉCNICA AUTOMÁTICA APLICADA AO REPARO." : "NENHUM REPARO/PEÇA REGISTRADO.",
-  ].map(normalizeSpace);
-  if (errors.length) return { errors, analysis, equipmentType, resolvedCatalog };
+  if (errors.length) return { errors, equipmentType, resolvedCatalog };
 
   const common = [
     block("MODELO", model),
@@ -90,5 +83,5 @@ export function generateTechnicalScript(call: ScriptCall, repairs: RepairForScri
   const tail = equipmentType === "COMPUTADOR/NOTEBOOK"
     ? [block("PROCEDIMENTOS REALIZADOS", "CONFIGURACAO E ATUALIZACAO DA BIOS PARA A ULTIMA VERSAO DISPONIVEL, ATUALIZACAO DA IMAGEM QUANDO APLICAVEL E EXECUCAO DE TESTES DE HARDWARE E SISTEMA."), block(versionLabel, imageValue), block("GARANTIA", warrantyForInspection(call.inspecaoVisual)), block("ACOES PREVENTIVAS", "REALIZADA LIMPEZA DE CONTATOS, VERIFICACAO DE CONEXOES INTERNAS E TESTES FUNCIONAIS."), block("AVALIACAO POS-REPARO", "EQUIPAMENTO LIGANDO, CARREGANDO, INICIALIZANDO SISTEMA E FUNCIONANDO DENTRO DOS PADROES ESTABELECIDOS PARA O PRODUTO.")]
     : [block(versionLabel, imageValue), block("GARANTIA", warrantyForInspection(call.inspecaoVisual)), block("ACOES PREVENTIVAS", "REALIZADA LIMPEZA DE CONTATOS.\nEXECUTADOS TESTES DE CAMERA, AUDIO, TOUCHSCREEN, CONEXOES, SENSORES E DEMAIS FUNCOES ATRAVES DAS FERRAMENTAS NATIVAS DO EQUIPAMENTO.\nEFETUADOS TESTES DE ESTABILIDADE E ESTRESSE UTILIZANDO STABILITY TEST (V2.5) E STRESS TEST (V9.4)."), block("AVALIACAO POS-REPARO", "EQUIPAMENTO LIGANDO, CARREGANDO E FUNCIONANDO DENTRO DOS PADROES ESTABELECIDOS PARA O PRODUTO.")];
-  return { errors, analysis, equipmentType, resolvedCatalog, script: [...common, ...tail].join("\n") };
+  return { errors, equipmentType, resolvedCatalog, script: [...common, ...tail].join("\n") };
 }

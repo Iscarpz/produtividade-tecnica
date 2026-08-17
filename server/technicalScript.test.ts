@@ -42,7 +42,7 @@ describe("gerador técnico estruturado", () => {
 
   it("não inventa versão quando o modelo não consta na tabela", () => {
     const result = generateTechnicalScript({ ...complete, modelo: "MODELO NÃO CADASTRADO" }, [], catalog);
-    expect(result.analysis).toContain("MODELO SEM IMAGEM CADASTRADA.");
+    expect(result).not.toHaveProperty("analysis");
     expect(result.script).toContain("IMAGEM ATUALIZADA - VERSAO NAO CADASTRADA (PENDENTE DE TABELA)");
   });
 
@@ -55,8 +55,15 @@ describe("gerador técnico estruturado", () => {
 
   it("lista múltiplas peças e preserva apenas os seriais realmente cadastrados", () => {
     const result = generateTechnicalScript(complete, [{ peca: "CONECTOR DE CARGA", codigo: "INTERNO" }, { peca: "PLACA PRINCIPAL", serialInstalada: "XYZ789" }], catalog);
-    expect(result.script).toContain("COMPONENTES SUBSTITUIDOS:\nCONECTOR DE CARGA.\nPLACA PRINCIPAL - SERIAL INSTALADO: XYZ789");
+    expect(result.script).toContain("COMPONENTES SUBSTITUIDOS:\nCONECTOR DE CARGA\nPLACA PRINCIPAL - SERIAL INSTALADO: XYZ789");
     expect(result.script).not.toContain("SERIAL RETIRADO:");
     expect(result.script).not.toContain("INTERNO");
+  });
+
+  it("ignora seriais vazios ou compostos somente por espaços", () => {
+    const result = generateTechnicalScript(complete, [{ peca: "TELA AMOLED TL-12 V2 REV", serialRetirada: "   ", serialInstalada: "" }], catalog);
+    expect(result.script).toContain("COMPONENTES SUBSTITUIDOS:\nTELA AMOLED TL-12 V2 REV\n/");
+    expect(result.script).not.toContain("SERIAL RETIRADO:");
+    expect(result.script).not.toContain("SERIAL INSTALADO:");
   });
 });

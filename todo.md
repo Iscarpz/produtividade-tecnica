@@ -334,3 +334,12 @@
 - [x] Alterar o início do bloco [REPARO:] para COMPONENTES SUBSTITUIDOS: quando houver peças
 - [x] Preservar seriais reais, ausência de código interno, reparo automático sem peças e toda a estrutura restante do script
 - [x] Cobrir conteúdo do script, interface simplificada, TypeScript, testes e build antes do checkpoint
+
+# Rodada 20 — Script final e timeline operacional
+
+- [x] Garantir que a função de saída do Script.AI retorne somente o script iniciado em [MODELO:] e sem análise, separador ou cabeçalho intermediário
+- [x] Preservar no bloco de componentes somente os seriais preenchidos e nunca expor código interno ou placeholders
+- [x] Manter auditoria interna, mas filtrar a timeline visível para abertura, destinações, retornos, reparo, finalização, recusa, troca e reabertura
+- [x] Exibir o evento Reparo realizado de forma operacional sem detalhar edições de Peça, diagnóstico ou campos internos
+- [x] Cobrir script, seriais vazios/parciais, PP, Orçamento, Zurich, reabertura e timeline limpa com testes
+- [x] Validar TypeScript, suíte completa, build e checkpoint publicado
