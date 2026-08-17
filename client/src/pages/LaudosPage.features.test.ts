@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(new URL("./LaudosPage.tsx", import.meta.url), "utf8");
+const documentSource = readFileSync(new URL("../components/LaudoDocument.tsx", import.meta.url), "utf8");
 
 describe("Laudo Creator nativo — recursos preservados", () => {
   it("mantém upload, colagem, limite, compressão e anotação permanente das fotos", () => {
@@ -14,12 +15,23 @@ describe("Laudo Creator nativo — recursos preservados", () => {
   });
 
   it("mantém o PDF A4 em duas páginas, histórico, auditoria e estado seguro sem logos", () => {
-    expect(source).toContain('new jsPDF("p", "mm", "a4")');
-    expect(source).toContain("pdf.addPage()");
-    expect(source).toContain("REGISTRO FOTOGRÁFICO");
+    expect(documentSource).toContain('new jsPDF("p", "mm", "a4")');
+    expect(documentSource).toContain("pdf.addPage()");
+    expect(documentSource).toContain("REGISTRO FOTOGRÁFICO");
     expect(source).toContain("Laudos gerados");
     expect(source).toContain("Ver histórico de ações");
     expect(source).toContain("settings.data?.logoPositivo");
+  });
+
+  it("compõe logos proporcionais no documento e oferece estados claros na configuração", () => {
+    expect(documentSource).toContain("object-contain");
+    expect(documentSource).toContain("logoPositivo");
+    expect(documentSource).toContain("logoInfinix");
+    expect(documentSource).toContain("logoVaio");
+    expect(documentSource).toContain("logoCompaq");
+    expect(source).toContain("Logos institucionais");
+    expect(source).toContain("Substituir logo");
+    expect(source).toContain("Nenhuma logo cadastrada");
   });
 
   it("usa o título correto, opções legíveis e não exige cargo ou função", () => {

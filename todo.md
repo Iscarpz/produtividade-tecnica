@@ -371,3 +371,11 @@
 - [x] Remover cargo/função do formulário, validação, PDF e persistência exigida pelo fluxo de Laudos
 - [x] Refinar a interface do módulo para hierarquia, espaçamento e responsividade coerentes com o sistema
 - [x] Validar o acesso pela sidebar e pela ficha do chamado, preservando PDF, fotos, histórico e os fluxos de Orçamento e Zurich
+
+# Rodada 24 — Composição visual do Laudo Técnico e logos
+
+- [x] Redesenhar visualmente o documento A4 sem alterar dados, campos, PDF ou fluxo de geração
+- [x] Integrar as quatro logos de modo proporcional e equilibrado ao cabeçalho do laudo
+- [x] Padronizar a segunda página fotográfica com a identidade documental da primeira página
+- [x] Refinar os quatro cartões de configuração de logos com preview, estado e substituição clara
+- [x] Validar preview, PDF em duas páginas, proporções de logos, TypeScript, testes e build sem regressões
