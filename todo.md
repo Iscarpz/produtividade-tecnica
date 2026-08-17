@@ -362,3 +362,12 @@
 - [x] Garantir que a barra lateral e a ficha do chamado abram somente o módulo nativo de Laudos
 - [x] Preservar fotos, anotações, PDF A4 em duas páginas, histórico, auditoria e permissões existentes
 - [x] Validar cenário sem configuração de logos e os doze fluxos obrigatórios da solicitação
+
+# Rodada 23 — Acesso interno e refinamento do Laudo Creator
+
+- [x] Corrigir a abertura do Laudo Creator como rota interna autenticada, sem exigir página pública compartilhável
+- [x] Eliminar qualquer ocorrência de “Louvores técnicos” e padronizar o título como “Laudo técnico”
+- [x] Exibir as três opções de conclusão com capitalização profissional, mantendo rádio de seleção exclusiva
+- [x] Remover cargo/função do formulário, validação, PDF e persistência exigida pelo fluxo de Laudos
+- [x] Refinar a interface do módulo para hierarquia, espaçamento e responsividade coerentes com o sistema
+- [x] Validar o acesso pela sidebar e pela ficha do chamado, preservando PDF, fotos, histórico e os fluxos de Orçamento e Zurich

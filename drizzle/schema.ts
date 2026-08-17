@@ -92,7 +92,7 @@ export const laudos = mysqlTable("laudos", {
   conclusao: text("conclusao").notNull(),
   mauUso: boolean("mauUso").notNull().default(false),
   responsavelTecnico: varchar("responsavelTecnico", { length: 255 }).notNull(),
-  cargoTecnico: varchar("cargoTecnico", { length: 160 }).notNull(),
+  cargoTecnico: varchar("cargoTecnico", { length: 160 }),
   fotos: text("fotos").notNull(),
   status: mysqlEnum("status", ["rascunho", "finalizado"]).notNull().default("rascunho"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),

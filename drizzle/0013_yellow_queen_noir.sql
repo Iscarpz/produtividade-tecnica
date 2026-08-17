@@ -1,0 +1,1 @@
+ALTER TABLE `laudos` MODIFY COLUMN `cargoTecnico` varchar(160);

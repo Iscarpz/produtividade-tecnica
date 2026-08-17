@@ -9,7 +9,7 @@ export type LaudoInput = {
   chamadoId?: number | null; numeroChamado: string; dataEmissao: string; marca: LaudoBrand;
   nomeCliente: string; contato: string; enderecoCliente: string; cidadeCliente: string; estadoCliente: string;
   produto: string; tipoProduto: string; numeroSerie: string; bilheteSeguro?: string; defeitoReclamado: string;
-  avaliacaoTecnica: string; conclusao: string; mauUso: boolean; responsavelTecnico: string; cargoTecnico: string;
+  avaliacaoTecnica: string; conclusao: string; mauUso: boolean; responsavelTecnico: string;
   fotos: string[]; status: "rascunho" | "finalizado";
 };
 
@@ -34,7 +34,7 @@ export async function getLaudoPrefill(userId: number, chamadoId: number) {
   const [call, user] = await Promise.all([getCall(userId, chamadoId), (await getDb())?.select().from(users).where(eq(users.id, userId)).limit(1)]);
   if (!call) throw new Error("Chamado não encontrado");
   const derived = deriveLaudoBrandAndProduct(call.modelo);
-  return { chamadoId: call.id, numeroChamado: call.numeroOs, marca: derived.marca, produto: derived.produto, numeroSerie: call.serial, defeitoReclamado: call.queixa, avaliacaoTecnica: value(call.diagnostico), inspecaoVisual: call.inspecaoVisual || "", responsavelTecnico: user?.[0]?.name || "", cargoTecnico: user?.[0]?.cargo || "" };
+  return { chamadoId: call.id, numeroChamado: call.numeroOs, marca: derived.marca, produto: derived.produto, numeroSerie: call.serial, defeitoReclamado: call.queixa, avaliacaoTecnica: value(call.diagnostico), inspecaoVisual: call.inspecaoVisual || "", responsavelTecnico: user?.[0]?.name || "" };
 }
 
 export async function listLaudos(userId: number, search?: string, marca?: LaudoBrand) {
@@ -72,7 +72,7 @@ export async function deleteLaudo(userId: number, id: number) {
 export async function duplicateLaudo(userId: number, id: number) {
   const original = await getLaudo(userId, id); if (!original) throw new Error("Laudo não encontrado");
   await audit(userId, id, original.numeroChamado, original.responsavelTecnico, "Laudo duplicado");
-  const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, numeroChamado: _numeroChamado, status: _status, ...copy } = original;
+  const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, numeroChamado: _numeroChamado, status: _status, cargoTecnico: _cargoTecnico, ...copy } = original;
   return { ...copy, fotos: original.fotos, chamadoId: original.chamadoId ?? undefined, numeroChamado: "", status: "rascunho" as const };
 }
 

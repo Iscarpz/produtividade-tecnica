@@ -114,7 +114,7 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
     setLaudoAction(null);
   };
   const openLaudoCreator = () => {
-    window.open(`${window.location.origin}${LAUDO_CREATOR_URL}?chamado=${id}`, "_blank", "noopener,noreferrer");
+    window.open(`${LAUDO_CREATOR_URL}?chamado=${id}`, "_blank", "noopener,noreferrer");
     setLaudoAction(null);
   };
   const save = () => updateData.mutate({ id, ...fields });

@@ -151,7 +151,7 @@ describe("CallDetail — laudo e peças", () => {
     renderDetail();
     fireEvent.click(screen.getByRole("button", { name: action }));
     fireEvent.click(screen.getByRole("button", { name: "SIM" }));
-    expect(open).toHaveBeenCalledWith("http://localhost:3000/laudos/novo?chamado=12", "_blank", "noopener,noreferrer");
+    expect(open).toHaveBeenCalledWith("/laudos/novo?chamado=12", "_blank", "noopener,noreferrer");
     expect(mocked.transitionMutate).not.toHaveBeenCalled();
     open.mockRestore();
   });

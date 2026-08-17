@@ -17,8 +17,18 @@ describe("Laudo Creator nativo — recursos preservados", () => {
     expect(source).toContain('new jsPDF("p", "mm", "a4")');
     expect(source).toContain("pdf.addPage()");
     expect(source).toContain("REGISTRO FOTOGRÁFICO");
-    expect(source).toContain("Laudos Gerados");
+    expect(source).toContain("Laudos gerados");
     expect(source).toContain("Ver histórico de ações");
     expect(source).toContain("settings.data?.logoPositivo");
+  });
+
+  it("usa o título correto, opções legíveis e não exige cargo ou função", () => {
+    expect(source).toContain("Laudo técnico");
+    expect(source).not.toMatch(/Louvores técnicos/i);
+    expect(source).toContain("Mau uso do equipamento");
+    expect(source).toContain("Falha não identificada");
+    expect(source).toContain("Equipamento aberto por pessoal não autorizado");
+    expect(source).not.toContain("Cargo / função");
+    expect(source).not.toContain("cargoTecnico");
   });
 });
