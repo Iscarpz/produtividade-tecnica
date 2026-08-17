@@ -14,15 +14,15 @@ describe("gerador técnico estruturado", () => {
     expect(result.errors).toEqual(expect.arrayContaining(["Informe o modelo do equipamento.", "Informe a queixa formalizada.", "Informe o diagnóstico do equipamento.", "Selecione a inspeção visual/testes de hardware."]));
   });
 
-  it("normaliza Infinix, usa a imagem cadastrada, garantia e reparos com seriais", () => {
-    const result = generateTechnicalScript(complete, [{ peca: "LCD", serialRetirada: "OLD-1", serialInstalada: "NEW-1" }], catalog);
+  it("normaliza Infinix, usa a imagem cadastrada, garantia e peças com seriais sem expor código interno", () => {
+    const result = generateTechnicalScript(complete, [{ peca: "LCD", codigo: "123456", serialRetirada: "OLD-1", serialInstalada: "NEW-1" }], catalog);
     expect(result.errors).toEqual([]);
     expect(result.equipmentType).toBe("SMARTPHONE/TABLET");
     expect(result.script).toContain("[MODELO:]\nINFINIX HOT 50I\n/");
     expect(result.script).toContain("[VERSAO DA IMAGEM INSTALADA:]\nIMAGEM ATUALIZADA - X6531B-V631BEAFAHAIAJAKAMANANOP-U-OP-260314V1118\n/");
     expect(result.script).toContain("[GARANTIA:]\nEM GARANTIA\n/");
-    expect(result.script).toContain("SERIAL RETIRADA: OLD-1");
-    expect(result.script).toContain("SERIAL INSTALADA: NEW-1");
+    expect(result.script).toContain("[REPARO:]\nREALIZADA A TROCA DE:\nLCD - SERIAL RETIRADO: OLD-1 - SERIAL INSTALADO: NEW-1\n/");
+    expect(result.script).not.toContain("123456");
     expect(result.script?.split("\n/").length).toBeGreaterThan(7);
   });
 
@@ -51,5 +51,12 @@ describe("gerador técnico estruturado", () => {
     const result = generateTechnicalScript(complete, [], updatedCatalog);
     expect(result.script).toContain("IMAGEM ATUALIZADA - VERSAO NOVA DA BASE");
     expect(result.script).not.toContain("X6531B-V631BEAFAHAIAJAKAMANANOP-U-OP-260314V1118");
+  });
+
+  it("lista múltiplas peças e preserva apenas os seriais realmente cadastrados", () => {
+    const result = generateTechnicalScript(complete, [{ peca: "CONECTOR DE CARGA", codigo: "INTERNO" }, { peca: "PLACA PRINCIPAL", serialInstalada: "XYZ789" }], catalog);
+    expect(result.script).toContain("REALIZADA A TROCA DE:\nCONECTOR DE CARGA.\nPLACA PRINCIPAL - SERIAL INSTALADO: XYZ789");
+    expect(result.script).not.toContain("SERIAL RETIRADO:");
+    expect(result.script).not.toContain("INTERNO");
   });
 });

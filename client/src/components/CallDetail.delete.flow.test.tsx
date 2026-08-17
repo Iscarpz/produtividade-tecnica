@@ -2,7 +2,7 @@
 import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocked = vi.hoisted(() => ({
@@ -138,15 +138,16 @@ describe("CallDetail — laudo e peças", () => {
     expect(mocked.deleteRepairMutate).toHaveBeenCalledWith({ id: 44, chamadoId: 12 });
   });
 
-  it("exige diagnóstico e uma única inspeção antes de salvar os dados técnicos", () => {
+  it("salva diagnóstico automaticamente e persiste a inspeção ao selecioná-la", async () => {
+    vi.useFakeTimers();
     renderDetail();
-    const save = screen.getByRole("button", { name: "Salvar dados técnicos" });
-    expect(save).toBeDisabled();
     fireEvent.change(screen.getByRole("textbox", { name: "Diagnóstico" }), { target: { value: "Falha no display." } });
+    await act(async () => { await vi.advanceTimersByTimeAsync(650); });
+    expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, diagnostico: "Falha no display." });
     fireEvent.click(screen.getByLabelText("SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA."));
-    expect(save).toBeEnabled();
-    fireEvent.click(save);
-    expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, diagnostico: "Falha no display.", inspecaoVisual: "SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA." });
+    expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, inspecaoVisual: "SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA." });
+    expect(screen.queryByRole("button", { name: "Salvar dados técnicos" })).not.toBeInTheDocument();
+    vi.useRealTimers();
   });
 
   it("explica quais campos impedem a geração quando o script está incompleto", () => {

@@ -306,3 +306,13 @@
 - [x] Aprimorar a tabela para atualização frequente, busca, edição, ativação/desativação e persistência após recarga
 - [x] Validar a resolução automática da versão atualizada e o fallback de modelo não cadastrado
 - [x] Cobrir papéis, CRUD, persistência, interface, TypeScript, testes e build antes do checkpoint
+
+# Rodada 17 — Reparos e geração de script
+
+- [x] Remover qualquer referência a “Registrador reparo” e padronizar a seção como Adicionar Peça e Peças utilizadas no reparo
+- [x] Salvar Diagnóstico automaticamente após edição e Inspeção visual imediatamente após seleção, sem botão manual
+- [x] Persistir no chamado a Imagem/BIOS automaticamente resolvida pelo modelo, sem interferir na base administrativa
+- [x] Ajustar [REPARO:] para listar somente peças registradas com seriais existentes, sem expor código interno
+- [x] Preservar reparo automático ou informado quando não houver peça registrada, sem inserir “REALIZADA A TROCA DE:” indevidamente
+- [x] Cobrir recarga, persistência automática, múltiplas peças, seriais parciais, exclusão de código e nomenclatura com testes
+- [x] Validar TypeScript, suíte completa, build e checkpoint publicado

@@ -38,6 +38,8 @@ export const calls = mysqlTable("calls", {
   queixaOriginal: text("queixaOriginal"),
   diagnostico: text("diagnostico"),
   inspecaoVisual: mysqlEnum("inspecaoVisual", ["SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA.", "MAU USO CONSTATADO - EQUIPAMENTO COM AVARIAS E/OU DANOS FÍSICOS", "CONSTATADO ABERTURA PRÉVIA POR PESSOAL NÃO AUTORIZADO"]),
+  imagemBiosTipo: mysqlEnum("imagemBiosTipo", ["IMAGEM", "BIOS"]),
+  imagemBiosVersao: text("imagemBiosVersao"),
   status: mysqlEnum("status", ["EM ANDAMENTO", "AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "Zurich", "FINALIZADO", "TROCA", "RECUSADO"]).notNull().default("EM ANDAMENTO"),
   dataEntrada: timestamp("dataEntrada").notNull().defaultNow(),
   dataFinalizacao: timestamp("dataFinalizacao"),

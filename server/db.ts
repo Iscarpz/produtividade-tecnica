@@ -2,7 +2,7 @@ import { and, asc, desc, eq, gte, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { calls, history, imageBiosCatalog, invitations, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
-import { generateTechnicalScript, type VisualInspection } from "./technicalScript";
+import { generateTechnicalScript, resolveCatalog, type VisualInspection } from "./technicalScript";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
@@ -61,22 +61,32 @@ export async function createCall(userId: number, data: { numeroOs: string; seria
 export async function updateCallData(userId: number, id: number, data: { modelo: string; serial: string; queixa: string }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const call = await getCall(userId, id); if (!call) throw new Error("Chamado não encontrado");
-  const changes = [call.modelo !== data.modelo.trim() && "modelo", call.serial !== data.serial.trim() && "serial", call.queixa !== data.queixa.trim() && "queixa"].filter(Boolean) as string[];
+  const modelo = data.modelo.trim();
+  const catalog = await listActiveImageBiosCatalog();
+  const resolved = resolveCatalog(modelo, catalog);
+  const imagemBiosTipo = resolved?.tipo ?? null;
+  const imagemBiosVersao = resolved?.versao ?? null;
+  const changes = [call.modelo !== modelo && "modelo", call.serial !== data.serial.trim() && "serial", call.queixa !== data.queixa.trim() && "queixa", call.imagemBiosTipo !== imagemBiosTipo && "tipo de Imagem/BIOS", call.imagemBiosVersao !== imagemBiosVersao && "versão de Imagem/BIOS"].filter(Boolean) as string[];
   if (!changes.length) return getCallBundle(userId, id);
   const now = new Date();
-  await db.update(calls).set({ modelo: data.modelo.trim(), serial: data.serial.trim(), queixa: data.queixa.trim(), updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
+  await db.update(calls).set({ modelo, serial: data.serial.trim(), queixa: data.queixa.trim(), imagemBiosTipo, imagemBiosVersao, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
   await db.insert(history).values({ chamadoId: id, userId, evento: "Dados do chamado atualizados", observacao: `Campos alterados: ${changes.join(", ")}`, createdAt: now });
   return getCallBundle(userId, id);
 }
 
-export async function updateCallTechnicalData(userId: number, id: number, data: { diagnostico: string; inspecaoVisual: VisualInspection }) {
+export async function updateCallTechnicalData(userId: number, id: number, data: { diagnostico?: string; inspecaoVisual?: VisualInspection }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const call = await getCall(userId, id); if (!call) throw new Error("Chamado não encontrado");
-  const diagnostico = data.diagnostico.trim();
-  const changes = [call.diagnostico !== diagnostico && "diagnóstico", call.inspecaoVisual !== data.inspecaoVisual && "inspeção visual"].filter(Boolean) as string[];
+  const diagnostico = data.diagnostico === undefined ? call.diagnostico : data.diagnostico.trim();
+  const inspecaoVisual = data.inspecaoVisual === undefined ? call.inspecaoVisual : data.inspecaoVisual;
+  const catalog = await listActiveImageBiosCatalog();
+  const resolved = resolveCatalog(call.modelo, catalog);
+  const imagemBiosTipo = resolved?.tipo ?? null;
+  const imagemBiosVersao = resolved?.versao ?? null;
+  const changes = [call.diagnostico !== diagnostico && "diagnóstico", call.inspecaoVisual !== inspecaoVisual && "inspeção visual", call.imagemBiosTipo !== imagemBiosTipo && "tipo de Imagem/BIOS", call.imagemBiosVersao !== imagemBiosVersao && "versão de Imagem/BIOS"].filter(Boolean) as string[];
   if (!changes.length) return getCallBundle(userId, id);
   const now = new Date();
-  await db.update(calls).set({ diagnostico, inspecaoVisual: data.inspecaoVisual, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
+  await db.update(calls).set({ diagnostico, inspecaoVisual, imagemBiosTipo, imagemBiosVersao, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
   await db.insert(history).values({ chamadoId: id, userId, evento: "Dados técnicos atualizados", observacao: `Campos alterados: ${changes.join(", ")}`, createdAt: now });
   return getCallBundle(userId, id);
 }

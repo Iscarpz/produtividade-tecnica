@@ -38,16 +38,15 @@ export function warrantyForInspection(inspection?: VisualInspection | null) {
 
 export function buildRepairText(repairs: RepairForScript[], fallback?: string) {
   if (!repairs.length) return fallback || "REPARO NÃO INFORMADO.";
-  return repairs.map((repair) => [
-    `PEÇA: ${repair.peca}`,
-    repair.codigo && `CÓDIGO: ${repair.codigo}`,
-    repair.serialRetirada && `SERIAL RETIRADA: ${repair.serialRetirada}`,
-    repair.serialInstalada && `SERIAL INSTALADA: ${repair.serialInstalada}`,
-    repair.observacao && `OBSERVAÇÕES: ${repair.observacao}`,
-  ].filter(Boolean).join(" | ")).join("\n");
+  const items = repairs.map((repair) => {
+    const serials = [repair.serialRetirada && `SERIAL RETIRADO: ${repair.serialRetirada}`, repair.serialInstalada && `SERIAL INSTALADO: ${repair.serialInstalada}`].filter(Boolean);
+    return `${repair.peca}${serials.length ? ` - ${serials.join(" - ")}` : "."}`;
+  });
+  return ["REALIZADA A TROCA DE:", ...items].join("\n");
 }
 
-function block(label: string, value: string) { return `[${label}:]\n${normalizeSpace(value)}\n/`; }
+function normalizeScriptValue(value: string) { return value.split("\n").map(normalizeSpace).join("\n"); }
+function block(label: string, value: string) { return `[${label}:]\n${normalizeScriptValue(value)}\n/`; }
 function automaticRepair(call: ScriptCall) {
   const complaint = normalizeSpace(call.queixa);
   const diagnosis = normalizeSpace(call.diagnostico || "");

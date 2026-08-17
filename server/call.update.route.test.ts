@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-const { updateCallData } = vi.hoisted(() => ({ updateCallData: vi.fn() }));
-vi.mock("./db", () => ({ addRepair: vi.fn(), createCall: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), listCalls: vi.fn(), listHistoricalCalls: vi.fn(), productivity: vi.fn(), transitionCall: vi.fn(), updateCallData, updateUserProfile: vi.fn() }));
+const { updateCallData, updateCallTechnicalData } = vi.hoisted(() => ({ updateCallData: vi.fn(), updateCallTechnicalData: vi.fn() }));
+vi.mock("./db", () => ({ addRepair: vi.fn(), createCall: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), listCalls: vi.fn(), listHistoricalCalls: vi.fn(), productivity: vi.fn(), transitionCall: vi.fn(), updateCallData, updateCallTechnicalData, updateUserProfile: vi.fn() }));
 
 import { appRouter } from "./routers";
 
@@ -13,5 +13,11 @@ describe("calls.updateData", () => {
     updateCallData.mockResolvedValueOnce(expected);
     await expect(appRouter.createCaller(ctx).calls.updateData({ id: 21, modelo: "INFINIX HOT 50I", serial: "5A538SY82", queixa: "Equipamento apresenta desligamentos espontâneos." })).resolves.toEqual(expected);
     expect(updateCallData).toHaveBeenCalledWith(7, 21, { modelo: "INFINIX HOT 50I", serial: "5A538SY82", queixa: "Equipamento apresenta desligamentos espontâneos." });
+  });
+
+  it("aceita diagnóstico e inspeção individualmente para o salvamento automático", async () => {
+    updateCallTechnicalData.mockResolvedValueOnce({ call: { id: 21, diagnostico: "FALHA NO DISPLAY" }, repairs: [], history: [] });
+    await expect(appRouter.createCaller(ctx).calls.updateTechnicalData({ id: 21, diagnostico: "FALHA NO DISPLAY" })).resolves.toMatchObject({ call: { diagnostico: "FALHA NO DISPLAY" } });
+    expect(updateCallTechnicalData).toHaveBeenCalledWith(7, 21, { diagnostico: "FALHA NO DISPLAY", inspecaoVisual: undefined });
   });
 });
