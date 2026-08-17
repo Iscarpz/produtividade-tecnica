@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addRepair, createCall, deleteCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, productivity, transitionCall, updateCallData, updateUserProfile } from "./db";
+import { addRepair, createCall, deleteCall, deleteRepair, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, productivity, transitionCall, updateCallData, updateRepair, updateUserProfile } from "./db";
 import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
 import { usersRouter } from "./userRouter";
@@ -33,6 +33,8 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => deleteCall(ctx.user.id, input.id)),
     transition: protectedProcedure.input(z.object({ id: z.number(), action: z.enum(["Enviar para PP", "Enviar para Orçamento", "Enviar para Zurich", "Retornar para Andamento", "Peça recebida", "Orçamento aprovado", "Orçamento recusado", "Finalizar", "Troca", "Recusado"]) })).mutation(({ ctx, input }) => transitionCall(ctx.user.id, input.id, input.action)),
     addRepair: protectedProcedure.input(z.object({ chamadoId: z.number(), peca: z.string().min(1), codigo: z.string().optional(), serialRetirada: z.string().optional(), serialInstalada: z.string().optional(), observacao: z.string().optional() })).mutation(({ ctx, input }) => addRepair(ctx.user.id, input)),
+    updateRepair: protectedProcedure.input(z.object({ id: z.number(), chamadoId: z.number(), peca: z.string().min(1).max(255), codigo: z.string().max(128).optional(), serialRetirada: z.string().max(128).optional(), serialInstalada: z.string().max(128).optional(), observacao: z.string().max(3000).optional() })).mutation(({ ctx, input }) => updateRepair(ctx.user.id, input)),
+    deleteRepair: protectedProcedure.input(z.object({ id: z.number(), chamadoId: z.number() })).mutation(({ ctx, input }) => deleteRepair(ctx.user.id, input)),
   }),
   productivity: router({ range: protectedProcedure.input(dateRange).query(({ ctx, input }) => productivity(ctx.user.id, input.from, input.to)) }),
   historical: router({ troca: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "TROCA", input?.search)), recusado: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "RECUSADO", input?.search)) }),

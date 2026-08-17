@@ -271,3 +271,14 @@
 - [x] Proteger a criação para gravar somente Chamado, serial, modelo, queixas, status, datas e userId em suas colunas corretas
 - [x] Criar teste de persistência da criação textual com todos os campos e não alterar o registro real de validação
 - [x] Validar o fluxo real, check, testes, build e checkpoint publicado
+
+# Rodada 14 — Laudo Creator e melhorias do chamado
+
+- [x] Exibir a pergunta “Necessário gerar um laudo?” antes da transição de Em andamento para Orçamento ou Zurich
+- [x] Fazer NÃO concluir somente a transição já existente, preservando produtividade e histórico
+- [x] Fazer SIM abrir o Laudo Creator em nova aba sem transicionar automaticamente o chamado
+- [x] Destacar Chamado, queixa, status, modelo e serial na hierarquia visual da ficha técnica
+- [x] Permitir editar uma peça existente no mesmo formulário, sem criar duplicidade e com histórico preservado
+- [x] Permitir excluir uma peça com confirmação, persistência e registro no histórico existente
+- [x] Cobrir os quatro cenários de laudo e os fluxos de edição/exclusão de peça com testes automatizados
+- [x] Validar interface, persistência após recarga, check, testes, build e checkpoint publicado
