@@ -12,6 +12,7 @@ const mocked = vi.hoisted(() => ({
   detailQuery: vi.fn(),
   invalidate: vi.fn(),
   transitionMutate: vi.fn(),
+  transitionSuccess: null as null | ((result: unknown, variables: { id: number; action: string }) => Promise<void>),
   updateRepairMutate: vi.fn(),
   deleteRepairMutate: vi.fn(),
   updateTechnicalMutate: vi.fn(),
@@ -30,7 +31,7 @@ vi.mock("@/lib/trpc", () => ({
     calls: {
       detail: { useQuery: (...args: unknown[]) => { mocked.detailQuery(...args); return mocked.queryState; } },
       generateScript: { useQuery: () => mocked.scriptState },
-      transition: { useMutation: () => ({ isPending: false, mutate: mocked.transitionMutate }) },
+      transition: { useMutation: ({ onSuccess }: { onSuccess: (result: unknown, variables: { id: number; action: string }) => Promise<void> }) => { mocked.transitionSuccess = onSuccess; return { isPending: false, mutate: mocked.transitionMutate }; } },
       updateData: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
       updateTechnicalData: { useMutation: () => ({ isPending: false, mutate: mocked.updateTechnicalMutate }) },
       addRepair: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
@@ -61,6 +62,7 @@ afterEach(() => {
   mocked.detailQuery.mockReset();
   mocked.invalidate.mockReset();
   mocked.transitionMutate.mockReset();
+  mocked.transitionSuccess = null;
   mocked.updateRepairMutate.mockReset();
   mocked.deleteRepairMutate.mockReset();
   mocked.updateTechnicalMutate.mockReset();
@@ -94,6 +96,27 @@ describe("CallDetail — fluxo de exclusão", () => {
 });
 
 describe("CallDetail — laudo e peças", () => {
+  it("exibe Reabrir chamado para finalizados e atualiza os dados operacionais ao reabrir", async () => {
+    mocked.queryState = { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "FINALIZADO", dataEntrada: new Date("2026-08-14T00:00:00Z"), dataFinalizacao: new Date("2026-08-15T00:00:00Z"), updatedAt: new Date("2026-08-15T00:00:00Z") }, repairs: [], history: [] } as any, isLoading: false, isError: false };
+    renderDetail();
+    fireEvent.click(screen.getByRole("button", { name: "Reabrir chamado" }));
+    expect(mocked.transitionMutate).toHaveBeenCalledWith({ id: 12, action: "Reabrir chamado" });
+    await act(async () => { await mocked.transitionSuccess?.({}, { id: 12, action: "Reabrir chamado" }); });
+    expect(mocked.invalidate).toHaveBeenCalled();
+    expect(mocked.close).not.toHaveBeenCalled();
+  });
+
+  it("fecha a ficha e retorna à fila em andamento após finalizar", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    renderDetail();
+    fireEvent.click(screen.getByRole("button", { name: "Finalizar" }));
+    await act(async () => { await mocked.transitionSuccess?.({}, { id: 12, action: "Finalizar" }); });
+    expect(mocked.close).toHaveBeenCalledTimes(1);
+    expect(mocked.setLocation).toHaveBeenCalledWith("/fila/em-andamento");
+    expect(mocked.invalidate).toHaveBeenCalled();
+    confirm.mockRestore();
+  });
+
   it.each([
     ["Enviar para Orçamento", "NÃO"],
     ["Enviar para Zurich", "NÃO"],

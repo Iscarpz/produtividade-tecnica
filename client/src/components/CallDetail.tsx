@@ -42,7 +42,17 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
   const [repairToDelete, setRepairToDelete] = useState<{ id: number; peca: string } | null>(null);
   const [laudoAction, setLaudoAction] = useState<"Enviar para Orçamento" | "Enviar para Zurich" | null>(null);
   const [scriptVisible, setScriptVisible] = useState(false);
-  const transition = trpc.calls.transition.useMutation({ onSuccess: () => { toast.success("Status atualizado"); onRefresh(); }, onError: (error) => toast.error(error.message) });
+  const refreshOperationalData = async () => {
+    await Promise.all([
+      utils.calls.list.invalidate(),
+      utils.calls.detail.invalidate({ id }),
+      utils.productivity.range.invalidate(),
+      utils.historical.troca.invalidate(),
+      utils.historical.recusado.invalidate(),
+    ]);
+    onRefresh();
+  };
+  const transition = trpc.calls.transition.useMutation({ onSuccess: async (_result, variables) => { await refreshOperationalData(); toast.success(variables.action === "Reabrir chamado" ? "Chamado reaberto" : "Status atualizado"); if (variables.action === "Finalizar") { onClose(); setLocation("/fila/em-andamento"); } }, onError: (error) => toast.error(error.message) });
   const updateData = trpc.calls.updateData.useMutation({ onSuccess: () => { toast.success("Dados atualizados"); setEditing(false); onRefresh(); }, onError: (error) => toast.error(error.message) });
   const updateTechnicalData = trpc.calls.updateTechnicalData.useMutation({ onMutate: () => setTechnicalSaveState("saving"), onSuccess: () => { setTechnicalSaveState("saved"); utils.calls.generateScript.invalidate({ id }); onRefresh(); }, onError: (error) => { setTechnicalSaveState("error"); toast.error(error.message); } });
   const addRepair = trpc.calls.addRepair.useMutation({ onSuccess: () => { toast.success("Peça adicionada"); setRepair(emptyRepair()); onRefresh(); }, onError: (error) => toast.error(error.message) });
@@ -81,7 +91,9 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
       ? ["Peça recebida", "Troca"]
       : call.status === "AGUARDANDO ORÇAMENTO" || call.status === "Zurich"
         ? ["Orçamento aprovado", "Orçamento recusado", "Troca"]
-        : [];
+        : call.status === "FINALIZADO"
+          ? ["Reabrir chamado"]
+          : [];
   const runAction = (action: string) => {
     if (action === "Finalizar" && !window.confirm("Confirmar a finalização do chamado?")) return;
     if (action === "Enviar para Orçamento" || action === "Enviar para Zurich") { setLaudoAction(action); return; }

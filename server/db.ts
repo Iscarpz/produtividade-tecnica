@@ -129,6 +129,7 @@ const transitions: Record<string, { status: any; event?: any; label: string; clo
   "Orçamento aprovado": { status: "EM ANDAMENTO", label: "Orçamento aprovado", from: ["AGUARDANDO ORÇAMENTO", "Zurich"] },
   "Orçamento recusado": { status: "RECUSADO", label: "Orçamento recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "Zurich"] },
   "Finalizar": { status: "FINALIZADO", event: "FINALIZADO", label: "Chamado finalizado", closed: true, from: ["EM ANDAMENTO"] },
+  "Reabrir chamado": { status: "EM ANDAMENTO", label: "Chamado reaberto", from: ["FINALIZADO"] },
   "Troca": { status: "TROCA", label: "Chamado marcado como troca", closed: true, from: ["AGUARDANDO PP", "AGUARDANDO ORÇAMENTO", "Zurich"] },
   "Recusado": { status: "RECUSADO", label: "Chamado recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "Zurich"] },
 };

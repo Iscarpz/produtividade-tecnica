@@ -316,3 +316,13 @@
 - [x] Preservar reparo automático ou informado quando não houver peça registrada, sem inserir “REALIZADA A TROCA DE:” indevidamente
 - [x] Cobrir recarga, persistência automática, múltiplas peças, seriais parciais, exclusão de código e nomenclatura com testes
 - [x] Validar TypeScript, suíte completa, build e checkpoint publicado
+
+# Rodada 18 — Reabertura e atualização automática
+
+- [x] Adicionar Reabrir chamado para registros finalizados, retornando para Em andamento sem alterar a data de entrada
+- [x] Registrar a reabertura no histórico e preservar produtividade, histórico e isolamento existentes
+- [x] Fechar automaticamente a ficha após finalizar e retornar o usuário à lista operacional apropriada
+- [x] Centralizar a invalidação/refetch das queries de Dashboard, Chamados, filas, prioridades, histórico e produtividade após cada transição
+- [x] Garantir atualização automática em PP, Orçamento, Zurich, Finalizados e retornos para Em andamento, sem F5
+- [x] Cobrir finalização, reabertura, cache, múltiplas telas e isolamento multiusuário com testes automatizados
+- [x] Validar interface, TypeScript, suíte completa, build e checkpoint publicado

@@ -15,7 +15,8 @@ describe("CallDetail — exclusão", () => {
     expect(source).toContain("Excluir permanentemente");
     expect(source).toContain("cancelQueries({ queryKey: detailQueryKey, exact: true })");
     expect(source).toContain("removeQueries({ queryKey: detailQueryKey, exact: true })");
-    expect(source.indexOf("onClose();")).toBeLessThan(source.indexOf("utils.calls.list.invalidate()"));
+    const deleteCallback = source.slice(source.indexOf("const removeCall"), source.indexOf("useEffect(() =>"));
+    expect(deleteCallback.indexOf("onClose();")).toBeLessThan(deleteCallback.indexOf("utils.calls.list.invalidate()"));
     expect(source).toContain("Chamado não encontrado");
     expect(source).toContain("Voltar para Chamados");
     expect(source).toContain('setLocation("/chamados")');

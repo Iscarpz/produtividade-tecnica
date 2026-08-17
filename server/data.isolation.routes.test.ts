@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
-  addRepair: vi.fn(), createCall: vi.fn(), deleteCall: vi.fn(), findInvitationByHash: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), getUserByEmail: vi.fn(), insertInvitation: vi.fn(), isInvitationAvailable: vi.fn(), listCalls: vi.fn(), listHistoricalCalls: vi.fn(), listInvitationsForAdmin: vi.fn(), listUsersForAdmin: vi.fn(), productivity: vi.fn(), revokeInvitation: vi.fn(), setUserAccountStatus: vi.fn(), updateCallData: vi.fn(), updateUserProfile: vi.fn(), createInvitedUser: vi.fn(),
+  addRepair: vi.fn(), createCall: vi.fn(), deleteCall: vi.fn(), findInvitationByHash: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), getUserByEmail: vi.fn(), insertInvitation: vi.fn(), isInvitationAvailable: vi.fn(), listCalls: vi.fn(), listHistoricalCalls: vi.fn(), listInvitationsForAdmin: vi.fn(), listUsersForAdmin: vi.fn(), productivity: vi.fn(), revokeInvitation: vi.fn(), setUserAccountStatus: vi.fn(), transitionCall: vi.fn(), updateCallData: vi.fn(), updateUserProfile: vi.fn(), createInvitedUser: vi.fn(),
 }));
 vi.mock("./db", () => db);
 
@@ -25,5 +25,11 @@ describe("isolamento de dados por técnico", () => {
     expect(db.getCallBundle).toHaveBeenCalledWith(202, 22);
     expect(db.listHistoricalCalls).toHaveBeenCalledWith(101, "TROCA", undefined);
     expect(db.productivity).toHaveBeenCalledWith(202, expect.any(Date), expect.any(Date));
+  });
+
+  it("vincula a reabertura ao técnico autenticado", async () => {
+    db.transitionCall.mockResolvedValueOnce({ call: { id: 11, status: "EM ANDAMENTO", userId: 101 }, repairs: [], history: [] });
+    await expect(appRouter.createCaller(context(101)).calls.transition({ id: 11, action: "Reabrir chamado" })).resolves.toMatchObject({ call: { userId: 101 } });
+    expect(db.transitionCall).toHaveBeenCalledWith(101, 11, "Reabrir chamado");
   });
 });
