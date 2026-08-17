@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -31,7 +31,7 @@ export const invitations = mysqlTable("invitations", {
 export const calls = mysqlTable("calls", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  numeroOs: varchar("numeroOs", { length: 64 }).notNull().unique(),
+  numeroOs: varchar("numeroOs", { length: 64 }).notNull(),
   serial: varchar("serial", { length: 128 }).notNull(),
   modelo: varchar("modelo", { length: 255 }).notNull(),
   queixa: text("queixa").notNull(),
@@ -41,7 +41,7 @@ export const calls = mysqlTable("calls", {
   dataFinalizacao: timestamp("dataFinalizacao"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
-});
+}, (table) => [uniqueIndex("calls_user_numeroOs_unique").on(table.userId, table.numeroOs)]);
 
 export const repairs = mysqlTable("repairs", {
   id: int("id").autoincrement().primaryKey(),

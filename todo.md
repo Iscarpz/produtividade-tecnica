@@ -242,3 +242,15 @@
 - [x] Validar que o OWNER autenticado retorna role admin e acessa Configurações → Usuários
 - [x] Preservar papéis e bloqueios dos técnicos durante a correção de sincronização do OWNER
 - [x] Fazer a página Usuários confirmar autorização administrativa no backend, sem depender exclusivamente do cache de perfil do navegador
+
+# Correção — Cadastro de chamados após validação multiusuário
+
+- [x] Reproduzir e identificar a causa raiz do erro de inserção em calls para novo chamado
+- [x] Conferir schema, banco, procedures e tipos de todos os campos persistidos na criação
+- [x] Corrigir dataFinalizacao para persistir NULL em chamados novos, preservando status EM ANDAMENTO
+- [x] Preservar queixa formalizada e queixaOriginal bruta no fluxo OCR e texto
+- [x] Preservar userId do usuário autenticado e o isolamento multiusuário na criação
+- [x] Ajustar o layout da confirmação OCR para manter Confirmar chamado acessível em 100% de zoom
+- [x] Permitir scroll somente no conteúdo da confirmação, mantendo ações visíveis e legíveis
+- [ ] Testar criação real por OCR/print e por texto, incluindo atualização imediata das filas e dashboard
+- [ ] Cobrir persistência, dataFinalizacao, queixaOriginal e responsividade com testes; validar check, testes, build e checkpoint publicado

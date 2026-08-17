@@ -11,3 +11,23 @@ button { transition: transform 160ms cubic-bezier(.23,1,.32,1), background-color
 button:active { transform: scale(.98); }
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* O modal de novo chamado não pode ultrapassar a viewport em telas com zoom normal.
+   O conteúdo rola internamente, enquanto o botão de confirmação permanece acessível. */
+.fixed.inset-0.z-50 > .max-w-2xl {
+  display: flex;
+  max-height: calc(100dvh - 2rem);
+  flex-direction: column;
+  overflow: hidden;
+}
+.fixed.inset-0.z-50 > .max-w-2xl > .p-5 {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+.fixed.inset-0.z-50 > .max-w-2xl > .p-5 > .rounded-xl > .w-full {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  box-shadow: 0 -10px 16px rgba(248, 250, 252, .95);
+}
