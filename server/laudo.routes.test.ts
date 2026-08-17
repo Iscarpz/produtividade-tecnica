@@ -26,4 +26,21 @@ describe("rotas do Laudo Creator integrado", () => {
     await expect(appRouter.createCaller(context("manager", 88)).laudos.settings.update({ logoPositivo: "/manus-storage/logo.png" })).resolves.toMatchObject({ id: 1 });
     expect(laudo.updateLaudoSettings).toHaveBeenCalledWith(88, { logoPositivo: "/manus-storage/logo.png" });
   });
+
+  it("retorna null como estado válido quando não há configuração de logos", async () => {
+    laudo.getLaudoSettings.mockResolvedValue(null);
+    await expect(appRouter.createCaller(context()).laudos.settings.get()).resolves.toBeNull();
+  });
+
+  it("cria laudo, recebe foto e retorna a auditoria exclusivamente pelas rotas nativas", async () => {
+    const caller = appRouter.createCaller(context("user", 77));
+    const input = { chamadoId: 12, numeroChamado: "60006454345", dataEmissao: "2026-08-17", marca: "Infinix" as const, nomeCliente: "Cliente", contato: "(11) 99999-9999", enderecoCliente: "Rua A, 10", cidadeCliente: "São Paulo", estadoCliente: "SP", produto: "NOTE 40", tipoProduto: "Smartphone", numeroSerie: "5A501L857", defeitoReclamado: "Não liga", avaliacaoTecnica: "Avaliação técnica registrada", conclusao: "Falha constatada", mauUso: false, responsavelTecnico: "Técnico", cargoTecnico: "Técnico autorizado", fotos: ["/manus-storage/foto-1.jpg", "/manus-storage/foto-2.jpg"], status: "finalizado" as const };
+    laudo.createLaudo.mockResolvedValue({ id: 501, ...input }); laudo.uploadLaudoImage.mockResolvedValue("/manus-storage/foto-3.jpg"); laudo.listLaudoAudit.mockResolvedValue([{ id: 1, acao: "Laudo criado" }]);
+    await expect(caller.laudos.create(input)).resolves.toMatchObject({ id: 501, numeroChamado: input.numeroChamado });
+    await expect(caller.laudos.uploadImage({ dataUrl: `data:image/png;base64,${"a".repeat(40)}`, kind: "foto" })).resolves.toBe("/manus-storage/foto-3.jpg");
+    await expect(caller.laudos.audit({ laudoId: 501 })).resolves.toEqual([{ id: 1, acao: "Laudo criado" }]);
+    expect(laudo.createLaudo).toHaveBeenCalledWith(77, input);
+    expect(laudo.uploadLaudoImage).toHaveBeenCalledWith(77, expect.any(String), "foto");
+    expect(laudo.listLaudoAudit).toHaveBeenCalledWith(77, 501);
+  });
 });

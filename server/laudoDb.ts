@@ -88,7 +88,7 @@ export async function recordLaudoPdf(userId: number, laudoId: number) {
   return { success: true } as const;
 }
 
-export async function getLaudoSettings() { const db = await getDb(); if (!db) return undefined; return (await db.select().from(laudoSettings).orderBy(desc(laudoSettings.updatedAt)).limit(1))[0]; }
+export async function getLaudoSettings() { const db = await getDb(); if (!db) return null; return (await db.select().from(laudoSettings).orderBy(desc(laudoSettings.updatedAt)).limit(1))[0] ?? null; }
 export async function updateLaudoSettings(userId: number, data: { logoPositivo?: string; logoInfinix?: string; logoVaio?: string; logoCompaq?: string }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const current = await getLaudoSettings();

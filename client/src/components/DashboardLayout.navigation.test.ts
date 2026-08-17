@@ -20,4 +20,10 @@ describe("DashboardLayout — navegação", () => {
       expect.objectContaining({ label: "Posiflow", url: POSIFLOW_URL }),
     ]));
   });
+
+  it("mantém o Laudo Creator como rota interna, sem URL do sistema antigo", () => {
+    expect(LAUDO_CREATOR_URL).toBe("/laudos/novo");
+    expect(source).toContain("item.internal ? go(item.url) : openExternal(item.url)");
+    expect(source).not.toMatch(/base44|laudoatppr/i);
+  });
 });

@@ -354,3 +354,11 @@
 - [x] Abrir o Laudo Creator em nova aba após SIM na decisão de Orçamento ou Zurich, mantendo NÃO e demais transições inalterados
 - [x] Vincular internamente o laudo ao chamado apenas quando possível, sem criar nova interface de histórico
 - [x] Validar formulário, fotos, PDF, auditoria, permissões e os quatro fluxos Orçamento/Zurich com e sem laudo
+
+# Rodada 22 — Correção do Laudo Creator nativo
+
+- [x] Identificar e corrigir a query de configurações de logos para nunca retornar undefined
+- [x] Remover qualquer referência ou caminho remanescente para o Laudo Creator antigo/Base44
+- [x] Garantir que a barra lateral e a ficha do chamado abram somente o módulo nativo de Laudos
+- [x] Preservar fotos, anotações, PDF A4 em duas páginas, histórico, auditoria e permissões existentes
+- [x] Validar cenário sem configuração de logos e os doze fluxos obrigatórios da solicitação
