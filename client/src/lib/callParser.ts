@@ -1,14 +1,14 @@
 import { normalizeModelName } from "@shared/modelNormalization";
 
 export { normalizeModelName };
-export type ParsedCall = { numeroOs: string; serial: string; modelo: string; queixa: string };
+export type ParsedCall = { numeroOs: string; serial: string; modelo: string; queixa: string; garantia?: string; causa?: string };
 
 const compact = (value: string) => value.replace(/\u00a0/g, " ").replace(/[ \t]+/g, " ").replace(/^[-–—]\s*/, "").trim();
 
 const FIELD_PATTERNS = {
-  numeroOs: "(?:n[uú]mero|n[ºo])\\s*o\\.?\\s*s\\.?",
+  numeroOs: "(?:chamado|n[uú]mero|n[ºo])\\s*(?:o\\.?\\s*s\\.?)?",
   serial: "(?:serial|s\\s*\\/\\s*n)",
-  modelo: "(?:modelo|produto)",
+  modelo: "(?:marca\\s*\\/\\s*modelo|modelo|produto)",
   abertura: "abertura",
   situacao: "situa[cç][aã]o",
   textoBreve: "texto\\s+breve",
@@ -18,7 +18,7 @@ const FIELD_PATTERNS = {
   material: "material",
   garantia: "garantia",
   contrato: "contrato",
-  cliente: "cliente",
+  cliente: "(?:cliente|consumidor)",
   telefone: "telefone",
   causa: "causa",
   descricao: "descri[cç][aã]o",
@@ -34,29 +34,41 @@ function fieldValue(text: string, pattern: string) {
 }
 
 function requiredNumber(text: string) {
-  const match = text.match(new RegExp(`(?:^|\\s)${FIELD_PATTERNS.numeroOs}\\s*[:：-]?\\s*([0-9]+)`, "i"));
-  return match?.[1] || "";
+  const labeledCall = text.match(/(?:^|\s)chamado\s*[:：-]?\s*([0-9]{5,})/i);
+  if (labeledCall?.[1]) return labeledCall[1];
+  const fallback = text.match(new RegExp(`(?:^|\\s)${FIELD_PATTERNS.numeroOs}\\s*[:：-]?\\s*([0-9]{5,})`, "i"));
+  return fallback?.[1] || "";
 }
 
-function cleanComplaint(description: string, cause: string) {
-  let result = compact(description);
-  const symptom = result.match(/(?:^|\s)Sintoma\s*[:：-]\s*([\s\S]*)$/i);
-  if (symptom?.[1]) result = symptom[1];
-  if (cause) result = result.replace(new RegExp(`^${cause.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*`, "i"), "");
-  result = result.replace(/^DESLIGANDO\s+/i, "");
-  return compact(result);
+function extractSerial(text: string) {
+  const source = text.replace(new RegExp(`((?:^|\\s)${FIELD_PATTERNS.serial}\\s*[:：-]\\s*)garantia\\s*[:：-]\\s*`, "i"), "$1");
+  const raw = fieldValue(source, FIELD_PATTERNS.serial).replace(/\b(?:em\s+garantia|fora\s+de\s+garantia|garantia)\b/gi, " ");
+  return raw.match(/\b[A-Za-z0-9][A-Za-z0-9-]{4,}\b/)?.[0] || "";
+}
+
+function extractWarranty(text: string) {
+  const raw = fieldValue(text, FIELD_PATTERNS.garantia);
+  const source = `${raw} ${text}`.toUpperCase();
+  if (/\bFORA\s+DE\s+GARANTIA\b/.test(source)) return "FORA DE GARANTIA";
+  if (/\bEM\s+GARANTIA\b/.test(source)) return "EM GARANTIA";
+  return /\bGARANTIA\b/.test(source) ? "GARANTIA" : "";
+}
+
+function cleanComplaint(description: string) {
+  return compact(description);
 }
 
 export function parseCallText(text: string): ParsedCall {
   const normalized = text.replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n");
   const numeroOs = requiredNumber(normalized);
-  const serial = fieldValue(normalized, FIELD_PATTERNS.serial);
+  const serial = extractSerial(normalized);
   const modelo = normalizeModelName(fieldValue(normalized, FIELD_PATTERNS.modelo));
-  const cause = fieldValue(normalized, FIELD_PATTERNS.causa);
+  const causa = compact(fieldValue(normalized, FIELD_PATTERNS.causa));
   const description = fieldValue(normalized, FIELD_PATTERNS.sintoma)
     || fieldValue(normalized, FIELD_PATTERNS.descricao)
     || fieldValue(normalized, FIELD_PATTERNS.defeito);
-  return { numeroOs, serial, modelo, queixa: cleanComplaint(description, cause) };
+  const garantia = extractWarranty(normalized);
+  return { numeroOs, serial, modelo, queixa: cleanComplaint(description), ...(garantia ? { garantia } : {}), ...(causa ? { causa } : {}) };
 }
 
 export function daysOpen(start: Date | string, end?: Date | string | null) {

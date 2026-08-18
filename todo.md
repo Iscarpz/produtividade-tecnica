@@ -498,3 +498,14 @@
 - [x] Dar maior destaque às métricas principais e reduzir a ênfase visual dos indicadores secundários
 - [x] Manter dados, cálculos, filtros e responsividade existentes
 - [x] Validar visualmente em desktop e móvel, além de TypeScript, testes e build
+
+# Rodada 40 — Parser robusto e visão gerencial
+
+- [x] Tornar o parser textual tolerante a campos desformatados, tabs e rótulos em posições variáveis
+- [x] Priorizar Chamado e Serial pelos rótulos, impedindo contaminação por garantia e outros campos
+- [x] Preservar termos técnicos sem tradução e a normalização VAIO > INFINIX > POSITIVO
+- [x] Uniformizar tamanho e proporção do card Finalizados com os demais indicadores
+- [x] Exibir métricas consolidadas para Gestor e permitir filtro por usuário combinado ao período
+- [x] Permitir que Gestor gerencie técnicos e convites sem visualizar ou administrar o Owner
+- [x] Atualizar automaticamente filtros, métricas e ações administrativas existentes
+- [x] Cobrir parser, isolamento, permissões de Gestor, filtros e visualização com testes

@@ -3,8 +3,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { imageBiosManagerProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { addRepair, createCall, createImageBiosCatalog, deleteCall, deleteImageBiosCatalog, deleteRepair, generateScriptForCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, listImageBiosCatalog, productivity, transitionCall, updateCallData, updateCallTechnicalData, updateImageBiosCatalog, updateRepair, updateUserProfile } from "./db";
+import { imageBiosManagerProcedure, protectedProcedure, publicProcedure, router, teamManagerProcedure } from "./_core/trpc";
+import { addRepair, createCall, createImageBiosCatalog, deleteCall, deleteImageBiosCatalog, deleteRepair, generateScriptForCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, listImageBiosCatalog, listTeamCalls, productivity, productivityForTeam, transitionCall, updateCallData, updateCallTechnicalData, updateImageBiosCatalog, updateRepair, updateUserProfile } from "./db";
 import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
 import { VISUAL_INSPECTIONS } from "./technicalScript";
@@ -26,6 +26,7 @@ export const appRouter = router({
     extractFromImage: protectedProcedure.input(z.object({ imageDataUrl: z.string().min(32).max(12000000) })).mutation(({ input }) => extractCallFromImage(input.imageDataUrl)),
     formalizeComplaint: protectedProcedure.input(z.object({ queixaOriginal: z.string().min(1).max(3000) })).mutation(({ input }) => formalizeComplaint(input.queixaOriginal)),
     list: protectedProcedure.input(z.object({ status: z.string().optional(), search: z.string().optional() }).optional()).query(({ ctx, input }) => listCalls(ctx.user.id, input?.status, input?.search)),
+    listTeam: teamManagerProcedure.input(z.object({ userId: z.number().int().positive().optional() }).optional()).query(({ input }) => listTeamCalls(input?.userId)),
     detail: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
       const bundle = await getCallBundle(ctx.user.id, input.id);
       if (!bundle) throw new TRPCError({ code: "NOT_FOUND", message: "Chamado não encontrado" });
@@ -63,7 +64,7 @@ export const appRouter = router({
       update: imageBiosManagerProcedure.input(z.object({ logoPositivo: z.string().optional(), logoInfinix: z.string().optional(), logoVaio: z.string().optional(), logoCompaq: z.string().optional() })).mutation(({ ctx, input }) => updateLaudoSettings(ctx.user.id, input)),
     }),
   }),
-  productivity: router({ range: protectedProcedure.input(dateRange).query(({ ctx, input }) => productivity(ctx.user.id, input.from, input.to)) }),
+  productivity: router({ range: protectedProcedure.input(dateRange).query(({ ctx, input }) => productivity(ctx.user.id, input.from, input.to)), teamRange: teamManagerProcedure.input(dateRange.extend({ userId: z.number().int().positive().optional() })).query(({ input }) => productivityForTeam(input.userId, input.from, input.to)) }),
   historical: router({ troca: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "TROCA", input?.search)), recusado: protectedProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ ctx, input }) => listHistoricalCalls(ctx.user.id, "RECUSADO", input?.search)) }),
 });
 export type AppRouter = typeof appRouter;

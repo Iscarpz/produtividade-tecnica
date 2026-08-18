@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   createInvitedUser: vi.fn(),
   findInvitationByHash: vi.fn(),
   getUserByEmail: vi.fn(),
+  getUserById: vi.fn(),
   insertInvitation: vi.fn(),
   listInvitationsForAdmin: vi.fn(),
   listUsersForAdmin: vi.fn(),
@@ -36,6 +37,7 @@ describe("fluxo de convites", () => {
   });
 
   it("autoriza o técnico cadastrado sem permitir alterar seu papel", async () => {
+    mocks.getUserById.mockResolvedValueOnce({ id: 55, role: "user" });
     mocks.setUserAccountStatus.mockResolvedValueOnce(undefined);
     await usersRouter.createCaller(admin).authorize({ userId: 55 });
     expect(mocks.setUserAccountStatus).toHaveBeenCalledWith(55, "ACTIVE");

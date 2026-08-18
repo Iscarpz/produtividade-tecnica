@@ -21,11 +21,24 @@ describe("parseCallText", () => {
     expect(parseCallText(text).numeroOs).toBe(numeroOs);
   });
 
-  it("extrai o formato tabular real e limpa causa/sintoma da queixa", () => {
-    expect(parseCallText(officialText)).toEqual({ numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Desliga apps sozinho. Desliga sozinho. Trava durante utilização" });
+  it("extrai o formato tabular real sem reescrever termos técnicos", () => {
+    expect(parseCallText(officialText)).toEqual({ numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Desliga apps sozinho. Desliga sozinho. Trava durante utilização", garantia: "GARANTIA", causa: "DESLIGANDO" });
   });
   it("aceita rótulos sem acento e separadores alternativos", () => {
     expect(parseCallText("Numero OS - 12345\nS/N: ABC999\nProduto: NOTEBOOK XYZ\nDefeito - Não liga")).toEqual({ numeroOs: "12345", serial: "ABC999", modelo: "NOTEBOOK XYZ", queixa: "Não liga" });
+  });
+
+  it("localiza chamado, modelo, serial, garantia e descrição pelo rótulo em texto completamente desformatado", () => {
+    const text = `Chamado:\t60006451515\t \tMarca / Modelo:\tPOSITIVO / TABLET VAIO TL12 VJTL21B0111B
+Situação:\tSUPORTE TÉCNICO HW (E0026)\tTexto Breve:\tTABLET
+SLA:\t720 horas (HC)\tData Limite:\t09/09/2026
+Consumidor:\tVIVALDO JÚNIOR\tTelefone:\t77-981466108
+ SERIAL:\tGarantia:
+ 4AJ99R29N\t GARANTIA
+Causa:\tCÂMERA COM FALHA
+Descrição:\tAparelho retornou da assistência com problema na câmera.`;
+
+    expect(parseCallText(text)).toEqual({ numeroOs: "60006451515", modelo: "VAIO TL12 VJTL21B0111B", serial: "4AJ99R29N", garantia: "GARANTIA", causa: "CÂMERA COM FALHA", queixa: "Aparelho retornou da assistência com problema na câmera." });
   });
 
   it.each([

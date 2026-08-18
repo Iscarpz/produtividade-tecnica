@@ -18,7 +18,16 @@ describe("autorização de conta", () => {
     await expect(appRouter.createCaller(context("ACTIVE", "user")).users.list()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
-  it("mantém o Gestor fora da administração de usuários do Owner", async () => {
-    await expect(appRouter.createCaller(context("ACTIVE", "manager")).users.list()).rejects.toMatchObject({ code: "FORBIDDEN" });
+  it("permite ao Gestor listar somente os usuários administráveis da equipe", async () => {
+    const members = await appRouter.createCaller(context("ACTIVE", "manager")).users.list();
+    expect(members.every((member) => member.role !== "admin")).toBe(true);
+  });
+
+  it("impede o Gestor de alterar papéis, preservando o controle exclusivo do Owner", async () => {
+    await expect(appRouter.createCaller(context("ACTIVE", "manager")).users.setRole({ userId: 88, role: "user" })).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("mantém técnicos fora da visão consolidada da equipe", async () => {
+    await expect(appRouter.createCaller(context("ACTIVE", "user")).calls.listTeam()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

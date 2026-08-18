@@ -63,3 +63,13 @@ export const imageBiosManagerProcedure = t.procedure.use(
     });
   }),
 );
+
+export const teamManagerProcedure = t.procedure.use(
+  t.middleware(async opts => {
+    const { ctx, next } = opts;
+    if (!ctx.user || (ctx.user.accountStatus && ctx.user.accountStatus !== "ACTIVE") || !["admin", "manager"].includes(ctx.user.role)) {
+      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+    }
+    return next({ ctx: { ...ctx, user: ctx.user } });
+  }),
+);
