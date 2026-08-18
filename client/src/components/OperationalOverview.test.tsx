@@ -19,15 +19,21 @@ describe("OperationalOverview — produção em andamento", () => {
     expect(screen.queryByText("3 chamados em produção")).not.toBeInTheDocument();
   });
 
-  it("exibe recebidos no painel e os envia para a fila sem abrir o chamado", () => {
+  it("exibe todos os dados dos recebidos e os envia para a fila sem abrir o chamado", () => {
     const onStart = vi.fn();
     const onSelect = vi.fn();
     render(<OperationalOverview onSelect={onSelect} onStart={onStart} calls={[
-      { id: 4, status: "RECEBIDO", numeroOs: "4", modelo: "VAIO TL12", serial: "S4", queixa: "Q", dataEntrada: new Date() },
+      { id: 4, status: "RECEBIDO", numeroOs: "60006451515", modelo: "INFINIX SMART 10", serial: "S4", queixa: "APARELHO NÃO LIGA", dataEntrada: new Date("2026-08-18T12:00:00Z") },
+      { id: 5, status: "RECEBIDO", numeroOs: "60006451516", modelo: "VAIO TL12", serial: "S5", queixa: "SEM IMAGEM", dataEntrada: new Date("2026-08-17T12:00:00Z") },
     ]}/>);
 
-    expect(screen.getByText("Recebidos do setor")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Colocar na fila" }));
+    expect(screen.getByText("Chamados recebidos")).toBeInTheDocument();
+    expect(screen.getByText("60006451515")).toBeInTheDocument();
+    expect(screen.getByText("INFINIX SMART 10")).toBeInTheDocument();
+    expect(screen.getByText("APARELHO NÃO LIGA")).toBeInTheDocument();
+    expect(screen.getAllByText("Recebido:")).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "Colocar em andamento" })).toHaveLength(2);
+    fireEvent.click(screen.getAllByRole("button", { name: "Colocar em andamento" })[0]!);
     expect(onStart).toHaveBeenCalledWith(4);
     expect(onSelect).not.toHaveBeenCalled();
   });

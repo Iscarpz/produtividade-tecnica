@@ -466,3 +466,11 @@
 - [x] Reutilizar a transição existente para preservar data de recebimento e registrar início de andamento no clique
 - [x] Atualizar recebidos, Minha fila, contador de produção e Dashboard sem F5 após a ação
 - [x] Cobrir normalização, ação do painel, datas e atualizações automáticas com testes
+
+# Rodada 36 — Chamados recebidos completos na Visão geral
+
+- [x] Exibir todos os chamados atualmente RECEBIDO em uma seção própria e explícita da Visão geral
+- [x] Mostrar chamado, modelo, queixa e data de recebimento em cada cartão de recebido
+- [x] Permitir colocar cada recebido em andamento diretamente no painel, sem abrir outra tela
+- [x] Preservar data de recebimento, início de andamento, prioridades e invalidações automáticas existentes
+- [x] Cobrir a seção, a transição direta e a remoção imediata do recebido com testes
