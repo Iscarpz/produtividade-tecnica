@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const mocked = vi.hoisted(() => ({ setLocation: vi.fn(), logout: vi.fn() }));
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ loading: false, user: { name: "Vinicius Scarpeta" }, logout: mocked.logout }) }));
 vi.mock("@/const", () => ({ startLogin: vi.fn() }));
+vi.mock("@/lib/trpc", () => ({ trpc: { calls: { list: { useQuery: () => ({ data: [{ id: 1, status: "EM ANDAMENTO" }, { id: 2, status: "EM ANDAMENTO" }, { id: 3, status: "AGUARDANDO PP" }] }) } } } }));
 vi.mock("wouter", () => ({ useLocation: () => ["/", mocked.setLocation] }));
 
 import DashboardLayout, { PORTAL_ATP_URL, POSIFLOW_URL } from "./DashboardLayout";
@@ -24,6 +25,7 @@ describe("DashboardLayout — hover", () => {
     expect(sidebar).toHaveClass("w-64");
     expect(container.querySelector(".ml-64")).toBeInTheDocument();
     expect(screen.getByText("Portal ATP")).toBeInTheDocument();
+    expect(screen.getByLabelText("2 chamados em produção")).toBeInTheDocument();
     fireEvent.mouseLeave(sidebar!);
     expect(sidebar).toHaveClass("w-16");
   });

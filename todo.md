@@ -411,3 +411,10 @@
 - [x] Separar múltiplos componentes substituídos por ponto e vírgula no script técnico, preservando seriais e sem códigos internos
 - [x] Definir Procedimentos realizados automaticamente por marca para Positivo, Infinix e Vaio
 - [x] Validar contador, edição longa, blur, componentes múltiplos e procedimentos por marca sem regressões
+
+# Rodada 29 — Feedback de diagnóstico e contador lateral
+
+- [x] Exibir confirmação visual de sucesso quando o diagnóstico for salvo após sair do campo
+- [x] Mostrar a quantidade atual de chamados EM ANDAMENTO no item Minha fila da navegação lateral
+- [x] Manter o contador lateral sincronizado com as atualizações automáticas e transições existentes
+- [x] Validar o feedback visual, a contagem lateral, TypeScript, testes e build

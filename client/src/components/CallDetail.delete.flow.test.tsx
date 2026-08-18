@@ -16,6 +16,7 @@ const mocked = vi.hoisted(() => ({
   updateRepairMutate: vi.fn(),
   deleteRepairMutate: vi.fn(),
   updateTechnicalMutate: vi.fn(),
+  updateTechnicalSuccess: null as null | ((result: unknown, variables: { id: number; diagnostico?: string; inspecaoVisual?: string }) => void),
   scriptState: { data: { errors: ["Informe o diagnóstico do equipamento."], analysis: ["MODELO NORMALIZADO: MODELO TESTE."], equipmentType: "SMARTPHONE/TABLET" }, isLoading: false, isError: false } as any,
   deleteSuccess: null as null | (() => Promise<void>),
   queryState: { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], history: [] } as any, isLoading: false, isError: false },
@@ -33,7 +34,7 @@ vi.mock("@/lib/trpc", () => ({
       generateScript: { useQuery: () => mocked.scriptState },
       transition: { useMutation: ({ onSuccess }: { onSuccess: (result: unknown, variables: { id: number; action: string }) => Promise<void> }) => { mocked.transitionSuccess = onSuccess; return { isPending: false, mutate: mocked.transitionMutate }; } },
       updateData: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
-      updateTechnicalData: { useMutation: () => ({ isPending: false, mutate: mocked.updateTechnicalMutate }) },
+      updateTechnicalData: { useMutation: ({ onSuccess }: { onSuccess: (result: unknown, variables: { id: number; diagnostico?: string; inspecaoVisual?: string }) => void }) => { mocked.updateTechnicalSuccess = onSuccess; return { isPending: false, mutate: mocked.updateTechnicalMutate }; } },
       addRepair: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
       updateRepair: { useMutation: () => ({ isPending: false, mutate: mocked.updateRepairMutate }) },
       deleteRepair: { useMutation: () => ({ isPending: false, mutate: mocked.deleteRepairMutate }) },
@@ -66,6 +67,7 @@ afterEach(() => {
   mocked.updateRepairMutate.mockReset();
   mocked.deleteRepairMutate.mockReset();
   mocked.updateTechnicalMutate.mockReset();
+  mocked.updateTechnicalSuccess = null;
   mocked.deleteSuccess = null;
   mocked.scriptState = { data: { errors: ["Informe o diagnóstico do equipamento."], analysis: ["MODELO NORMALIZADO: MODELO TESTE."], equipmentType: "SMARTPHONE/TABLET" }, isLoading: false, isError: false };
   mocked.queryState = { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], history: [] }, isLoading: false, isError: false };
@@ -176,7 +178,7 @@ describe("CallDetail — laudo e peças", () => {
     expect(mocked.deleteRepairMutate).toHaveBeenCalledWith({ id: 44, chamadoId: 12 });
   });
 
-  it("mantém diagnóstico longo em estado local e salva somente ao sair do campo", () => {
+  it("mantém diagnóstico longo em estado local e confirma o salvamento somente ao sair do campo", async () => {
     renderDetail();
     const diagnosis = screen.getByRole("textbox", { name: "Diagnóstico" });
     fireEvent.focus(diagnosis);
@@ -185,6 +187,8 @@ describe("CallDetail — laudo e peças", () => {
     expect(mocked.updateTechnicalMutate).not.toHaveBeenCalled();
     fireEvent.blur(diagnosis);
     expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, diagnostico: "Falha no display durante uma descrição técnica longa" });
+    await act(async () => { mocked.updateTechnicalSuccess?.({}, { id: 12, diagnostico: "Falha no display durante uma descrição técnica longa" }); });
+    expect(screen.getByRole("status")).toHaveTextContent("Diagnóstico salvo");
     fireEvent.click(screen.getByLabelText("SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA."));
     expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, inspecaoVisual: "SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA." });
     expect(screen.queryByRole("button", { name: "Salvar dados técnicos" })).not.toBeInTheDocument();
