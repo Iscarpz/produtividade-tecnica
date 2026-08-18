@@ -509,3 +509,11 @@
 - [x] Permitir que Gestor gerencie técnicos e convites sem visualizar ou administrar o Owner
 - [x] Atualizar automaticamente filtros, métricas e ações administrativas existentes
 - [x] Cobrir parser, isolamento, permissões de Gestor, filtros e visualização com testes
+
+# Rodada 41 — Refinamento visual da Visão geral
+
+- [x] Padronizar todos os cards de métricas com fundo branco, borda cinza, sombra sutil e ícones TECBASE
+- [x] Remover cores decorativas fora da paleta TECBASE na Visão geral e no filtro lateral
+- [x] Ampliar a presença visual de Minha fila e Prioridades sem alterar os dados ou fluxos
+- [x] Redistribuir a largura e os espaçamentos do Dashboard com responsividade preservada
+- [x] Validar visualmente desktop e móvel, além de TypeScript, testes e build
