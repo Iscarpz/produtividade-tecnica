@@ -482,3 +482,11 @@
 - [x] Preservar a escolha de intervalo personalizado no painel lateral
 - [x] Adaptar o painel a telas menores sem alterar consultas, cálculos ou dados
 - [x] Validar seleção, período personalizado, responsividade, TypeScript, testes e build
+
+# Rodada 38 — Refinamento visual do Dashboard
+
+- [x] Tornar o filtro de período lateral mais compacto, sutil e integrado à linguagem visual dos cards
+- [x] Preservar todas as opções e o intervalo personalizado sem mudança de lógica ou consultas
+- [x] Ampliar moderadamente a largura útil do Dashboard e dos cards sem remover margens confortáveis
+- [x] Ajustar espaçamentos e responsividade para evitar compressão ou overflow em telas menores
+- [x] Validar visualmente em desktop e móvel, além de TypeScript, testes e build
