@@ -403,3 +403,11 @@
 - [x] Calcular prioridades exclusivamente pela data de recebimento e manter os fluxos PP, Orçamento, Zurich, Troca, Finalização, Reabertura e Exclusão
 - [x] Registrar recebimento e início do andamento no histórico, com atualização automática das contagens e prioridades
 - [x] Cobrir migração, tempos, prioridade, transições e compatibilidade multiusuário com testes
+
+# Rodada 28 — Produção, diagnóstico e Script do Laudo
+
+- [x] Mostrar a quantidade atual de chamados EM ANDAMENTO no cabeçalho de Minha fila, com atualização automática
+- [x] Manter o diagnóstico em edição local e salvar somente no blur ou ação explícita, sem perder caracteres
+- [x] Separar múltiplos componentes substituídos por ponto e vírgula no script técnico, preservando seriais e sem códigos internos
+- [x] Definir Procedimentos realizados automaticamente por marca para Positivo, Infinix e Vaio
+- [x] Validar contador, edição longa, blur, componentes múltiplos e procedimentos por marca sem regressões

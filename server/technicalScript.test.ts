@@ -21,7 +21,8 @@ describe("gerador técnico estruturado", () => {
     expect(result.script).toContain("[MODELO:]\nINFINIX HOT 50I\n/");
     expect(result.script).toContain("[VERSAO DA IMAGEM INSTALADA:]\nIMAGEM ATUALIZADA - X6531B-V631BEAFAHAIAJAKAMANANOP-U-OP-260314V1118\n/");
     expect(result.script).toContain("[GARANTIA:]\nEM GARANTIA\n/");
-    expect(result.script).toContain("[REPARO:]\nCOMPONENTES SUBSTITUIDOS:\nLCD - SERIAL RETIRADO: OLD-1 - SERIAL INSTALADO: NEW-1\n/");
+    expect(result.script).toContain("[REPARO:]\nCOMPONENTES SUBSTITUIDOS: LCD - SERIAL RETIRADO: OLD-1 - SERIAL INSTALADO: NEW-1\n/");
+    expect(result.script).toContain("[PROCEDIMENTOS REALIZADOS:]\nCONFIGURACAO E ATUALIZACAO DA IMAGEM PARA A ULTIMA VERSAO DISPONIVEL, EXECUCAO DE TESTES DE HARDWARE E SOFTWARE.\n/");
     expect(result.script).not.toContain("123456");
     expect(result.script?.split("\n/").length).toBeGreaterThan(7);
   });
@@ -30,6 +31,7 @@ describe("gerador técnico estruturado", () => {
     const result = generateTechnicalScript({ ...complete, modelo: "POSITIVO VISION C14 - N14JP9R", queixa: "Não inicia o sistema." }, [], catalog);
     expect(result.equipmentType).toBe("COMPUTADOR/NOTEBOOK");
     expect(result.script).toContain("[PROCEDIMENTOS REALIZADOS:]");
+    expect(result.script).toContain("CONFIGURACAO E ATUALIZACAO DA BIOS PARA A ULTIMA VERSAO DISPONIVEL, EXECUCAO DE TESTES DE HARDWARE E SOFTWARE.");
     expect(result.script).toContain("[VERSÃO DA BIOS:]\nV1.13.X\n/");
     expect(result.script).not.toContain("[VERSAO DA IMAGEM INSTALADA:]");
   });
@@ -55,15 +57,20 @@ describe("gerador técnico estruturado", () => {
 
   it("lista múltiplas peças e preserva apenas os seriais realmente cadastrados", () => {
     const result = generateTechnicalScript(complete, [{ peca: "CONECTOR DE CARGA", codigo: "INTERNO" }, { peca: "PLACA PRINCIPAL", serialInstalada: "XYZ789" }], catalog);
-    expect(result.script).toContain("COMPONENTES SUBSTITUIDOS:\nCONECTOR DE CARGA\nPLACA PRINCIPAL - SERIAL INSTALADO: XYZ789");
+    expect(result.script).toContain("COMPONENTES SUBSTITUIDOS: CONECTOR DE CARGA; PLACA PRINCIPAL - SERIAL INSTALADO: XYZ789");
     expect(result.script).not.toContain("SERIAL RETIRADO:");
     expect(result.script).not.toContain("INTERNO");
   });
 
   it("ignora seriais vazios ou compostos somente por espaços", () => {
     const result = generateTechnicalScript(complete, [{ peca: "TELA AMOLED TL-12 V2 REV", serialRetirada: "   ", serialInstalada: "" }], catalog);
-    expect(result.script).toContain("COMPONENTES SUBSTITUIDOS:\nTELA AMOLED TL-12 V2 REV\n/");
+    expect(result.script).toContain("COMPONENTES SUBSTITUIDOS: TELA AMOLED TL-12 V2 REV\n/");
     expect(result.script).not.toContain("SERIAL RETIRADO:");
     expect(result.script).not.toContain("SERIAL INSTALADO:");
+  });
+
+  it("usa o procedimento de imagem para Vaio sem exigir escolha manual do técnico", () => {
+    const result = generateTechnicalScript({ ...complete, modelo: "VAIO TL12" }, [], []);
+    expect(result.script).toContain("[PROCEDIMENTOS REALIZADOS:]\nCONFIGURACAO E ATUALIZACAO DA IMAGEM PARA A ULTIMA VERSAO DISPONIVEL, EXECUCAO DE TESTES DE HARDWARE E SOFTWARE.\n/");
   });
 });

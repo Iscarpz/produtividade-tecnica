@@ -44,7 +44,7 @@ export function buildRepairText(repairs: RepairForScript[], fallback?: string) {
     const serials = [serialRetirada && `SERIAL RETIRADO: ${serialRetirada}`, serialInstalada && `SERIAL INSTALADO: ${serialInstalada}`].filter(Boolean);
     return `${repair.peca}${serials.length ? ` - ${serials.join(" - ")}` : ""}`;
   });
-  return ["COMPONENTES SUBSTITUIDOS:", ...items].join("\n");
+  return `COMPONENTES SUBSTITUIDOS: ${items.join("; ")}`;
 }
 
 function normalizeScriptValue(value: string) { return value.split("\n").map(normalizeSpace).join("\n"); }
@@ -55,6 +55,21 @@ function automaticRepair(call: ScriptCall) {
   if (normalizeModel(call.modelo).includes("INFINIX HOT 11S") && (complaint.includes("REINICI") || diagnosis.includes("LCD") && diagnosis.includes("CURTO"))) return "E NECESSÁRIA A TROCA DO LCD, FPC E BATERIA.";
   if ((complaint.includes("LENTID") || complaint.includes("TRAVAMENTO") || complaint.includes("DESEMPENHO")) && !diagnosis.includes("HARDWARE")) return "ATUALIZAÇÃO DA IMAGEM.";
   return undefined;
+}
+
+export function equipmentBrand(modelo: string, resolvedCatalog?: CatalogEntry) {
+  const normalized = normalizeModel(modelo);
+  if (/\bINFINIX\b/.test(normalized)) return "INFINIX";
+  if (/\bVAIO\b/.test(normalized)) return "VAIO";
+  if (/\bPOSITIVO\b/.test(normalized)) return "POSITIVO";
+  return normalizeSpace(resolvedCatalog?.marca || "");
+}
+
+export function proceduresForBrand(modelo: string, resolvedCatalog?: CatalogEntry) {
+  const brand = equipmentBrand(modelo, resolvedCatalog);
+  if (brand === "POSITIVO") return "CONFIGURACAO E ATUALIZACAO DA BIOS PARA A ULTIMA VERSAO DISPONIVEL, EXECUCAO DE TESTES DE HARDWARE E SOFTWARE.";
+  if (brand === "INFINIX" || brand === "VAIO") return "CONFIGURACAO E ATUALIZACAO DA IMAGEM PARA A ULTIMA VERSAO DISPONIVEL, EXECUCAO DE TESTES DE HARDWARE E SOFTWARE.";
+  return "CONFIGURACAO E ATUALIZACAO DA IMAGEM OU BIOS CONFORME APLICAVEL, EXECUCAO DE TESTES DE HARDWARE E SOFTWARE.";
 }
 
 export function generateTechnicalScript(call: ScriptCall, repairs: RepairForScript[], catalog: CatalogEntry[]): ScriptResult {
@@ -68,6 +83,7 @@ export function generateTechnicalScript(call: ScriptCall, repairs: RepairForScri
   const repair = buildRepairText(repairs, automatic);
   const inspection = call.inspecaoVisual || "NÃO INFORMADA";
   const usesBios = isBiosModel(call.modelo) || resolvedCatalog?.tipo === "BIOS";
+  const procedures = proceduresForBrand(call.modelo, resolvedCatalog);
   const version = resolvedCatalog?.versao || (usesBios ? "VERSÃO DA BIOS NÃO CADASTRADA (PENDENTE DE TABELA)" : "IMAGEM ATUALIZADA - VERSAO NAO CADASTRADA (PENDENTE DE TABELA)");
   const versionLabel = usesBios ? "VERSÃO DA BIOS" : "VERSAO DA IMAGEM INSTALADA";
   const imageValue = usesBios ? version : resolvedCatalog ? `IMAGEM ATUALIZADA - ${version}` : version;
@@ -81,7 +97,7 @@ export function generateTechnicalScript(call: ScriptCall, repairs: RepairForScri
     block("REPARO", repair),
   ];
   const tail = equipmentType === "COMPUTADOR/NOTEBOOK"
-    ? [block("PROCEDIMENTOS REALIZADOS", "CONFIGURACAO E ATUALIZACAO DA BIOS PARA A ULTIMA VERSAO DISPONIVEL, ATUALIZACAO DA IMAGEM QUANDO APLICAVEL E EXECUCAO DE TESTES DE HARDWARE E SISTEMA."), block(versionLabel, imageValue), block("GARANTIA", warrantyForInspection(call.inspecaoVisual)), block("ACOES PREVENTIVAS", "REALIZADA LIMPEZA DE CONTATOS, VERIFICACAO DE CONEXOES INTERNAS E TESTES FUNCIONAIS."), block("AVALIACAO POS-REPARO", "EQUIPAMENTO LIGANDO, CARREGANDO, INICIALIZANDO SISTEMA E FUNCIONANDO DENTRO DOS PADROES ESTABELECIDOS PARA O PRODUTO.")]
-    : [block(versionLabel, imageValue), block("GARANTIA", warrantyForInspection(call.inspecaoVisual)), block("ACOES PREVENTIVAS", "REALIZADA LIMPEZA DE CONTATOS.\nEXECUTADOS TESTES DE CAMERA, AUDIO, TOUCHSCREEN, CONEXOES, SENSORES E DEMAIS FUNCOES ATRAVES DAS FERRAMENTAS NATIVAS DO EQUIPAMENTO.\nEFETUADOS TESTES DE ESTABILIDADE E ESTRESSE UTILIZANDO STABILITY TEST (V2.5) E STRESS TEST (V9.4)."), block("AVALIACAO POS-REPARO", "EQUIPAMENTO LIGANDO, CARREGANDO E FUNCIONANDO DENTRO DOS PADROES ESTABELECIDOS PARA O PRODUTO.")];
+    ? [block("PROCEDIMENTOS REALIZADOS", procedures), block(versionLabel, imageValue), block("GARANTIA", warrantyForInspection(call.inspecaoVisual)), block("ACOES PREVENTIVAS", "REALIZADA LIMPEZA DE CONTATOS, VERIFICACAO DE CONEXOES INTERNAS E TESTES FUNCIONAIS."), block("AVALIACAO POS-REPARO", "EQUIPAMENTO LIGANDO, CARREGANDO, INICIALIZANDO SISTEMA E FUNCIONANDO DENTRO DOS PADROES ESTABELECIDOS PARA O PRODUTO.")]
+    : [block("PROCEDIMENTOS REALIZADOS", procedures), block(versionLabel, imageValue), block("GARANTIA", warrantyForInspection(call.inspecaoVisual)), block("ACOES PREVENTIVAS", "REALIZADA LIMPEZA DE CONTATOS.\nEXECUTADOS TESTES DE CAMERA, AUDIO, TOUCHSCREEN, CONEXOES, SENSORES E DEMAIS FUNCOES ATRAVES DAS FERRAMENTAS NATIVAS DO EQUIPAMENTO.\nEFETUADOS TESTES DE ESTABILIDADE E ESTRESSE UTILIZANDO STABILITY TEST (V2.5) E STRESS TEST (V9.4)."), block("AVALIACAO POS-REPARO", "EQUIPAMENTO LIGANDO, CARREGANDO E FUNCIONANDO DENTRO DOS PADROES ESTABELECIDOS PARA O PRODUTO.")];
   return { errors, equipmentType, resolvedCatalog, script: [...common, ...tail].join("\n") };
 }

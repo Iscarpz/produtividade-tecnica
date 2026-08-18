@@ -176,16 +176,18 @@ describe("CallDetail — laudo e peças", () => {
     expect(mocked.deleteRepairMutate).toHaveBeenCalledWith({ id: 44, chamadoId: 12 });
   });
 
-  it("salva diagnóstico automaticamente e persiste a inspeção ao selecioná-la", async () => {
-    vi.useFakeTimers();
+  it("mantém diagnóstico longo em estado local e salva somente ao sair do campo", () => {
     renderDetail();
-    fireEvent.change(screen.getByRole("textbox", { name: "Diagnóstico" }), { target: { value: "Falha no display." } });
-    await act(async () => { await vi.advanceTimersByTimeAsync(650); });
-    expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, diagnostico: "Falha no display." });
+    const diagnosis = screen.getByRole("textbox", { name: "Diagnóstico" });
+    fireEvent.focus(diagnosis);
+    fireEvent.change(diagnosis, { target: { value: "Falha no display durante uma descrição técnica longa" } });
+    expect(diagnosis).toHaveValue("Falha no display durante uma descrição técnica longa");
+    expect(mocked.updateTechnicalMutate).not.toHaveBeenCalled();
+    fireEvent.blur(diagnosis);
+    expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, diagnostico: "Falha no display durante uma descrição técnica longa" });
     fireEvent.click(screen.getByLabelText("SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA."));
     expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, inspecaoVisual: "SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA." });
     expect(screen.queryByRole("button", { name: "Salvar dados técnicos" })).not.toBeInTheDocument();
-    vi.useRealTimers();
   });
 
   it("explica quais campos impedem a geração quando o script está incompleto", () => {
