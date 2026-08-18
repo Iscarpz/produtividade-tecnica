@@ -474,3 +474,11 @@
 - [x] Permitir colocar cada recebido em andamento diretamente no painel, sem abrir outra tela
 - [x] Preservar data de recebimento, início de andamento, prioridades e invalidações automáticas existentes
 - [x] Cobrir a seção, a transição direta e a remoção imediata do recebido com testes
+
+# Rodada 37 — Filtro de período lateral
+
+- [x] Reposicionar as opções de período em um painel vertical na lateral direita do Dashboard
+- [x] Manter Hoje, Esta semana, Este mês, Este ano e Personalizado com a mesma lógica atual
+- [x] Preservar a escolha de intervalo personalizado no painel lateral
+- [x] Adaptar o painel a telas menores sem alterar consultas, cálculos ou dados
+- [x] Validar seleção, período personalizado, responsividade, TypeScript, testes e build
