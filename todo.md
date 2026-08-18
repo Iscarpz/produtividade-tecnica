@@ -517,3 +517,12 @@
 - [x] Ampliar a presença visual de Minha fila e Prioridades sem alterar os dados ou fluxos
 - [x] Redistribuir a largura e os espaçamentos do Dashboard com responsividade preservada
 - [x] Validar visualmente desktop e móvel, além de TypeScript, testes e build
+
+# Rodada 42 — Identidade de centro de operação
+
+- [x] Ajustar o rodapé para separar marca e autoria em duas linhas discretas
+- [x] Reduzir cardificação, bordas e ícones decorativos na Visão geral sem remover informações
+- [x] Reforçar a hierarquia da produção atual e das prioridades como superfícies operacionais centrais
+- [x] Manter métricas e filtro existentes como contexto visual integrado e discreto
+- [x] Preservar estritamente dados, funções, fluxos, filtros, permissões e responsividade
+- [x] Validar a composição em desktop e móvel, além de TypeScript, testes e build

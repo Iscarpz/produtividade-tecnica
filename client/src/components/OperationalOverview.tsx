@@ -18,7 +18,7 @@ function ReceivedCard({ call, onStart, isStarting }: { call: any; onStart?: (id:
 
 function AttentionGroup({ title, calls, onSelect, icon: Icon }: { title: string; calls: any[]; onSelect: (id: number) => void; accent: string; icon: typeof AlertTriangle }) {
   if (!calls.length) return null;
-  return <section className="overflow-hidden rounded-xl border border-[#E5E7EB] bg-white shadow-[0_1px_2px_rgba(13,17,23,.05)]"><div className="flex items-center gap-2 border-b border-[#E5E7EB] px-5 py-3.5"><span className="grid h-7 w-7 place-items-center rounded-lg bg-[#F5B700]"><Icon className="h-4 w-4 text-[#0D1117]"/></span><div><h3 className="text-sm font-semibold text-[#1A1F24]">{title}</h3><p className="text-[11px] text-slate-500">{calls.length} chamado{calls.length === 1 ? "" : "s"}</p></div></div><div className="divide-y divide-[#E5E7EB]">{calls.map((call) => <CallRow key={call.id} call={call} onSelect={onSelect} accent="bg-[#F5B700]"/>)}</div></section>;
+  return <section className="border-t border-[#E5E7EB]"><div className="flex items-center gap-2 px-1 py-3"><Icon className="h-4 w-4 text-[#F5B700]"/><div><h3 className="text-sm font-semibold text-[#1A1F24]">{title}</h3><p className="text-[11px] text-slate-500">{calls.length} chamado{calls.length === 1 ? "" : "s"}</p></div></div><div className="divide-y divide-[#E5E7EB] bg-white">{calls.map((call) => <CallRow key={call.id} call={call} onSelect={onSelect} accent="bg-[#F5B700]"/>)}</div></section>;
 }
 
 export function OperationalOverview({ calls, onSelect, onStart, startingCallId }: { calls: any[]; onSelect: (id: number) => void; onStart?: (id: number) => void; startingCallId?: number | null }) {
