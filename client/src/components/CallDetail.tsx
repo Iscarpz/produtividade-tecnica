@@ -86,6 +86,16 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
 
   useEffect(() => { const interval = window.setInterval(() => setClock(Date.now()), 60_000); return () => window.clearInterval(interval); }, []);
 
+  useEffect(() => {
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      if (document.querySelector('[role="alertdialog"], [role="dialog"]')) return;
+      onClose();
+    };
+    window.addEventListener("keydown", closeWithEscape);
+    return () => window.removeEventListener("keydown", closeWithEscape);
+  }, [onClose]);
+
   if (isLoading) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4"><div className="rounded-xl bg-white p-8 text-sm shadow-xl">Carregando chamado...</div></div>;
   if (isError || !data) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><section className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"><h2 className="text-xl font-bold text-slate-950">Chamado não encontrado</h2><p className="mt-2 text-sm leading-relaxed text-slate-600">Este chamado não existe mais ou não está disponível para sua conta.</p><Button className="mt-6 bg-[#173f5f] text-white hover:bg-[#102d43]" onClick={() => { onClose(); setLocation("/chamados"); }}>Voltar para Chamados</Button></section></div>;
 

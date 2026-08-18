@@ -418,3 +418,10 @@
 - [x] Mostrar a quantidade atual de chamados EM ANDAMENTO no item Minha fila da navegação lateral
 - [x] Manter o contador lateral sincronizado com as atualizações automáticas e transições existentes
 - [x] Validar o feedback visual, a contagem lateral, TypeScript, testes e build
+
+# Rodada 30 — Fechamento seguro da tela do chamado
+
+- [x] Fechar a ficha do chamado pela tecla ESC com o mesmo retorno do botão X
+- [x] Preservar retornos à lista ou tela de origem, sem recarregar, alterar status ou salvar dados adicionais
+- [x] Evitar conflito da tecla ESC com diálogos e controles internos abertos
+- [x] Cobrir botão X, ESC e os casos de exclusão e diálogo interno com testes

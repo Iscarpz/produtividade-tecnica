@@ -74,6 +74,30 @@ afterEach(() => {
 });
 
 describe("CallDetail — fluxo de exclusão", () => {
+  it("fecha pelo botão X sem alterar o chamado", () => {
+    renderDetail();
+    fireEvent.click(screen.getByRole("button", { name: "Fechar ficha" }));
+    expect(mocked.close).toHaveBeenCalledTimes(1);
+    expect(mocked.transitionMutate).not.toHaveBeenCalled();
+    expect(mocked.updateTechnicalMutate).not.toHaveBeenCalled();
+  });
+
+  it("fecha pela tecla ESC com o mesmo retorno seguro do botão X", () => {
+    renderDetail();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(mocked.close).toHaveBeenCalledTimes(1);
+    expect(mocked.transitionMutate).not.toHaveBeenCalled();
+    expect(mocked.updateTechnicalMutate).not.toHaveBeenCalled();
+  });
+
+  it("não fecha a ficha com ESC enquanto um diálogo interno estiver aberto", () => {
+    renderDetail();
+    fireEvent.click(screen.getByRole("button", { name: "Enviar para Orçamento" }));
+    expect(screen.getByRole("heading", { name: "Necessário gerar um laudo?" })).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(mocked.close).not.toHaveBeenCalled();
+  });
+
   it("fecha a ficha e remove a query de detalhes antes de atualizar as listas", async () => {
     const { cancelQueries, removeQueries } = renderDetail();
     fireEvent.click(screen.getByRole("button", { name: /excluir chamado/i }));

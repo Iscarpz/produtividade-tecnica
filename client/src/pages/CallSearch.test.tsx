@@ -42,7 +42,7 @@ describe("CallSearch UI", () => {
   it("abre os detalhes ao selecionar o resultado filtrado", () => {
     render(<CallSearch />);
     fireEvent.click(screen.getByText("Chamado 60006454345"));
-    expect(setLocation).toHaveBeenCalledWith("/?call=12");
+    expect(setLocation).toHaveBeenCalledWith("/?call=12&from=chamados");
   });
 
   it("expõe o filtro Finalizados mantendo os badges de quantidade neutros", () => {
