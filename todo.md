@@ -433,3 +433,19 @@
 - [x] Atualizar estados ativos, botões, ícones e indicadores sem modificar funções, fluxos, rotas ou estrutura de telas
 - [x] Preservar cards claros, hierarquia tipográfica, responsividade e contraste acessível
 - [x] Validar visualmente desktop e móvel, além de TypeScript, testes e build sem regressões funcionais
+
+# Rodada 32 — Presença institucional TECBASE
+
+- [x] Criar e aplicar favicon oficial baseado no símbolo TB
+- [x] Alinhar animações de carregamento e estados vazios à paleta grafite e verde-lima TECBASE
+- [x] Manter contraste, acessibilidade e comportamentos atuais dos feedbacks visuais
+- [x] Alterar o prefixo do domínio Manus para tecbase quando a gestão de domínio estiver disponível
+- [x] Validar favicon, feedbacks visuais, TypeScript, testes e build
+
+# Rodada 33 — Conclusão de favicon e identificação TECBASE
+
+- [x] Verificar e consolidar o favicon oficial TB em todas as referências ativas da aplicação
+- [x] Verificar manifest e ícones de instalação, quando existentes, sem criar uma nova marca
+- [x] Fazer varredura de identidade antiga em título, metadados, login, carregamento e elementos visuais ativos
+- [x] Confirmar que o prefixo do domínio depende da configuração de publicação da plataforma quando não controlável pelo código
+- [x] Validar favicon, referências TECBASE, TypeScript, testes e build

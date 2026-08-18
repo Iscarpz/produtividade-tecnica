@@ -10,6 +10,9 @@ button, input, textarea { font: inherit; }
 button { transition: transform 160ms cubic-bezier(.23,1,.32,1), background-color 160ms ease, color 160ms ease; }
 button:active { transform: scale(.98); }
 .font-mono { font-family: 'JetBrains Mono', monospace; }
+.tecbase-loader { display: inline-block; height: 1.75rem; width: 1.75rem; border: 3px solid #E5E7EB; border-top-color: #A3E635; border-right-color: #2E7D32; border-radius: 9999px; animation: tecbase-spin .8s linear infinite; }
+.tecbase-empty-icon { display: grid; height: 2.5rem; width: 2.5rem; place-items: center; margin-inline: auto; border: 1px solid #D1FAE5; border-radius: .75rem; background: #F7FDF8; color: #2E7D32; }
+@keyframes tecbase-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 /* O modal de novo chamado não pode ultrapassar a viewport em telas com zoom normal.

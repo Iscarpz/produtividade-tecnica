@@ -96,7 +96,7 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
     return () => window.removeEventListener("keydown", closeWithEscape);
   }, [onClose]);
 
-  if (isLoading) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4"><div className="rounded-xl bg-white p-8 text-sm shadow-xl">Carregando chamado...</div></div>;
+  if (isLoading) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><div className="flex min-w-52 flex-col items-center rounded-xl border border-[#D1FAE5] bg-white p-8 text-sm font-medium text-slate-700 shadow-xl"><span className="tecbase-loader"/><span className="mt-4">Carregando chamado...</span></div></div>;
   if (isError || !data) return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/45 p-4"><section className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"><h2 className="text-xl font-bold text-slate-950">Chamado não encontrado</h2><p className="mt-2 text-sm leading-relaxed text-slate-600">Este chamado não existe mais ou não está disponível para sua conta.</p><Button className="mt-6 bg-[#2E7D32] text-white hover:bg-[#0D1117]" onClick={() => { onClose(); setLocation("/chamados"); }}>Voltar para Chamados</Button></section></div>;
 
   const call: any = data.call;
