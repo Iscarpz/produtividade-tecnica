@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysOpen, parseCallText } from "./callParser";
+import { daysOpen, normalizeModelName, parseCallText } from "./callParser";
 
 const officialText = `Número O.S.:\t60006454345\tAbertura:\t12/08/2026 08:09\tSerial:\t5A538SY82
 Situação:\tSUPORTE TÉCNICO HW (E0026)\tTexto Breve:\tCELULAR
@@ -26,6 +26,15 @@ describe("parseCallText", () => {
   });
   it("aceita rótulos sem acento e separadores alternativos", () => {
     expect(parseCallText("Numero OS - 12345\nS/N: ABC999\nProduto: NOTEBOOK XYZ\nDefeito - Não liga")).toEqual({ numeroOs: "12345", serial: "ABC999", modelo: "NOTEBOOK XYZ", queixa: "Não liga" });
+  });
+
+  it.each([
+    ["VAIO POSITIVO / TABLET VAIO TL12 VJTL21B0311B", "VAIO TL12 VJTL21B0311B"],
+    ["POSITIVO / INFINIX SMART 10 PRATA PST", "INFINIX SMART 10 PRATA PST"],
+    ["POSITIVO   VISION   TAB 10", "POSITIVO VISION TAB 10"],
+    ["  VAIO   POSITIVO   FE14  ", "VAIO FE14"],
+  ])("normaliza modelo com prioridade VAIO, INFINIX e POSITIVO", (modelo, expected) => {
+    expect(normalizeModelName(modelo)).toBe(expected);
   });
 });
 

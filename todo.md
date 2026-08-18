@@ -457,3 +457,12 @@
 - [x] Corrigir a sidebar para mostrar apenas o símbolo TB recolhida e apenas a identificação completa TECBASE expandida
 - [x] Preservar regras de status, fluxos operacionais, Laudos, reparos, permissões e publicação atual
 - [x] Cobrir a ação rápida, atualizações automáticas e estados compacto/expandido da marca com testes
+
+# Rodada 35 — Normalização de modelos e recebidos no painel
+
+- [x] Normalizar modelos com prioridade VAIO, depois INFINIX e por fim POSITIVO, removendo apenas repetições indevidas e espaços duplicados
+- [x] Preservar serial, chamado, queixa, datas, prioridades e demais dados durante a normalização visual e de criação
+- [x] Exibir no painel principal uma ação rápida para levar chamados RECEBIDO à fila EM ANDAMENTO
+- [x] Reutilizar a transição existente para preservar data de recebimento e registrar início de andamento no clique
+- [x] Atualizar recebidos, Minha fila, contador de produção e Dashboard sem F5 após a ação
+- [x] Cobrir normalização, ação do painel, datas e atualizações automáticas com testes

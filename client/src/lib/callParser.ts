@@ -1,3 +1,6 @@
+import { normalizeModelName } from "@shared/modelNormalization";
+
+export { normalizeModelName };
 export type ParsedCall = { numeroOs: string; serial: string; modelo: string; queixa: string };
 
 const compact = (value: string) => value.replace(/\u00a0/g, " ").replace(/[ \t]+/g, " ").replace(/^[-–—]\s*/, "").trim();
@@ -48,7 +51,7 @@ export function parseCallText(text: string): ParsedCall {
   const normalized = text.replace(/\u00a0/g, " ").replace(/\r\n?/g, "\n");
   const numeroOs = requiredNumber(normalized);
   const serial = fieldValue(normalized, FIELD_PATTERNS.serial);
-  const modelo = fieldValue(normalized, FIELD_PATTERNS.modelo);
+  const modelo = normalizeModelName(fieldValue(normalized, FIELD_PATTERNS.modelo));
   const cause = fieldValue(normalized, FIELD_PATTERNS.causa);
   const description = fieldValue(normalized, FIELD_PATTERNS.sintoma)
     || fieldValue(normalized, FIELD_PATTERNS.descricao)

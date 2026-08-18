@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { callDeletionLogs, calls, history, imageBiosCatalog, invitations, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { generateTechnicalScript, resolveCatalog, type VisualInspection } from "./technicalScript";
+import { normalizeModelName } from "../shared/modelNormalization";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
@@ -47,7 +48,7 @@ export async function updateUserProfile(userId: number, name: string) { const db
 export async function listHistoricalCalls(userId: number, status: "TROCA" | "RECUSADO", search?: string) { const db = await getDb(); if (!db) return []; const rows = await listCalls(userId, status, search); return Promise.all(rows.map(async (call) => { const events = await db.select().from(history).where(and(eq(history.chamadoId, call.id), eq(history.statusNovo, status))).orderBy(desc(history.createdAt)).limit(1); const event = events[0]; return { ...call, dataMovimento: event?.createdAt ?? null, origem: event?.statusAnterior ?? null }; })); }
 export async function getCallBundle(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const call = await getCall(userId, id); if (!call) return undefined; const [repairRows, historyRows] = await Promise.all([db.select().from(repairs).where(eq(repairs.chamadoId, id)).orderBy(desc(repairs.createdAt)), db.select().from(history).where(eq(history.chamadoId, id)).orderBy(desc(history.createdAt))]); return { call, repairs: repairRows, history: historyRows }; }
 
-export function buildNewCallValues(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }, now = new Date()) { const { dataRecebimento, ...callData } = data; return { userId, ...callData, status: "RECEBIDO" as const, dataEntrada: dataRecebimento, dataInicioAndamento: null, dataFinalizacao: null, createdAt: now, updatedAt: now }; }
+export function buildNewCallValues(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }, now = new Date()) { const { dataRecebimento, modelo, ...callData } = data; return { userId, ...callData, modelo: normalizeModelName(modelo), status: "RECEBIDO" as const, dataEntrada: dataRecebimento, dataInicioAndamento: null, dataFinalizacao: null, createdAt: now, updatedAt: now }; }
 export async function createCall(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const now = new Date();
