@@ -534,3 +534,11 @@
 - [x] Preservar Hoje, Esta semana, Este mês, Este ano e Personalizado com o seletor de datas sob demanda
 - [x] Manter fila e prioridades como foco operacional abaixo do resumo de indicadores
 - [x] Validar desktop, móvel, filtro personalizado, TypeScript, testes e build sem alterar funcionalidades
+
+# Rodada 44 — Organização de queixa no parser
+
+- [x] Restaurar a organização e o resumo automático da queixa ao abrir novos chamados
+- [x] Preservar a extração atual por rótulos de chamado, serial, modelo e demais campos
+- [x] Preservar termos técnicos e a normalização VAIO > INFINIX > POSITIVO
+- [x] Impedir que a queixa receba blocos operacionais ou campos irrelevantes do texto bruto
+- [x] Cobrir o exemplo oficial e validar abertura de chamado, TypeScript, testes e build

@@ -41,6 +41,23 @@ Descrição:\tAparelho retornou da assistência com problema na câmera.`;
     expect(parseCallText(text)).toEqual({ numeroOs: "60006451515", modelo: "VAIO TL12 VJTL21B0111B", serial: "4AJ99R29N", garantia: "GARANTIA", causa: "CÂMERA COM FALHA", queixa: "Aparelho retornou da assistência com problema na câmera." });
   });
 
+  it("mantém o texto da reclamação isolado para a formalização, sem misturar os demais campos do exemplo oficial", () => {
+    const text = `Chamado: 60006451515
+Marca / Modelo: POSITIVO / TABLET VAIO TL12 VJTL21B0111B
+Situação: SUPORTE TÉCNICO HW (E0026)
+Texto Breve: TABLET
+SLA: 720 horas (HC)
+Data Limite: 09/09/2026
+Consumidor: VIVALDO JÚNIOR
+Telefone: 77-981466108
+SERIAL: 4AJ99R29
+Garantia: GARANTIA
+Causa: CÂMERA COM FALHA
+Descrição: Aparelho retornou da assistência com problema na câmera.`;
+
+    expect(parseCallText(text)).toEqual({ numeroOs: "60006451515", modelo: "VAIO TL12 VJTL21B0111B", serial: "4AJ99R29", garantia: "GARANTIA", causa: "CÂMERA COM FALHA", queixa: "Aparelho retornou da assistência com problema na câmera." });
+  });
+
   it.each([
     ["VAIO POSITIVO / TABLET VAIO TL12 VJTL21B0311B", "VAIO TL12 VJTL21B0311B"],
     ["POSITIVO / INFINIX SMART 10 PRATA PST", "INFINIX SMART 10 PRATA PST"],
