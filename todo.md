@@ -449,3 +449,11 @@
 - [x] Fazer varredura de identidade antiga em título, metadados, login, carregamento e elementos visuais ativos
 - [x] Confirmar que o prefixo do domínio depende da configuração de publicação da plataforma quando não controlável pelo código
 - [x] Validar favicon, referências TECBASE, TypeScript, testes e build
+
+# Rodada 34 — Recebidos na fila e marca lateral
+
+- [x] Adicionar ação rápida para transicionar chamado RECEBIDO para EM ANDAMENTO diretamente na lista de Chamados
+- [x] Atualizar listas, Minha fila, Dashboard e contador de produção sem F5 após a ação rápida
+- [x] Corrigir a sidebar para mostrar apenas o símbolo TB recolhida e apenas a identificação completa TECBASE expandida
+- [x] Preservar regras de status, fluxos operacionais, Laudos, reparos, permissões e publicação atual
+- [x] Cobrir a ação rápida, atualizações automáticas e estados compacto/expandido da marca com testes
