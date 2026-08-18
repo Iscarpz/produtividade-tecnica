@@ -551,3 +551,11 @@
 - [x] Fazer a formalização da queixa sintetizar o problema central, sem copiar a descrição
 - [x] Preservar fatos, termos técnicos, modelo, serial, parser e fluxos existentes
 - [x] Cobrir reparos, geração de script, síntese de queixa, TypeScript, testes e build
+
+# Rodada 46 — Queixa sintetizada na conferência
+
+- [x] Corrigir a aplicação da queixa sintetizada após extrair texto ou OCR
+- [x] Exibir a síntese focada no problema na área de conferência antes da confirmação
+- [x] Preservar a descrição bruta como referência sem substituí-la pela queixa organizada
+- [x] Cobrir extração, síntese, conferência e confirmação para evitar nova regressão
+- [x] Validar TypeScript, testes, build e o fluxo visual de abertura

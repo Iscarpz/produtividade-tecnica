@@ -34,11 +34,14 @@ describe("NewCallModal — recebimento e número obrigatórios", () => {
   });
 
   it("mostra o número extraído e libera a confirmação quando todos os campos essenciais existem", () => {
-    render(<NewCallModal {...baseProps} parsed={{ numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Não liga" }}/>);
+    render(<NewCallModal {...baseProps} queixaOriginal="Aparelho retornou da assistência com problema na câmera." parsed={{ numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Falha na câmera após retorno da assistência." }}/>);
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Número do chamado")).toHaveValue("60006454345");
     expect(screen.getByLabelText("Data de recebimento no setor")).toHaveValue(new Date().toISOString().slice(0, 10));
+    expect(screen.getByText("Queixa organizada")).toBeInTheDocument();
+    expect(screen.getByText("Falha na câmera após retorno da assistência.")).toBeInTheDocument();
+    expect(screen.getByText("Ver descrição original extraída")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "CONFIRMAR RECEBIMENTO" })).toBeEnabled();
   });
 
