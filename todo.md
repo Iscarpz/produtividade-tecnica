@@ -526,3 +526,11 @@
 - [x] Manter métricas e filtro existentes como contexto visual integrado e discreto
 - [x] Preservar estritamente dados, funções, fluxos, filtros, permissões e responsividade
 - [x] Validar a composição em desktop e móvel, além de TypeScript, testes e build
+
+# Rodada 43 — Resumo no topo e filtro integrado
+
+- [x] Reposicionar os indicadores existentes para o topo da Visão geral como faixa de resumo operacional
+- [x] Integrar o filtro de período ao cabeçalho em formato compacto, sem painel lateral
+- [x] Preservar Hoje, Esta semana, Este mês, Este ano e Personalizado com o seletor de datas sob demanda
+- [x] Manter fila e prioridades como foco operacional abaixo do resumo de indicadores
+- [x] Validar desktop, móvel, filtro personalizado, TypeScript, testes e build sem alterar funcionalidades
