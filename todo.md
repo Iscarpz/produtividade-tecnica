@@ -490,3 +490,11 @@
 - [x] Ampliar moderadamente a largura útil do Dashboard e dos cards sem remover margens confortáveis
 - [x] Ajustar espaçamentos e responsividade para evitar compressão ou overflow em telas menores
 - [x] Validar visualmente em desktop e móvel, além de TypeScript, testes e build
+
+# Rodada 39 — Densidade e hierarquia do Dashboard
+
+- [x] Aumentar a densidade de Minha fila e Prioridades em monitores grandes sem reduzir legibilidade
+- [x] Preservar abertura de chamados, ordenação, status e informações operacionais das listas
+- [x] Dar maior destaque às métricas principais e reduzir a ênfase visual dos indicadores secundários
+- [x] Manter dados, cálculos, filtros e responsividade existentes
+- [x] Validar visualmente em desktop e móvel, além de TypeScript, testes e build
