@@ -542,3 +542,12 @@
 - [x] Preservar termos técnicos e a normalização VAIO > INFINIX > POSITIVO
 - [x] Impedir que a queixa receba blocos operacionais ou campos irrelevantes do texto bruto
 - [x] Cobrir o exemplo oficial e validar abertura de chamado, TypeScript, testes e build
+
+# Rodada 45 — Reparo no script e síntese de queixa
+
+- [x] Corrigir a atualização tardia ou ausente dos reparos no Script Técnico
+- [x] Garantir que o bloco [REPARO:] reflita peças e seriais persistidos antes da geração
+- [x] Manter todos os demais campos existentes do Script Técnico sem mudança de regras
+- [x] Fazer a formalização da queixa sintetizar o problema central, sem copiar a descrição
+- [x] Preservar fatos, termos técnicos, modelo, serial, parser e fluxos existentes
+- [x] Cobrir reparos, geração de script, síntese de queixa, TypeScript, testes e build

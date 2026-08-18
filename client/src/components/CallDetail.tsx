@@ -58,6 +58,7 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
     await Promise.all([
       utils.calls.list.invalidate(),
       utils.calls.detail.invalidate({ id }),
+      utils.calls.generateScript.invalidate({ id }),
       utils.productivity.range.invalidate(),
       utils.historical.troca.invalidate(),
       utils.historical.recusado.invalidate(),
@@ -67,9 +68,9 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
   const transition = trpc.calls.transition.useMutation({ onSuccess: async (_result, variables) => { await refreshOperationalData(); toast.success(variables.action === "Reabrir chamado" ? "Chamado reaberto" : "Status atualizado"); if (variables.action === "Finalizar") { onClose(); setLocation("/fila/em-andamento"); } }, onError: (error) => toast.error(error.message) });
   const updateData = trpc.calls.updateData.useMutation({ onSuccess: () => { toast.success("Dados atualizados"); setEditing(false); onRefresh(); }, onError: (error) => toast.error(error.message) });
   const updateTechnicalData = trpc.calls.updateTechnicalData.useMutation({ onMutate: (variables) => { setTechnicalSaveState("saving"); if (variables.diagnostico !== undefined) setDiagnosticSaveState("saving"); }, onSuccess: (_result, variables) => { if (variables.diagnostico !== undefined) { lastPersistedTechnical.current = { ...lastPersistedTechnical.current, diagnostico: variables.diagnostico }; setDiagnosticSaveState("saved"); } setTechnicalSaveState("saved"); utils.calls.generateScript.invalidate({ id }); onRefresh(); }, onError: (error, variables) => { if (variables.diagnostico !== undefined) setDiagnosticSaveState("error"); setTechnicalSaveState("error"); toast.error(error.message); } });
-  const addRepair = trpc.calls.addRepair.useMutation({ onSuccess: () => { toast.success("Peça adicionada"); setRepair(emptyRepair()); onRefresh(); }, onError: (error) => toast.error(error.message) });
-  const updateRepair = trpc.calls.updateRepair.useMutation({ onSuccess: () => { toast.success("Peça atualizada"); setEditingRepairId(null); setRepair(emptyRepair()); onRefresh(); }, onError: (error) => toast.error(error.message) });
-  const deleteRepair = trpc.calls.deleteRepair.useMutation({ onSuccess: () => { toast.success("Peça excluída"); setRepairToDelete(null); onRefresh(); }, onError: (error) => toast.error(error.message) });
+  const addRepair = trpc.calls.addRepair.useMutation({ onSuccess: async () => { setRepair(emptyRepair()); await refreshOperationalData(); toast.success("Peça adicionada e Script Técnico atualizado"); }, onError: (error) => toast.error(error.message) });
+  const updateRepair = trpc.calls.updateRepair.useMutation({ onSuccess: async () => { setEditingRepairId(null); setRepair(emptyRepair()); await refreshOperationalData(); toast.success("Peça atualizada e Script Técnico atualizado"); }, onError: (error) => toast.error(error.message) });
+  const deleteRepair = trpc.calls.deleteRepair.useMutation({ onSuccess: async () => { setRepairToDelete(null); await refreshOperationalData(); toast.success("Peça excluída e Script Técnico atualizado"); }, onError: (error) => toast.error(error.message) });
   const removeCall = trpc.calls.delete.useMutation({ onSuccess: async () => {
     setDeleted(true);
     await queryClient.cancelQueries({ queryKey: detailQueryKey, exact: true });

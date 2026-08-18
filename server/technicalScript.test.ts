@@ -62,6 +62,15 @@ describe("gerador técnico estruturado", () => {
     expect(result.script).not.toContain("INTERNO");
   });
 
+  it("reconstrói o bloco de reparo com as peças mais recentes em cada geração", () => {
+    const beforeUpdate = generateTechnicalScript(complete, [{ peca: "LCD" }], catalog);
+    const afterUpdate = generateTechnicalScript(complete, [{ peca: "CONECTOR DE CARGA", serialInstalada: "NOVO-1" }], catalog);
+
+    expect(beforeUpdate.script).toContain("COMPONENTES SUBSTITUIDOS: LCD");
+    expect(afterUpdate.script).toContain("COMPONENTES SUBSTITUIDOS: CONECTOR DE CARGA - SERIAL INSTALADO: NOVO-1");
+    expect(afterUpdate.script).not.toContain("COMPONENTES SUBSTITUIDOS: LCD");
+  });
+
   it("ignora seriais vazios ou compostos somente por espaços", () => {
     const result = generateTechnicalScript(complete, [{ peca: "TELA AMOLED TL-12 V2 REV", serialRetirada: "   ", serialInstalada: "" }], catalog);
     expect(result.script).toContain("COMPONENTES SUBSTITUIDOS: TELA AMOLED TL-12 V2 REV\n/");

@@ -10,8 +10,8 @@ export async function formalizeComplaint(original: string) {
   try {
     const response = await invokeLLM({
       messages: [
-        { role: "system", content: "Você organiza queixas de assistência técnica. Use somente fatos presentes no texto fornecido. Não diagnostique, não atribua causa, não inclua defeitos não mencionados. Remova repetições e linguagem coloquial. Preserve literalmente termos técnicos, siglas e palavras em inglês, como touchscreen, display, BIOS, firmware, USB e HDMI; nunca os traduza ou substitua. Responda somente JSON válido." },
-        { role: "user", content: `Organize e resuma esta queixa em uma frase técnica clara, preservando integralmente os fatos e os termos técnicos: ${queixaOriginal}` },
+        { role: "system", content: "Você sintetiza queixas de assistência técnica. Use somente fatos presentes no texto fornecido. Identifique primeiro o problema central e formule uma única frase técnica, objetiva e impessoal; não copie a estrutura da descrição e não repita o relato narrativo quando puder expressar a falha diretamente. Exemplo: 'Aparelho retornou da assistência com problema na câmera' deve ser sintetizado como 'Falha na câmera após retorno da assistência'. Não diagnostique, não atribua causa, não inclua defeitos não mencionados. Preserve literalmente termos técnicos, siglas e palavras em inglês, como touchscreen, display, BIOS, firmware, USB e HDMI; nunca os traduza ou substitua. Responda somente JSON válido." },
+        { role: "user", content: `Sintetize a queixa a seguir destacando somente o problema principal, em uma frase técnica curta: ${queixaOriginal}` },
       ],
       response_format: { type: "json_schema", json_schema: { name: "technical_complaint", strict: true, schema: { type: "object", properties: { queixaFormalizada: { type: "string" } }, required: ["queixaFormalizada"], additionalProperties: false } } },
     });

@@ -5,7 +5,7 @@ vi.mock("./_core/llm", () => ({ invokeLLM: vi.fn(async () => ({ choices: [{ mess
 import { formalizeComplaint } from "./complaint";
 
 describe("formalizeComplaint", () => {
-  it("preserva a queixa original e retorna a versão formalizada", async () => {
+  it("preserva a queixa original e retorna uma síntese focada no problema principal", async () => {
     const result = await formalizeComplaint("Desliga sozinho. Trava durante utilização.");
     expect(result.queixaOriginal).toBe("Desliga sozinho. Trava durante utilização.");
     expect(result.queixaFormalizada).toContain("desligamentos espontâneos");
