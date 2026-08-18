@@ -3,9 +3,9 @@
 @import "tw-animate-css";
 @source "./**/*.{ts,tsx}";
 
-:root { font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; color: #17202a; background: #f5f7fa; font-synthesis: none; text-rendering: optimizeLegibility; --background: 210 33% 97%; --foreground: 215 28% 15%; --card: 0 0% 100%; --card-foreground: 215 28% 15%; --popover: 0 0% 100%; --popover-foreground: 215 28% 15%; --primary: 205 57% 23%; --primary-foreground: 0 0% 100%; --secondary: 210 20% 94%; --secondary-foreground: 215 28% 15%; --muted: 210 20% 94%; --muted-foreground: 215 12% 47%; --accent: 42 87% 57%; --accent-foreground: 215 28% 15%; --border: 214 20% 89%; --input: 214 20% 89%; --ring: 205 57% 23%; --radius: .75rem; }
+:root { font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; color: #0D1117; background: #F7F8F7; font-synthesis: none; text-rendering: optimizeLegibility; --background: 120 9% 97%; --foreground: 210 22% 7%; --card: 0 0% 100%; --card-foreground: 210 22% 7%; --popover: 0 0% 100%; --popover-foreground: 210 22% 7%; --primary: 122 39% 34%; --primary-foreground: 0 0% 100%; --secondary: 120 9% 95%; --secondary-foreground: 210 22% 7%; --muted: 120 9% 95%; --muted-foreground: 215 12% 40%; --accent: 82 81% 55%; --accent-foreground: 210 22% 7%; --border: 220 13% 91%; --input: 220 13% 91%; --ring: 122 39% 34%; --radius: .75rem; }
 * { border-color: hsl(var(--border)); }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: #f5f7fa; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #F7F8F7; }
 button, input, textarea { font: inherit; }
 button { transition: transform 160ms cubic-bezier(.23,1,.32,1), background-color 160ms ease, color 160ms ease; }
 button:active { transform: scale(.98); }

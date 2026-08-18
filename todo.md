@@ -425,3 +425,11 @@
 - [x] Preservar retornos à lista ou tela de origem, sem recarregar, alterar status ou salvar dados adicionais
 - [x] Evitar conflito da tecla ESC com diálogos e controles internos abertos
 - [x] Cobrir botão X, ESC e os casos de exclusão e diálogo interno com testes
+
+# Rodada 31 — Identidade visual TECBASE
+
+- [x] Aplicar a paleta TECBASE: grafite estrutural, verde institucional, verde-lima de destaque e amarelo apenas para atenção
+- [x] Substituir a identificação visual antiga pela marca TECBASE na sidebar e no cabeçalho, mantendo o comportamento atual
+- [x] Atualizar estados ativos, botões, ícones e indicadores sem modificar funções, fluxos, rotas ou estrutura de telas
+- [x] Preservar cards claros, hierarquia tipográfica, responsividade e contraste acessível
+- [x] Validar visualmente desktop e móvel, além de TypeScript, testes e build sem regressões funcionais
