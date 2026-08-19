@@ -61,14 +61,16 @@ describe("Laudo Creator nativo — emissão confiável", () => {
     expect(documentSource).toContain("81.243.735/0019-77");
     expect(documentSource).toContain("Rua João Bettega, 5200 - Cidade Industrial");
     expect(documentSource).toContain("Tel: (41) 3316-7500");
-    expect(documentSource).toContain("grid-cols-[1fr_148px]");
-    expect(documentSource).toContain("gap-1");
+    expect(documentSource).toContain("grid-cols-[1fr_124px]");
+    expect(documentSource).toContain("h-10");
     expect(documentSource).not.toContain("Documento técnico emitido a partir das informações registradas no atendimento.");
   });
 
   it("prepara fotos e logos persistidos antes de gerar o arquivo final", () => {
     expect(source).toContain("preparePdfAssets.mutateAsync");
-    expect(source).toContain("generateLaudoPdf({ ...form, fotos: assets.fotos }, assets.logos");
+    expect(source).toContain("setPreparedAssets(assets)");
+    expect(source).toContain("generateLaudoPdf({ ...form, fotos: preparedAssets.fotos }, preparedAssets.logos)");
+    expect(source).toContain("preview && preparedAssets");
     expect(documentSource).toContain("A foto ${index + 1} não foi preparada para o PDF.");
   });
 

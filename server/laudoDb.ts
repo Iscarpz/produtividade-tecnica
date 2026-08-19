@@ -143,7 +143,7 @@ async function storedImageAsDataUrl(url: string, index: number) {
 export async function prepareLaudoPdfAssets(userId: number, photoUrls: string[]) {
   const [fotos, settings] = await Promise.all([prepareLaudoPhotosForPdf(userId, photoUrls), getLaudoSettings()]);
   const logoUrls = [settings?.logoPositivo, settings?.logoInfinix, settings?.logoVaio, settings?.logoCompaq];
-  const preparedLogos = await Promise.all(logoUrls.map((url, index) => url ? storedImageAsDataUrl(url, index) : Promise.resolve(null)));
+  const preparedLogos = await Promise.all(logoUrls.map(async (url, index) => { try { return url ? await storedImageAsDataUrl(url, index) : null; } catch { return null; } }));
   return { fotos, logos: { logoPositivo: preparedLogos[0], logoInfinix: preparedLogos[1], logoVaio: preparedLogos[2], logoCompaq: preparedLogos[3] } };
 }
 

@@ -596,3 +596,40 @@
 - [x] Garantir que Fazer download dispare o download real de um arquivo PDF no navegador
 - [x] Eliminar cores OKLCH da camada usada para gerar o PDF sem alterar a identidade TECBASE
 - [x] Executar emissão real com múltiplas fotos, validar PDF baixado e cobrir regressões com testes
+
+# Rodada 51 — Diagnóstico definitivo de emissão do laudo
+
+- [x] Reproduzir o fluxo real autenticado com fotos, preview e download no navegador
+- [x] Identificar a causa efetiva de fotos ausentes, download sem arquivo ou erro OKLCH
+- [x] Corrigir somente a camada necessária de exportação, preservando o modelo e fluxos atuais
+- [x] Revisar o cabeçalho efetivamente presente no PDF, incluindo compactação de logos e telefone
+- [x] Validar arquivo PDF baixado, imagens incorporadas, anotações, ordem e duas páginas
+- [x] Publicar apenas depois de confirmar o fluxo completo com evidência real
+
+# Rodada 52 — Escala e moldura do PDF
+
+- [x] Aumentar a escala efetiva de tipografia e conteúdo no PDF impresso
+- [x] Reforçar a hierarquia e legibilidade do cabeçalho institucional no papel
+- [x] Reduzir as molduras excessivas das fotos sem cortar evidências ou anotações
+- [x] Validar visualmente o PDF refinado com o fluxo de fotos já aprovado
+
+# Rodada 53 — Logos institucionais ampliadas
+
+- [x] Aumentar as quatro logos do cabeçalho do PDF, preservando compactação e alinhamento
+- [x] Revisar visualmente o cabeçalho sem alterar o layout de conteúdo e fotos aprovado
+- [x] Validar TypeScript, testes, build e emissão final antes da publicação
+
+# Rodada 54 — Cabeçalho conforme referência externa
+
+- [x] Medir a escala visual do bloco institucional, título e grade de logos da referência — bloco à esquerda no topo, quatro células quadradas compactas à direita, título e data centralizados abaixo e divisor no limite inferior
+- [x] Ajustar o cabeçalho do PDF para reproduzir a mesma composição da referência aprovada
+- [x] Comparar visualmente o PDF emitido ao modelo sem alterar os demais conteúdos
+- [x] Validar e publicar somente após a aprovação dimensional do cabeçalho
+
+# Rodada 55 — Substituição das logos institucionais
+
+- [x] Substituir a logo Positivo Tecnologia pelo arquivo fornecido
+- [x] Substituir a logo Infinix pelo arquivo fornecido
+- [x] Substituir a logo VAIO pelo arquivo fornecido
+- [x] Substituir a logo COMPAQ pelo arquivo fornecido
+- [x] Validar o cabeçalho e o PDF final com o conjunto de logos atualizado
