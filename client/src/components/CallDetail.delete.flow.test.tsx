@@ -16,10 +16,10 @@ const mocked = vi.hoisted(() => ({
   updateRepairMutate: vi.fn(),
   deleteRepairMutate: vi.fn(),
   updateTechnicalMutate: vi.fn(),
-  updateTechnicalSuccess: null as null | ((result: unknown, variables: { id: number; diagnostico?: string; inspecaoVisual?: string }) => void),
+  updateTechnicalSuccess: null as null | ((result: unknown, variables: { id: number; diagnostico?: string; observacoes?: string; inspecaoVisual?: string }) => void),
   scriptState: { data: { errors: ["Informe o diagnóstico do equipamento."], analysis: ["MODELO NORMALIZADO: MODELO TESTE."], equipmentType: "SMARTPHONE/TABLET" }, isLoading: false, isError: false } as any,
   deleteSuccess: null as null | (() => Promise<void>),
-  queryState: { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], history: [] } as any, isLoading: false, isError: false },
+  queryState: { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], attachments: [], history: [] } as any, isLoading: false, isError: false },
 }));
 
 vi.mock("@/lib/trpc", () => ({
@@ -32,12 +32,14 @@ vi.mock("@/lib/trpc", () => ({
     calls: {
       detail: { useQuery: (...args: unknown[]) => { mocked.detailQuery(...args); return mocked.queryState; } },
       generateScript: { useQuery: () => mocked.scriptState },
-      transition: { useMutation: ({ onSuccess }: { onSuccess: (result: unknown, variables: { id: number; action: string }) => Promise<void> }) => { mocked.transitionSuccess = onSuccess; return { isPending: false, mutate: mocked.transitionMutate }; } },
+      transition: { useMutation: ({ onSuccess }: { onSuccess: (result: unknown, variables: { id: number; action: string }) => Promise<void> }) => { mocked.transitionSuccess = onSuccess; return { isPending: false, mutate: mocked.transitionMutate, mutateAsync: async (variables: { id: number; action: string }) => { mocked.transitionMutate(variables); await onSuccess({}, variables); } }; } },
       updateData: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
-      updateTechnicalData: { useMutation: ({ onSuccess }: { onSuccess: (result: unknown, variables: { id: number; diagnostico?: string; inspecaoVisual?: string }) => void }) => { mocked.updateTechnicalSuccess = onSuccess; return { isPending: false, mutate: mocked.updateTechnicalMutate }; } },
+      updateTechnicalData: { useMutation: ({ onSuccess }: { onSuccess: (result: unknown, variables: { id: number; diagnostico?: string; observacoes?: string; inspecaoVisual?: string }) => void }) => { mocked.updateTechnicalSuccess = onSuccess; return { isPending: false, mutate: mocked.updateTechnicalMutate, mutateAsync: async (variables: { id: number; diagnostico?: string; observacoes?: string; inspecaoVisual?: string }) => { mocked.updateTechnicalMutate(variables); onSuccess({}, variables); } }; } },
       addRepair: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
       updateRepair: { useMutation: () => ({ isPending: false, mutate: mocked.updateRepairMutate }) },
       deleteRepair: { useMutation: () => ({ isPending: false, mutate: mocked.deleteRepairMutate }) },
+      uploadAttachment: { useMutation: () => ({ isPending: false, mutateAsync: vi.fn() }) },
+      deleteAttachment: { useMutation: () => ({ isPending: false, mutate: vi.fn() }) },
       delete: { useMutation: ({ onSuccess }: { onSuccess: () => Promise<void> }) => { mocked.deleteSuccess = onSuccess; return { isPending: false, mutate: () => onSuccess() }; } },
     },
   },
@@ -70,7 +72,7 @@ afterEach(() => {
   mocked.updateTechnicalSuccess = null;
   mocked.deleteSuccess = null;
   mocked.scriptState = { data: { errors: ["Informe o diagnóstico do equipamento."], analysis: ["MODELO NORMALIZADO: MODELO TESTE."], equipmentType: "SMARTPHONE/TABLET" }, isLoading: false, isError: false };
-  mocked.queryState = { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], history: [] }, isLoading: false, isError: false };
+  mocked.queryState = { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "EM ANDAMENTO", dataEntrada: new Date("2026-08-14T00:00:00Z"), updatedAt: new Date("2026-08-14T00:00:00Z") }, repairs: [], attachments: [], history: [] }, isLoading: false, isError: false };
 });
 
 describe("CallDetail — fluxo de exclusão", () => {
@@ -138,7 +140,7 @@ describe("CallDetail — timeline operacional", () => {
 
 describe("CallDetail — laudo e peças", () => {
   it("exibe Reabrir chamado para finalizados e atualiza os dados operacionais ao reabrir", async () => {
-    mocked.queryState = { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "FINALIZADO", dataEntrada: new Date("2026-08-14T00:00:00Z"), dataFinalizacao: new Date("2026-08-15T00:00:00Z"), updatedAt: new Date("2026-08-15T00:00:00Z") }, repairs: [], history: [] } as any, isLoading: false, isError: false };
+    mocked.queryState = { data: { call: { id: 12, numeroOs: "60006454345", modelo: "Modelo teste", serial: "ABC123", queixa: "Sem imagem", status: "FINALIZADO", dataEntrada: new Date("2026-08-14T00:00:00Z"), dataFinalizacao: new Date("2026-08-15T00:00:00Z"), updatedAt: new Date("2026-08-15T00:00:00Z") }, repairs: [], attachments: [], history: [] } as any, isLoading: false, isError: false };
     renderDetail();
     fireEvent.click(screen.getByRole("button", { name: "Reabrir chamado" }));
     expect(mocked.transitionMutate).toHaveBeenCalledWith({ id: 12, action: "Reabrir chamado" });
@@ -147,15 +149,23 @@ describe("CallDetail — laudo e peças", () => {
     expect(mocked.close).not.toHaveBeenCalled();
   });
 
-  it("fecha a ficha e retorna à fila em andamento após finalizar", async () => {
+  it("fecha a ficha e retorna ao Dashboard após finalizar", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
     renderDetail();
     fireEvent.click(screen.getByRole("button", { name: "Finalizar" }));
     await act(async () => { await mocked.transitionSuccess?.({}, { id: 12, action: "Finalizar" }); });
     expect(mocked.close).toHaveBeenCalledTimes(1);
-    expect(mocked.setLocation).toHaveBeenCalledWith("/fila/em-andamento");
+    expect(mocked.setLocation).toHaveBeenCalledWith("/");
     expect(mocked.invalidate).toHaveBeenCalled();
     confirm.mockRestore();
+  });
+
+  it("fecha a ficha e retorna ao Dashboard após enviar para PP", async () => {
+    renderDetail();
+    fireEvent.click(screen.getByRole("button", { name: "Enviar para PP" }));
+    await act(async () => { await mocked.transitionSuccess?.({}, { id: 12, action: "Enviar para PP" }); });
+    expect(mocked.close).toHaveBeenCalledTimes(1);
+    expect(mocked.setLocation).toHaveBeenCalledWith("/");
   });
 
   it.each([
@@ -172,13 +182,14 @@ describe("CallDetail — laudo e peças", () => {
   it.each([
     ["Enviar para Orçamento"],
     ["Enviar para Zurich"],
-  ])("abre o Laudo Creator sem mover o chamado para %s ao escolher SIM", (action) => {
+  ])("abre o Laudo Creator vinculado e movimenta o chamado para %s ao escolher SIM", (action) => {
     const open = vi.spyOn(window, "open").mockImplementation(() => null);
     renderDetail();
     fireEvent.click(screen.getByRole("button", { name: action }));
     fireEvent.click(screen.getByRole("button", { name: "SIM" }));
-    expect(open).toHaveBeenCalledWith("/laudos/novo?chamado=12", "_blank", "noopener,noreferrer");
-    expect(mocked.transitionMutate).not.toHaveBeenCalled();
+    const movement = action === "Enviar para Zurich" ? "zurich" : "orcamento";
+    expect(open).toHaveBeenCalledWith(`/laudos/novo?chamado=12&movimento=${movement}`, "_blank", "noopener,noreferrer");
+    expect(mocked.transitionMutate).toHaveBeenCalledWith({ id: 12, action });
     open.mockRestore();
   });
 

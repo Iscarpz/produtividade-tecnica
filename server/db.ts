@@ -1,9 +1,10 @@
 import { and, asc, desc, eq, gte, inArray, lte, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { callDeletionLogs, calls, history, imageBiosCatalog, invitations, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
+import { callAttachments, callDeletionLogs, calls, history, imageBiosCatalog, invitations, productivityEvents, repairs, InsertUser, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 import { generateTechnicalScript, resolveCatalog, type VisualInspection } from "./technicalScript";
 import { normalizeModelName } from "../shared/modelNormalization";
+import { storagePut } from "./storage";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
@@ -53,13 +54,24 @@ export async function listTeamUsers() { const db = await getDb(); if (!db) retur
 export async function listTeamCalls(userId?: number) { const db = await getDb(); if (!db) return []; const team = await listTeamUsers(); const ids = userId ? team.filter((member) => member.id === userId).map((member) => member.id) : team.map((member) => member.id); if (!ids.length) return []; return withZurichPriority(await db.select().from(calls).where(inArray(calls.userId, ids)).orderBy(desc(calls.createdAt))); }
 export async function getCall(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const row = await db.select().from(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))).limit(1); return row[0]; }
 export async function getCallByOs(userId: number, numeroOs: string) { const db = await getDb(); if (!db) return undefined; const row = await db.select().from(calls).where(and(eq(calls.userId, userId), eq(calls.numeroOs, numeroOs))).limit(1); return row[0]; }
+export async function checkNewCall(number: string, serial: string) {
+  const db = await getDb(); if (!db) return { duplicateStatus: null, hasSerialHistory: false };
+  const normalizedNumber = number.trim(); const normalizedSerial = serial.trim();
+  const [sameNumber, sameSerial] = await Promise.all([
+    normalizedNumber ? db.select({ status: calls.status }).from(calls).where(eq(calls.numeroOs, normalizedNumber)).limit(1) : [],
+    normalizedSerial ? db.select({ id: calls.id }).from(calls).where(eq(calls.serial, normalizedSerial)).limit(1) : [],
+  ]);
+  return { duplicateStatus: sameNumber[0]?.status ?? null, hasSerialHistory: sameSerial.length > 0 };
+}
 export async function updateUserProfile(userId: number, name: string) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.update(users).set({ name: name.trim(), updatedAt: new Date() }).where(eq(users.id, userId)); return db.select().from(users).where(eq(users.id, userId)).limit(1).then((rows) => rows[0]); }
 export async function listHistoricalCalls(userId: number, status: "TROCA" | "RECUSADO", search?: string) { const db = await getDb(); if (!db) return []; const rows = await listCalls(userId, status, search); return Promise.all(rows.map(async (call) => { const events = await db.select().from(history).where(and(eq(history.chamadoId, call.id), eq(history.statusNovo, status))).orderBy(desc(history.createdAt)).limit(1); const event = events[0]; return { ...call, dataMovimento: event?.createdAt ?? null, origem: event?.statusAnterior ?? null }; })); }
-export async function getCallBundle(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const call = await getCall(userId, id); if (!call) return undefined; const [repairRows, historyRows] = await Promise.all([db.select().from(repairs).where(eq(repairs.chamadoId, id)).orderBy(desc(repairs.createdAt)), db.select().from(history).where(eq(history.chamadoId, id)).orderBy(desc(history.createdAt))]); return { call, repairs: repairRows, history: historyRows }; }
+export async function getCallBundle(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const call = await getCall(userId, id); if (!call) return undefined; const [repairRows, historyRows, attachmentRows] = await Promise.all([db.select().from(repairs).where(eq(repairs.chamadoId, id)).orderBy(desc(repairs.createdAt)), db.select().from(history).where(eq(history.chamadoId, id)).orderBy(desc(history.createdAt)), db.select().from(callAttachments).where(and(eq(callAttachments.chamadoId, id), eq(callAttachments.userId, userId))).orderBy(desc(callAttachments.createdAt))]); return { call, repairs: repairRows, history: historyRows, attachments: attachmentRows }; }
 
-export function buildNewCallValues(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }, now = new Date()) { const { dataRecebimento, modelo, ...callData } = data; return { userId, ...callData, modelo: normalizeModelName(modelo), status: "RECEBIDO" as const, dataEntrada: dataRecebimento, dataInicioAndamento: null, dataFinalizacao: null, createdAt: now, updatedAt: now }; }
+export function buildNewCallValues(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }, now = new Date()) { const { dataRecebimento, modelo, ...callData } = data; return { userId, ...callData, numeroOs: data.numeroOs.trim(), serial: data.serial.trim(), modelo: normalizeModelName(modelo), status: "RECEBIDO" as const, dataEntrada: dataRecebimento, dataInicioAndamento: null, dataFinalizacao: null, createdAt: now, updatedAt: now }; }
 export async function createCall(userId: number, data: { numeroOs: string; serial: string; modelo: string; queixa: string; queixaOriginal?: string; dataRecebimento: Date }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
+  const duplicate = (await db.select({ status: calls.status }).from(calls).where(eq(calls.numeroOs, data.numeroOs.trim())).limit(1))[0];
+  if (duplicate) throw new Error(`CHAMADO JÁ CADASTRADO\nStatus atual: ${duplicate.status}`);
   const now = new Date();
   const result = await db.insert(calls).values(buildNewCallValues(userId, data, now));
   const id = Number(result[0].insertId);
@@ -84,19 +96,20 @@ export async function updateCallData(userId: number, id: number, data: { modelo:
   return getCallBundle(userId, id);
 }
 
-export async function updateCallTechnicalData(userId: number, id: number, data: { diagnostico?: string; inspecaoVisual?: VisualInspection }) {
+export async function updateCallTechnicalData(userId: number, id: number, data: { diagnostico?: string; observacoes?: string; inspecaoVisual?: VisualInspection }) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const call = await getCall(userId, id); if (!call) throw new Error("Chamado não encontrado");
   const diagnostico = data.diagnostico === undefined ? call.diagnostico : data.diagnostico.trim();
+  const observacoes = data.observacoes === undefined ? call.observacoes : data.observacoes;
   const inspecaoVisual = data.inspecaoVisual === undefined ? call.inspecaoVisual : data.inspecaoVisual;
   const catalog = await listActiveImageBiosCatalog();
   const resolved = resolveCatalog(call.modelo, catalog);
   const imagemBiosTipo = resolved?.tipo ?? null;
   const imagemBiosVersao = resolved?.versao ?? null;
-  const changes = [call.diagnostico !== diagnostico && "diagnóstico", call.inspecaoVisual !== inspecaoVisual && "inspeção visual", call.imagemBiosTipo !== imagemBiosTipo && "tipo de Imagem/BIOS", call.imagemBiosVersao !== imagemBiosVersao && "versão de Imagem/BIOS"].filter(Boolean) as string[];
+  const changes = [call.diagnostico !== diagnostico && "diagnóstico", call.observacoes !== observacoes && "observações", call.inspecaoVisual !== inspecaoVisual && "inspeção visual", call.imagemBiosTipo !== imagemBiosTipo && "tipo de Imagem/BIOS", call.imagemBiosVersao !== imagemBiosVersao && "versão de Imagem/BIOS"].filter(Boolean) as string[];
   if (!changes.length) return getCallBundle(userId, id);
   const now = new Date();
-  await db.update(calls).set({ diagnostico, inspecaoVisual, imagemBiosTipo, imagemBiosVersao, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
+  await db.update(calls).set({ diagnostico, observacoes, inspecaoVisual, imagemBiosTipo, imagemBiosVersao, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
   await db.insert(history).values({ chamadoId: id, userId, evento: "Dados técnicos atualizados", observacao: `Campos alterados: ${changes.join(", ")}`, createdAt: now });
   return getCallBundle(userId, id);
 }
@@ -109,9 +122,10 @@ export async function updateImageBiosCatalog(id: number, data: ImageBiosInput) {
 export async function deleteImageBiosCatalog(id: number) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.delete(imageBiosCatalog).where(eq(imageBiosCatalog.id, id)); return { success: true } as const; }
 export async function generateScriptForCall(userId: number, id: number) { const bundle = await getCallBundle(userId, id); if (!bundle) throw new Error("Chamado não encontrado"); const catalog = await listActiveImageBiosCatalog(); return generateTechnicalScript(bundle.call, bundle.repairs, catalog); }
 
-export async function deleteCallWithRelations(operations: { findCall: () => Promise<unknown>; deleteRepairs: () => Promise<unknown>; deleteHistory: () => Promise<unknown>; deleteProductivityEvents: () => Promise<unknown>; deleteCall: () => Promise<unknown>; recordDeletion: () => Promise<unknown> }) {
+export async function deleteCallWithRelations(operations: { findCall: () => Promise<unknown>; deleteRepairs: () => Promise<unknown>; deleteAttachments?: () => Promise<unknown>; deleteHistory: () => Promise<unknown>; deleteProductivityEvents: () => Promise<unknown>; deleteCall: () => Promise<unknown>; recordDeletion: () => Promise<unknown> }) {
   if (!(await operations.findCall())) throw new Error("Chamado não encontrado");
   await operations.deleteRepairs();
+  await operations.deleteAttachments?.();
   await operations.deleteHistory();
   await operations.deleteProductivityEvents();
   await operations.deleteCall();
@@ -125,11 +139,42 @@ export async function deleteCall(userId: number, id: number) {
   return db.transaction(async (tx) => deleteCallWithRelations({
     findCall: async () => (await tx.select({ id: calls.id }).from(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))).limit(1))[0],
     deleteRepairs: () => tx.delete(repairs).where(eq(repairs.chamadoId, id)),
+    deleteAttachments: () => tx.delete(callAttachments).where(and(eq(callAttachments.chamadoId, id), eq(callAttachments.userId, userId))),
     deleteHistory: () => tx.delete(history).where(eq(history.chamadoId, id)),
     deleteProductivityEvents: () => tx.delete(productivityEvents).where(eq(productivityEvents.chamadoId, id)),
     deleteCall: () => tx.delete(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))),
     recordDeletion: () => tx.insert(callDeletionLogs).values({ userId, deletedAt: new Date() }),
   }));
+}
+
+function parseAttachmentDataUrl(dataUrl: string) {
+  const match = /^data:([^;]+);base64,([\s\S]+)$/i.exec(dataUrl);
+  if (!match) throw new Error("Formato de anexo inválido");
+  const bytes = Buffer.from(match[2], "base64");
+  if (!bytes.byteLength || bytes.byteLength > 25 * 1024 * 1024) throw new Error("O anexo deve ter no máximo 25MB");
+  return { contentType: match[1].toLowerCase(), bytes };
+}
+function safeAttachmentName(name: string) { return name.trim().replace(/[\\/:*?"<>|]+/g, "-").slice(0, 255) || "anexo"; }
+export async function uploadCallAttachment(userId: number, data: { chamadoId: number; nomeArquivo: string; dataUrl: string; tipo?: "ANEXO" | "LAUDO_TECNICO" }) {
+  const db = await getDb(); if (!db) throw new Error("Banco indisponível");
+  const call = await getCall(userId, data.chamadoId); if (!call) throw new Error("Chamado não encontrado");
+  const { contentType, bytes } = parseAttachmentDataUrl(data.dataUrl);
+  const allowed = ["application/pdf", "text/plain", "application/zip", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+  if (!contentType.startsWith("image/") && !allowed.includes(contentType)) throw new Error("Tipo de anexo não permitido");
+  const nomeArquivo = safeAttachmentName(data.nomeArquivo);
+  const stored = await storagePut(`chamados/${userId}/${call.id}/anexos/${nomeArquivo}`, bytes, contentType);
+  const result = await db.insert(callAttachments).values({ chamadoId: call.id, userId, nomeArquivo, storageKey: stored.key, url: stored.url, contentType, tamanhoBytes: bytes.byteLength, tipo: data.tipo ?? "ANEXO" });
+  const id = Number(result[0].insertId);
+  await db.insert(history).values({ chamadoId: call.id, userId, evento: data.tipo === "LAUDO_TECNICO" ? "Laudo técnico anexado" : "Anexo adicionado", observacao: nomeArquivo, createdAt: new Date() });
+  return (await db.select().from(callAttachments).where(and(eq(callAttachments.id, id), eq(callAttachments.userId, userId))).limit(1))[0];
+}
+export async function deleteCallAttachment(userId: number, attachmentId: number) {
+  const db = await getDb(); if (!db) throw new Error("Banco indisponível");
+  const attachment = (await db.select().from(callAttachments).where(and(eq(callAttachments.id, attachmentId), eq(callAttachments.userId, userId))).limit(1))[0];
+  if (!attachment || !(await getCall(userId, attachment.chamadoId))) throw new Error("Anexo não encontrado");
+  await db.delete(callAttachments).where(and(eq(callAttachments.id, attachmentId), eq(callAttachments.userId, userId)));
+  await db.insert(history).values({ chamadoId: attachment.chamadoId, userId, evento: "Anexo removido", observacao: attachment.nomeArquivo, createdAt: new Date() });
+  return { success: true } as const;
 }
 
 const transitions: Record<string, { status: any; event?: any; label: string; closed?: boolean; startsWork?: boolean; from: string[] }> = {

@@ -640,3 +640,14 @@
 - [x] Encaminhar orçamento Zurich aprovado para Reparo conforme o fluxo operacional
 - [x] Permitir finalizar o chamado depois da etapa de Reparo
 - [x] Cobrir as transições Zurich aprovado, Reparo e Finalizado sem alterar recusas ou prioridades
+
+# Rodada 57 — Anexos, observações e controle de duplicidade
+
+- [x] Adicionar anexos opcionais vinculados ao chamado, com visualização, download e remoção
+- [x] Adicionar observações opcionais com salvamento explícito ou ao sair do campo, sem alterar diagnóstico
+- [x] Armazenar automaticamente nos anexos a cópia do PDF emitido pelo Laudo Creator para Orçamento e Zurich
+- [x] Fechar a ficha e retornar ao Dashboard após envio para PP, Orçamento ou Zurich
+- [x] Exibir alerta compacto quando o serial do novo chamado já tiver histórico
+- [x] Bloquear abertura com número de chamado já cadastrado, mostrando apenas o status atual
+- [x] Preservar status, prioridades, permissões, identidade e todos os fluxos não especificados
+- [x] Validar TypeScript, build, anexos, observações, Laudo, movimentações e regressões antes da publicação

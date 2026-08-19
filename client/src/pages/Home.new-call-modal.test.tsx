@@ -59,4 +59,20 @@ describe("NewCallModal — recebimento e número obrigatórios", () => {
     fireEvent.change(screen.getByLabelText("Data de recebimento no setor"), { target: { value: "" } });
     expect(screen.getByRole("button", { name: "CONFIRMAR RECEBIMENTO" })).toBeDisabled();
   });
+
+  it("avisa discretamente quando o serial possui histórico sem bloquear o novo chamado", () => {
+    render(<NewCallModal {...baseProps} intakeCheck={{ duplicateStatus: null, hasSerialHistory: true }} parsed={{ numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Não liga" }}/>);
+
+    expect(screen.getByRole("status")).toHaveTextContent("EQUIPAMENTO COM HISTÓRICO");
+    expect(screen.getByRole("button", { name: "CONFIRMAR RECEBIMENTO" })).toBeEnabled();
+  });
+
+  it("bloqueia somente o chamado duplicado e mostra o status atual", () => {
+    render(<NewCallModal {...baseProps} intakeCheck={{ duplicateStatus: "EM ANDAMENTO", hasSerialHistory: true }} parsed={{ numeroOs: "60006454345", serial: "5A538SY82", modelo: "INFINIX HOT 50I PRETO", queixa: "Não liga" }}/>);
+
+    expect(screen.getByRole("alert")).toHaveTextContent("CHAMADO JÁ CADASTRADO");
+    expect(screen.getByRole("alert")).toHaveTextContent("Status atual: EM ANDAMENTO");
+    expect(screen.queryByText("EQUIPAMENTO COM HISTÓRICO")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "CONFIRMAR RECEBIMENTO" })).toBeDisabled();
+  });
 });

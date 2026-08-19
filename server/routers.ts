@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { imageBiosManagerProcedure, protectedProcedure, publicProcedure, router, teamManagerProcedure } from "./_core/trpc";
-import { addRepair, createCall, createImageBiosCatalog, deleteCall, deleteImageBiosCatalog, deleteRepair, generateScriptForCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, listImageBiosCatalog, listTeamCalls, productivity, productivityForTeam, transitionCall, updateCallData, updateCallTechnicalData, updateImageBiosCatalog, updateRepair, updateUserProfile } from "./db";
+import { addRepair, checkNewCall, createCall, createImageBiosCatalog, deleteCall, deleteCallAttachment, deleteImageBiosCatalog, deleteRepair, generateScriptForCall, getCallBundle, getCallByOs, listCalls, listHistoricalCalls, listImageBiosCatalog, listTeamCalls, productivity, productivityForTeam, transitionCall, updateCallData, updateCallTechnicalData, updateImageBiosCatalog, updateRepair, updateUserProfile, uploadCallAttachment } from "./db";
 import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
 import { VISUAL_INSPECTIONS } from "./technicalScript";
@@ -33,15 +33,18 @@ export const appRouter = router({
       return bundle;
     }),
     findByOs: protectedProcedure.input(z.object({ numeroOs: z.string() })).query(({ ctx, input }) => getCallByOs(ctx.user.id, input.numeroOs)),
+    checkNew: protectedProcedure.input(z.object({ numeroOs: z.string().max(64), serial: z.string().max(128) })).query(({ input }) => checkNewCall(input.numeroOs, input.serial)),
     create: protectedProcedure.input(z.object({ numeroOs: z.string().min(1), serial: z.string().min(1), modelo: z.string().min(1), queixa: z.string().min(1), queixaOriginal: z.string().optional(), dataRecebimento: z.coerce.date() })).mutation(({ ctx, input }) => createCall(ctx.user.id, input)),
     updateData: protectedProcedure.input(z.object({ id: z.number(), modelo: z.string().min(1).max(255), serial: z.string().min(1).max(128), queixa: z.string().min(1).max(3000) })).mutation(({ ctx, input }) => updateCallData(ctx.user.id, input.id, { modelo: input.modelo, serial: input.serial, queixa: input.queixa })),
-    updateTechnicalData: protectedProcedure.input(z.object({ id: z.number(), diagnostico: z.string().max(3000).optional(), inspecaoVisual: z.enum(VISUAL_INSPECTIONS).optional() }).refine((input) => input.diagnostico !== undefined || input.inspecaoVisual !== undefined, { message: "Informe um dado técnico para salvar" })).mutation(({ ctx, input }) => updateCallTechnicalData(ctx.user.id, input.id, { diagnostico: input.diagnostico, inspecaoVisual: input.inspecaoVisual })),
+    updateTechnicalData: protectedProcedure.input(z.object({ id: z.number(), diagnostico: z.string().max(3000).optional(), observacoes: z.string().max(6000).optional(), inspecaoVisual: z.enum(VISUAL_INSPECTIONS).optional() }).refine((input) => input.diagnostico !== undefined || input.observacoes !== undefined || input.inspecaoVisual !== undefined, { message: "Informe um dado técnico para salvar" })).mutation(({ ctx, input }) => updateCallTechnicalData(ctx.user.id, input.id, { diagnostico: input.diagnostico, observacoes: input.observacoes, inspecaoVisual: input.inspecaoVisual })),
     generateScript: protectedProcedure.input(z.object({ id: z.number() })).query(({ ctx, input }) => generateScriptForCall(ctx.user.id, input.id)),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => deleteCall(ctx.user.id, input.id)),
     transition: protectedProcedure.input(z.object({ id: z.number(), action: z.enum(["Iniciar andamento", "Enviar para PP", "Enviar para Orçamento", "Enviar para Zurich", "Retornar para Andamento", "Peça recebida", "Orçamento aprovado", "Orçamento recusado", "Finalizar", "Reabrir chamado", "Troca", "Recusado"]) })).mutation(({ ctx, input }) => transitionCall(ctx.user.id, input.id, input.action)),
     addRepair: protectedProcedure.input(z.object({ chamadoId: z.number(), peca: z.string().min(1), codigo: z.string().optional(), serialRetirada: z.string().optional(), serialInstalada: z.string().optional(), observacao: z.string().optional() })).mutation(({ ctx, input }) => addRepair(ctx.user.id, input)),
     updateRepair: protectedProcedure.input(z.object({ id: z.number(), chamadoId: z.number(), peca: z.string().min(1).max(255), codigo: z.string().max(128).optional(), serialRetirada: z.string().max(128).optional(), serialInstalada: z.string().max(128).optional(), observacao: z.string().max(3000).optional() })).mutation(({ ctx, input }) => updateRepair(ctx.user.id, input)),
     deleteRepair: protectedProcedure.input(z.object({ id: z.number(), chamadoId: z.number() })).mutation(({ ctx, input }) => deleteRepair(ctx.user.id, input)),
+    uploadAttachment: protectedProcedure.input(z.object({ chamadoId: z.number(), nomeArquivo: z.string().min(1).max(255), dataUrl: z.string().min(16).max(40_000_000), tipo: z.enum(["ANEXO", "LAUDO_TECNICO"]).optional() })).mutation(({ ctx, input }) => uploadCallAttachment(ctx.user.id, input)),
+    deleteAttachment: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => deleteCallAttachment(ctx.user.id, input.id)),
   }),
   imageBios: router({
     list: imageBiosManagerProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ input }) => listImageBiosCatalog(input?.search)),

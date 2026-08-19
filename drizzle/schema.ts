@@ -38,6 +38,7 @@ export const calls = mysqlTable("calls", {
   queixa: text("queixa").notNull(),
   queixaOriginal: text("queixaOriginal"),
   diagnostico: text("diagnostico"),
+  observacoes: text("observacoes"),
   inspecaoVisual: mysqlEnum("inspecaoVisual", ["SEM SINAIS DE MAU USO OU DE ABERTURA PRÉVIA.", "MAU USO CONSTATADO - EQUIPAMENTO COM AVARIAS E/OU DANOS FÍSICOS", "CONSTATADO ABERTURA PRÉVIA POR PESSOAL NÃO AUTORIZADO"]),
   imagemBiosTipo: mysqlEnum("imagemBiosTipo", ["IMAGEM", "BIOS"]),
   imagemBiosVersao: text("imagemBiosVersao"),
@@ -59,6 +60,19 @@ export const repairs = mysqlTable("repairs", {
   observacao: text("observacao"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
 });
+
+export const callAttachments = mysqlTable("callAttachments", {
+  id: int("id").autoincrement().primaryKey(),
+  chamadoId: int("chamadoId").notNull(),
+  userId: int("userId").notNull(),
+  nomeArquivo: varchar("nomeArquivo", { length: 255 }).notNull(),
+  storageKey: text("storageKey").notNull(),
+  url: text("url").notNull(),
+  contentType: varchar("contentType", { length: 160 }).notNull(),
+  tamanhoBytes: int("tamanhoBytes").notNull(),
+  tipo: mysqlEnum("tipo", ["ANEXO", "LAUDO_TECNICO"]).notNull().default("ANEXO"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+}, (table) => [index("call_attachments_chamado_idx").on(table.chamadoId, table.createdAt), index("call_attachments_user_idx").on(table.userId, table.createdAt)]);
 
 export const imageBiosCatalog = mysqlTable("imageBiosCatalog", {
   id: int("id").autoincrement().primaryKey(),
@@ -152,6 +166,7 @@ export type Invitation = typeof invitations.$inferSelect;
 export type InsertInvitation = typeof invitations.$inferInsert;
 export type Call = typeof calls.$inferSelect;
 export type Repair = typeof repairs.$inferSelect;
+export type CallAttachment = typeof callAttachments.$inferSelect;
 export type ImageBiosCatalog = typeof imageBiosCatalog.$inferSelect;
 export type Laudo = typeof laudos.$inferSelect;
 export type LaudoAuditLog = typeof laudoAuditLogs.$inferSelect;

@@ -7,6 +7,7 @@ describe("exclusão íntegra de chamados", () => {
     const result = await deleteCallWithRelations({
       findCall: vi.fn(async () => ({ id: 42 })),
       deleteRepairs: vi.fn(async () => { sequence.push("reparos"); }),
+      deleteAttachments: vi.fn(async () => { sequence.push("anexos"); }),
       deleteHistory: vi.fn(async () => { sequence.push("historico"); }),
       deleteProductivityEvents: vi.fn(async () => { sequence.push("produtividade"); }),
       deleteCall: vi.fn(async () => { sequence.push("chamado"); }),
@@ -14,7 +15,7 @@ describe("exclusão íntegra de chamados", () => {
     });
 
     expect(result).toEqual({ success: true });
-    expect(sequence).toEqual(["reparos", "historico", "produtividade", "chamado", "auditoria de exclusão"]);
+    expect(sequence).toEqual(["reparos", "anexos", "historico", "produtividade", "chamado", "auditoria de exclusão"]);
   });
 
   it("não remove nenhum dado quando o chamado não pertence ao usuário ou não existe", async () => {

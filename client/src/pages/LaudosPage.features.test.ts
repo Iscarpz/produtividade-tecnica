@@ -78,4 +78,12 @@ describe("Laudo Creator nativo — emissão confiável", () => {
     expect(source).toContain('"FEATUREPHONE"');
     expect(source).toContain("nomeCliente: p.nomeCliente || current.nomeCliente");
   });
+
+  it("anexa a mesma emissão PDF ao chamado quando o Laudo Creator vier de orçamento ou Zurich", () => {
+    expect(source).toContain('laudoParams.get("movimento")');
+    expect(source).toContain('movement === "orcamento" || movement === "zurich"');
+    expect(source).toContain("uploadPdfAttachment.mutateAsync");
+    expect(source).toContain('tipo: "LAUDO_TECNICO"');
+    expect(source).toContain('`Laudo_Tecnico_${form.numeroChamado}.pdf`');
+  });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 const { updateCallData, updateCallTechnicalData } = vi.hoisted(() => ({ updateCallData: vi.fn(), updateCallTechnicalData: vi.fn() }));
-vi.mock("./db", () => ({ addRepair: vi.fn(), createCall: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), listCalls: vi.fn(), listHistoricalCalls: vi.fn(), productivity: vi.fn(), transitionCall: vi.fn(), updateCallData, updateCallTechnicalData, updateUserProfile: vi.fn() }));
+vi.mock("./db", () => ({ addRepair: vi.fn(), checkNewCall: vi.fn(), createCall: vi.fn(), deleteCallAttachment: vi.fn(), getCallBundle: vi.fn(), getCallByOs: vi.fn(), listCalls: vi.fn(), listHistoricalCalls: vi.fn(), productivity: vi.fn(), transitionCall: vi.fn(), updateCallData, updateCallTechnicalData, updateUserProfile: vi.fn(), uploadCallAttachment: vi.fn() }));
 
 import { appRouter } from "./routers";
 
@@ -18,6 +18,13 @@ describe("calls.updateData", () => {
   it("aceita diagnóstico e inspeção individualmente para o salvamento automático", async () => {
     updateCallTechnicalData.mockResolvedValueOnce({ call: { id: 21, diagnostico: "FALHA NO DISPLAY" }, repairs: [], history: [] });
     await expect(appRouter.createCaller(ctx).calls.updateTechnicalData({ id: 21, diagnostico: "FALHA NO DISPLAY" })).resolves.toMatchObject({ call: { diagnostico: "FALHA NO DISPLAY" } });
-    expect(updateCallTechnicalData).toHaveBeenCalledWith(7, 21, { diagnostico: "FALHA NO DISPLAY", inspecaoVisual: undefined });
+    expect(updateCallTechnicalData).toHaveBeenCalledWith(7, 21, { diagnostico: "FALHA NO DISPLAY", observacoes: undefined, inspecaoVisual: undefined });
+  });
+
+  it("preserva observações em salvamento separado do diagnóstico", async () => {
+    const observacoes = "Cliente informou retorno após atualização.\nAguardar confirmação do setor.";
+    updateCallTechnicalData.mockResolvedValueOnce({ call: { id: 21, observacoes }, repairs: [], attachments: [], history: [] });
+    await expect(appRouter.createCaller(ctx).calls.updateTechnicalData({ id: 21, observacoes })).resolves.toMatchObject({ call: { observacoes } });
+    expect(updateCallTechnicalData).toHaveBeenCalledWith(7, 21, { diagnostico: undefined, observacoes, inspecaoVisual: undefined });
   });
 });
