@@ -23,14 +23,10 @@ describe("Laudo Creator nativo — recursos preservados", () => {
     expect(source).toContain("settings.data?.logoPositivo");
   });
 
-  it("gera o PDF em visor antes de permitir o download", () => {
-    expect(documentSource).toContain("createLaudoPdfPreviewUrl");
-    expect(documentSource).toContain('pdf.output("blob")');
-    expect(source).toContain("Pré-visualização do PDF");
-    expect(source).toContain('title="Pré-visualização do PDF do Laudo Técnico"');
-    expect(source).toContain("Pré-visualizar PDF");
-    expect(source).toContain("Baixar PDF");
-    expect(source).toContain("disabled={!url}");
+  it("faz o download diretamente a partir da visualização do laudo", () => {
+    expect(source).toContain("Fazer download");
+    expect(source).not.toContain("Pré-visualizar PDF");
+    expect(source).not.toContain("Pré-visualização do PDF");
   });
 
   it("compõe logos proporcionais no documento e oferece estados claros na configuração", () => {
@@ -69,6 +65,18 @@ describe("Laudo Creator nativo — recursos preservados", () => {
 
   it("carrega cada foto antes de incorporá-la ao PDF final", () => {
     expect(documentSource).toContain("Não foi possível carregar a foto");
-    expect(documentSource).toContain("pdf.addImage(image");
+    expect(documentSource).toContain("preparePhotoForPdf");
+    expect(documentSource).toContain("fetch(url)");
+    expect(documentSource).toContain("pdf.addImage(photo.dataUrl");
+    expect(documentSource).toContain('canvas.toDataURL("image/jpeg", 0.92)');
+    expect(source).toContain("preparePhotosForPdf.mutateAsync");
+    expect(source).toContain("generateLaudoPdf({ ...form, fotos }");
+  });
+
+  it("mantém o cabeçalho compacto e remove o texto institucional desnecessário", () => {
+    expect(documentSource).toContain("grid-cols-[1fr_180px]");
+    expect(documentSource).toContain("gap-x-2 gap-y-2");
+    expect(documentSource).toContain('className="mt-1">Tel: (41) 3316-7500');
+    expect(documentSource).not.toContain("Documento técnico emitido a partir das informações registradas no atendimento.");
   });
 });

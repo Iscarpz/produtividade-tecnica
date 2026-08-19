@@ -9,7 +9,7 @@ import { extractCallFromImage } from "./ocr";
 import { formalizeComplaint } from "./complaint";
 import { VISUAL_INSPECTIONS } from "./technicalScript";
 import { usersRouter } from "./userRouter";
-import { createLaudo, deleteLaudo, duplicateLaudo, getLaudo, getLaudoPrefill, getLaudoSettings, LAUDO_BRANDS, listLaudoAudit, listLaudos, recordLaudoPdf, updateLaudoSettings, uploadLaudoImage } from "./laudoDb";
+import { createLaudo, deleteLaudo, duplicateLaudo, getLaudo, getLaudoPrefill, getLaudoSettings, LAUDO_BRANDS, listLaudoAudit, listLaudos, prepareLaudoPhotosForPdf, recordLaudoPdf, updateLaudoSettings, uploadLaudoImage } from "./laudoDb";
 
 const dateRange = z.object({ from: z.coerce.date(), to: z.coerce.date() });
 const imageBiosInput = z.object({ modelo: z.string().min(1).max(255), marca: z.string().min(1).max(120), tipo: z.enum(["IMAGEM", "BIOS"]), versao: z.string().min(1).max(3000), ativo: z.boolean().optional(), observacao: z.string().max(3000).optional() });
@@ -57,6 +57,7 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => deleteLaudo(ctx.user.id, input.id)),
     duplicate: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => duplicateLaudo(ctx.user.id, input.id)),
     recordPdf: protectedProcedure.input(z.object({ id: z.number() })).mutation(({ ctx, input }) => recordLaudoPdf(ctx.user.id, input.id)),
+    preparePhotosForPdf: protectedProcedure.input(z.object({ photos: z.array(z.string().min(1)).min(1).max(4) })).mutation(({ ctx, input }) => prepareLaudoPhotosForPdf(ctx.user.id, input.photos)),
     audit: protectedProcedure.input(z.object({ laudoId: z.number() })).query(({ ctx, input }) => listLaudoAudit(ctx.user.id, input.laudoId)),
     uploadImage: protectedProcedure.input(z.object({ dataUrl: z.string().min(32).max(15000000), kind: z.enum(["foto", "logo"]) })).mutation(({ ctx, input }) => uploadLaudoImage(ctx.user.id, input.dataUrl, input.kind)),
     settings: router({

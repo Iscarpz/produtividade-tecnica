@@ -1,7 +1,7 @@
 import { and, desc, eq, like, or } from "drizzle-orm";
 import { laudoAuditLogs, laudos, laudoSettings, users } from "../drizzle/schema";
 import { getCall, getDb } from "./db";
-import { storagePut } from "./storage";
+import { storageGetSignedUrl, storagePut } from "./storage";
 
 export const LAUDO_BRANDS = ["Positivo", "Infinix", "Vaio", "Compaq"] as const;
 export type LaudoBrand = (typeof LAUDO_BRANDS)[number];
@@ -112,6 +112,23 @@ export async function uploadLaudoImage(userId: number, dataUrl: string, kind: "f
   const extension = match[1].split("/")[1] === "jpeg" ? "jpg" : match[1].split("/")[1];
   const stored = await storagePut(`laudos/${userId}/${kind}-${Date.now()}.${extension}`, bytes, match[1]);
   return stored.url;
+}
+
+export function getLaudoImageStorageKey(userId: number, url: string) {
+  const key = url.replace(/^\/manus-storage\//, "");
+  if (!key.startsWith(`laudos/${userId}/`)) throw new Error("A foto não pertence ao laudo atual.");
+  return key;
+}
+
+export async function prepareLaudoPhotosForPdf(userId: number, photoUrls: string[]) {
+  return Promise.all(photoUrls.map(async (url, index) => {
+    if (url.startsWith("data:image/")) return url;
+    const key = getLaudoImageStorageKey(userId, url);
+    const response = await fetch(await storageGetSignedUrl(key));
+    if (!response.ok) throw new Error(`Não foi possível preparar a foto ${index + 1} para o PDF.`);
+    const contentType = response.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+    return `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+  }));
 }
 
 export async function updateLaudoProfile(userId: number, name: string, cargo: string) {

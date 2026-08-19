@@ -577,3 +577,12 @@
 - [x] Fazer Zurich entrar no ranking de prioridade somente após orçamento aceito
 - [x] Manter Zurich sem prioridade quando apenas enviado ou quando orçamento for recusado
 - [x] Cobrir cliente, tipo, PDF, fotos, logos e regras Zurich com testes, TypeScript e build
+
+# Rodada 49 — Renderização final do Laudo
+
+- [x] Reduzir espaçamento das logos e aproximar o telefone no cabeçalho institucional
+- [x] Remover o texto institucional desnecessário do documento e do PDF
+- [x] Trocar a etapa interna de pré-visualização por download direto no preview do laudo
+- [x] Corrigir definitivamente a incorporação de fotos e anotações no PDF final
+- [x] Preservar ordem, proporção e posicionamento das fotos no documento
+- [x] Cobrir cabeçalho, fotos, download, TypeScript, testes e build sem alterar outros fluxos
