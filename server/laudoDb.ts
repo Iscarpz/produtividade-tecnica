@@ -25,6 +25,13 @@ export function deriveLaudoBrandAndProduct(modelo: string) {
   return { marca: found[0], produto: value(modelo).replace(found[1], "").trim() };
 }
 
+export function extractCustomerNameFromCall(text?: string | null) {
+  const source = value(text);
+  if (!source) return "";
+  const match = /(?:^|\n|\r)\s*(?:CONSUMIDOR|CLIENTE|NOME(?:\s+DO\s+CLIENTE)?)\s*:\s*([\s\S]*?)(?=(?:\s{2,}|\n|\r)(?:TELEFONE|TEL|SERIAL|GARANTIA|CAUSA|DESCRIÇÃO|DEFEITO|SITUAÇÃO|SLA)\s*:|$)/i.exec(source);
+  return value(match?.[1]).replace(/\s+/g, " ");
+}
+
 async function audit(userId: number, laudoId: number, numeroChamado: string, tecnicoResponsavel: string, acao: string, detalhes?: string) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   await db.insert(laudoAuditLogs).values({ userId, laudoId, numeroChamado, tecnicoResponsavel, acao, detalhes: detalhes || null });
@@ -34,7 +41,7 @@ export async function getLaudoPrefill(userId: number, chamadoId: number) {
   const [call, user] = await Promise.all([getCall(userId, chamadoId), (await getDb())?.select().from(users).where(eq(users.id, userId)).limit(1)]);
   if (!call) throw new Error("Chamado não encontrado");
   const derived = deriveLaudoBrandAndProduct(call.modelo);
-  return { chamadoId: call.id, numeroChamado: call.numeroOs, marca: derived.marca, produto: derived.produto, numeroSerie: call.serial, defeitoReclamado: call.queixa, avaliacaoTecnica: value(call.diagnostico), inspecaoVisual: call.inspecaoVisual || "", responsavelTecnico: user?.[0]?.name || "" };
+  return { chamadoId: call.id, numeroChamado: call.numeroOs, marca: derived.marca, nomeCliente: extractCustomerNameFromCall(call.queixaOriginal), produto: derived.produto, numeroSerie: call.serial, defeitoReclamado: call.queixa, avaliacaoTecnica: value(call.diagnostico), inspecaoVisual: call.inspecaoVisual || "", responsavelTecnico: user?.[0]?.name || "" };
 }
 
 export async function listLaudos(userId: number, search?: string, marca?: LaudoBrand) {

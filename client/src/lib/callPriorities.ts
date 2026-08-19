@@ -1,4 +1,4 @@
-export type OpenCall = { id: number; status: string; dataEntrada: Date | string | number; dataInicioAndamento?: Date | string | number | null; dataFinalizacao?: Date | string | number | null };
+export type OpenCall = { id: number; status: string; prioridadeZurich?: boolean; dataEntrada: Date | string | number; dataInicioAndamento?: Date | string | number | null; dataFinalizacao?: Date | string | number | null };
 export type QueueOrder = "all" | "oldest" | "newest";
 
 export function callAgeInDays(call: OpenCall, now = new Date()) {
@@ -18,7 +18,7 @@ export function sortMyQueue<T extends OpenCall>(calls: T[], order: QueueOrder, n
 
 export function attentionGroups<T extends OpenCall>(calls: T[], now = new Date()) {
   const byOldest = (a: T, b: T) => callAgeInDays(b, now) - callAgeInDays(a, now);
-  const zurich = calls.filter((call) => call.status === "Zurich").sort(byOldest);
+  const zurich = calls.filter((call) => call.status === "Zurich" && call.prioridadeZurich === true).sort(byOldest);
   const andamento = calls.filter((call) => call.status === "EM ANDAMENTO");
   return {
     zurich,

@@ -53,4 +53,22 @@ describe("Laudo Creator nativo — recursos preservados", () => {
     expect(source).not.toContain("Cargo / função");
     expect(source).not.toContain("cargoTecnico");
   });
+
+  it("oferece FEATUREPHONE, preenche o cliente do chamado e monta o cabeçalho institucional solicitado", () => {
+    expect(source).toContain('"FEATUREPHONE"');
+    expect(source).toContain("nomeCliente: p.nomeCliente || current.nomeCliente");
+    expect(documentSource).toContain("Positivo Tecnologia");
+    expect(documentSource).toContain("81.243.735/0019-77");
+    expect(documentSource).toContain("Rua João Bettega, 5200 - Cidade Industrial");
+    expect(documentSource).toContain("Curitiba - PR");
+    expect(documentSource).toContain("Tel: (41) 3316-7500");
+    expect(documentSource).toContain("grid-cols-2");
+    expect(documentSource).toContain("LAUDO TÉCNICO - Nº");
+    expect(documentSource).toContain("Data de Emissão:");
+  });
+
+  it("carrega cada foto antes de incorporá-la ao PDF final", () => {
+    expect(documentSource).toContain("Não foi possível carregar a foto");
+    expect(documentSource).toContain("pdf.addImage(image");
+  });
 });

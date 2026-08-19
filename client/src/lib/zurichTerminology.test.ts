@@ -13,8 +13,8 @@ describe("terminologia Zurich", () => {
     expect(OPEN_STATUSES).not.toContain("ZURICH");
   });
 
-  it("separa chamados Zurich no grupo de atenção necessário", () => {
-    const groups = attentionGroups([{ id: 1, status: "Zurich", dataEntrada: new Date("2026-08-01T00:00:00Z") }], new Date("2026-08-14T00:00:00Z"));
+  it("separa somente chamados Zurich com orçamento aceito no grupo de atenção necessário", () => {
+    const groups = attentionGroups([{ id: 1, status: "Zurich", prioridadeZurich: true, dataEntrada: new Date("2026-08-01T00:00:00Z") }, { id: 2, status: "Zurich", prioridadeZurich: false, dataEntrada: new Date("2026-08-01T00:00:00Z") }], new Date("2026-08-14T00:00:00Z"));
     expect(groups.zurich.map((call) => call.id)).toEqual([1]);
   });
 });

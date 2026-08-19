@@ -567,3 +567,13 @@
 - [x] Preservar a descrição original extraída apenas como referência expansível
 - [x] Manter validações de campos obrigatórios e todos os fluxos de criação existentes
 - [x] Cobrir edição, confirmação, TypeScript, testes e build
+
+# Rodada 48 — Laudo Creator e prioridade Zurich
+
+- [x] Adicionar FEATUREPHONE às opções de tipo de produto do Laudo Creator
+- [x] Preencher automaticamente o nome do cliente a partir do chamado, preservando edição manual
+- [x] Reestruturar o cabeçalho do PDF com dados institucionais à esquerda e logos 2x2 à direita
+- [x] Garantir que fotos e anotações sejam incorporadas no PDF final, na ordem definida
+- [x] Fazer Zurich entrar no ranking de prioridade somente após orçamento aceito
+- [x] Manter Zurich sem prioridade quando apenas enviado ou quando orçamento for recusado
+- [x] Cobrir cliente, tipo, PDF, fotos, logos e regras Zurich com testes, TypeScript e build

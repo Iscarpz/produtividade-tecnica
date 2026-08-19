@@ -40,10 +40,17 @@ export async function listCalls(userId: number, status?: string, search?: string
   const filters = [eq(calls.userId, userId)];
   if (status) filters.push(eq(calls.status, status as any));
   if (search) filters.push(or(sql`${calls.numeroOs} like ${`%${search}%`}`, sql`${calls.serial} like ${`%${search}%`}`) as any);
-  return db.select().from(calls).where(and(...filters)).orderBy(desc(calls.createdAt));
+  return withZurichPriority(await db.select().from(calls).where(and(...filters)).orderBy(desc(calls.createdAt)));
+}
+
+async function withZurichPriority<T extends { id: number; status: string }>(rows: T[]) {
+  const db = await getDb(); if (!db || !rows.length) return rows.map((row) => ({ ...row, prioridadeZurich: false }));
+  const approvals = await db.select({ chamadoId: history.chamadoId }).from(history).where(and(inArray(history.chamadoId, rows.map((row) => row.id)), eq(history.evento, "Orçamento aprovado")));
+  const approvedIds = new Set(approvals.map((item) => item.chamadoId));
+  return rows.map((row) => ({ ...row, prioridadeZurich: row.status === "Zurich" && approvedIds.has(row.id) }));
 }
 export async function listTeamUsers() { const db = await getDb(); if (!db) return []; return db.select({ id: users.id, name: users.name, email: users.email, role: users.role, accountStatus: users.accountStatus, createdAt: users.createdAt }).from(users).where(ne(users.role, "admin")).orderBy(asc(users.name)); }
-export async function listTeamCalls(userId?: number) { const db = await getDb(); if (!db) return []; const team = await listTeamUsers(); const ids = userId ? team.filter((member) => member.id === userId).map((member) => member.id) : team.map((member) => member.id); if (!ids.length) return []; return db.select().from(calls).where(inArray(calls.userId, ids)).orderBy(desc(calls.createdAt)); }
+export async function listTeamCalls(userId?: number) { const db = await getDb(); if (!db) return []; const team = await listTeamUsers(); const ids = userId ? team.filter((member) => member.id === userId).map((member) => member.id) : team.map((member) => member.id); if (!ids.length) return []; return withZurichPriority(await db.select().from(calls).where(inArray(calls.userId, ids)).orderBy(desc(calls.createdAt))); }
 export async function getCall(userId: number, id: number) { const db = await getDb(); if (!db) return undefined; const row = await db.select().from(calls).where(and(eq(calls.id, id), eq(calls.userId, userId))).limit(1); return row[0]; }
 export async function getCallByOs(userId: number, numeroOs: string) { const db = await getDb(); if (!db) return undefined; const row = await db.select().from(calls).where(and(eq(calls.userId, userId), eq(calls.numeroOs, numeroOs))).limit(1); return row[0]; }
 export async function updateUserProfile(userId: number, name: string) { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.update(users).set({ name: name.trim(), updatedAt: new Date() }).where(eq(users.id, userId)); return db.select().from(users).where(eq(users.id, userId)).limit(1).then((rows) => rows[0]); }
@@ -145,8 +152,9 @@ export async function transitionCall(userId: number, id: number, action: string)
   const call = await getCall(userId, id); if (!call) throw new Error("Chamado não encontrado");
   const transition = transitions[action]; if (!isAllowedTransition(call.status, action)) throw new Error("Ação não disponível para o status atual");
   const now = new Date();
-  await db.update(calls).set({ status: transition.status, dataInicioAndamento: transition.startsWork && !call.dataInicioAndamento ? now : call.dataInicioAndamento, dataFinalizacao: transition.closed ? now : null, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
-  await db.insert(history).values({ chamadoId: id, userId, evento: transition.label, statusAnterior: call.status, statusNovo: transition.status, createdAt: now });
+  const nextStatus = action === "Orçamento aprovado" && call.status === "Zurich" ? "Zurich" : transition.status;
+  await db.update(calls).set({ status: nextStatus, dataInicioAndamento: transition.startsWork && !call.dataInicioAndamento ? now : call.dataInicioAndamento, dataFinalizacao: transition.closed ? now : null, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
+  await db.insert(history).values({ chamadoId: id, userId, evento: transition.label, statusAnterior: call.status, statusNovo: nextStatus, createdAt: now });
   if (transition.event) await db.insert(productivityEvents).values({ chamadoId: id, userId, tipoEvento: transition.event, createdAt: now });
   return getCallBundle(userId, id);
 }
