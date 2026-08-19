@@ -131,6 +131,22 @@ export async function prepareLaudoPhotosForPdf(userId: number, photoUrls: string
   }));
 }
 
+async function storedImageAsDataUrl(url: string, index: number) {
+  if (url.startsWith("data:image/")) return url;
+  const key = url.replace(/^\/manus-storage\//, "");
+  const response = await fetch(await storageGetSignedUrl(key));
+  if (!response.ok) throw new Error(`Não foi possível preparar a imagem ${index + 1} para o PDF.`);
+  const contentType = response.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+  return `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+}
+
+export async function prepareLaudoPdfAssets(userId: number, photoUrls: string[]) {
+  const [fotos, settings] = await Promise.all([prepareLaudoPhotosForPdf(userId, photoUrls), getLaudoSettings()]);
+  const logoUrls = [settings?.logoPositivo, settings?.logoInfinix, settings?.logoVaio, settings?.logoCompaq];
+  const preparedLogos = await Promise.all(logoUrls.map((url, index) => url ? storedImageAsDataUrl(url, index) : Promise.resolve(null)));
+  return { fotos, logos: { logoPositivo: preparedLogos[0], logoInfinix: preparedLogos[1], logoVaio: preparedLogos[2], logoCompaq: preparedLogos[3] } };
+}
+
 export async function updateLaudoProfile(userId: number, name: string, cargo: string) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   await db.update(users).set({ name: value(name), cargo: value(cargo), updatedAt: new Date() }).where(eq(users.id, userId));

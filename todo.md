@@ -586,3 +586,13 @@
 - [x] Corrigir definitivamente a incorporação de fotos e anotações no PDF final
 - [x] Preservar ordem, proporção e posicionamento das fotos no documento
 - [x] Cobrir cabeçalho, fotos, download, TypeScript, testes e build sem alterar outros fluxos
+
+# Rodada 50 — Emissão confiável e ordem das fotos
+
+- [x] Implementar reorganização das fotos por arrastar e soltar, preservando a ordem escolhida no preview e no PDF
+- [x] Exibir numeração visual das páginas diretamente na pré-visualização do laudo
+- [x] Revisar o layout efetivo do cabeçalho no documento exportado e compactar logos e telefone
+- [x] Garantir carregamento e incorporação obrigatória de fotos anotadas no PDF final
+- [x] Garantir que Fazer download dispare o download real de um arquivo PDF no navegador
+- [x] Eliminar cores OKLCH da camada usada para gerar o PDF sem alterar a identidade TECBASE
+- [x] Executar emissão real com múltiplas fotos, validar PDF baixado e cobrir regressões com testes
