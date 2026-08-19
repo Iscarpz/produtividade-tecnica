@@ -229,6 +229,20 @@ describe("CallDetail — laudo e peças", () => {
     expect(screen.queryByRole("button", { name: "Salvar dados técnicos" })).not.toBeInTheDocument();
   });
 
+  it("mantém observações longas localmente e salva somente ao sair do campo", async () => {
+    renderDetail();
+    const observation = screen.getByRole("textbox", { name: "Observações" });
+    const text = `Registro complementar com acentuação, USB-C/HDMI e caracteres especiais — ${"detalhe técnico. ".repeat(90)}`;
+    fireEvent.focus(observation);
+    fireEvent.change(observation, { target: { value: text } });
+    expect(observation).toHaveValue(text);
+    expect(mocked.updateTechnicalMutate).not.toHaveBeenCalled();
+    fireEvent.blur(observation);
+    expect(mocked.updateTechnicalMutate).toHaveBeenCalledWith({ id: 12, observacoes: text });
+    await act(async () => { mocked.updateTechnicalSuccess?.({}, { id: 12, observacoes: text }); });
+    expect(screen.getByRole("status")).toHaveTextContent("Observações salvas");
+  });
+
   it("explica quais campos impedem a geração quando o script está incompleto", () => {
     renderDetail();
     fireEvent.click(screen.getByRole("button", { name: "GERAR SCRIPT TÉCNICO" }));

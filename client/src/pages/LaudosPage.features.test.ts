@@ -28,15 +28,22 @@ describe("Laudo Creator nativo — emissão confiável", () => {
     writeFileSync("/tmp/tecbase-laudo-validation.pdf", binary);
   });
 
+  it.each([2, 3, 4])("emite registro fotográfico sem erro com %i evidências", (totalFotos) => {
+    const pdf = buildLaudoPdf({ ...laudoData, fotos: Array.from({ length: totalFotos }, () => pixelPng) }, null);
+    expect(pdf.getNumberOfPages()).toBe(2);
+    expect(Buffer.from(pdf.output("arraybuffer")).subarray(0, 4).toString()).toBe("%PDF");
+  });
+
   it("dispara o download do arquivo PDF no navegador", async () => {
     const click = vi.fn(); const remove = vi.fn(); const anchor = { href: "", download: "", style: {}, click, remove };
     vi.stubGlobal("document", { createElement: vi.fn(() => anchor), body: { appendChild: vi.fn() } });
     vi.stubGlobal("URL", { createObjectURL: vi.fn(() => "blob:laudo"), revokeObjectURL: vi.fn() });
     vi.stubGlobal("window", { setTimeout: vi.fn((callback: () => void) => { callback(); return 1; }) });
-    await generateLaudoPdf(laudoData, null);
+    const blob = await generateLaudoPdf(laudoData, null);
     expect(anchor.download).toBe("Laudo_60006451515.pdf");
     expect(click).toHaveBeenCalledOnce();
     expect(remove).toHaveBeenCalledOnce();
+    expect(blob.size).toBeGreaterThan(0);
     vi.unstubAllGlobals();
   });
 

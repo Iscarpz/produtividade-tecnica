@@ -27,4 +27,22 @@ describe("regras de transição dos chamados", () => {
     expect(isAllowedTransition(resolveNextCallStatus("Zurich", "Orçamento aprovado")!, "Finalizar")).toBe(true);
     expect(resolveNextCallStatus("Zurich", "Orçamento recusado")).toBe("RECUSADO");
   });
+
+  it.each([
+    ["RECEBIDO", "Iniciar andamento", "EM ANDAMENTO"],
+    ["EM ANDAMENTO", "Enviar para PP", "AGUARDANDO PP"],
+    ["EM ANDAMENTO", "Enviar para Orçamento", "AGUARDANDO ORÇAMENTO"],
+    ["EM ANDAMENTO", "Enviar para Zurich", "Zurich"],
+    ["AGUARDANDO PP", "Peça recebida", "EM ANDAMENTO"],
+    ["AGUARDANDO PP", "Troca", "TROCA"],
+    ["AGUARDANDO ORÇAMENTO", "Orçamento aprovado", "EM ANDAMENTO"],
+    ["AGUARDANDO ORÇAMENTO", "Orçamento recusado", "RECUSADO"],
+    ["Zurich", "Orçamento aprovado", "EM ANDAMENTO"],
+    ["Zurich", "Orçamento recusado", "RECUSADO"],
+    ["EM ANDAMENTO", "Finalizar", "FINALIZADO"],
+    ["FINALIZADO", "Reabrir chamado", "EM ANDAMENTO"],
+  ] as const)("mantém a sequência operacional %s → %s → %s", (from, action, to) => {
+    expect(isAllowedTransition(from, action)).toBe(true);
+    expect(resolveNextCallStatus(from, action)).toBe(to);
+  });
 });

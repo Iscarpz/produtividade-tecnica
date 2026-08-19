@@ -651,3 +651,13 @@
 - [x] Bloquear abertura com número de chamado já cadastrado, mostrando apenas o status atual
 - [x] Preservar status, prioridades, permissões, identidade e todos os fluxos não especificados
 - [x] Validar TypeScript, build, anexos, observações, Laudo, movimentações e regressões antes da publicação
+
+# Rodada 58 — Auditoria final de estabilidade
+
+- [x] Auditar status, transições, contadores, filas, prioridades, datas e permissões
+- [x] Auditar criação, parser, OCR, duplicidade, reincidência, edição e persistência de chamados
+- [x] Auditar diagnóstico, observações, reparos, peças, script técnico e exclusão
+- [x] Auditar Laudo Creator, fotos, anotações, PDF, download, armazenamento e anexos
+- [x] Auditar Dashboard, filtros, atualização sem F5, navegação, modais, estados vazios e responsividade
+- [x] Executar testes de falhas, valores extremos, repetição de ações, concorrência e regressão
+- [x] Corrigir somente falhas comprovadas, revalidar e consolidar relatório objetivo da auditoria

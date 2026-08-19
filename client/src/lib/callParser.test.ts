@@ -58,6 +58,16 @@ Descrição: Aparelho retornou da assistência com problema na câmera.`;
     expect(parseCallText(text)).toEqual({ numeroOs: "60006451515", modelo: "VAIO TL12 VJTL21B0111B", serial: "4AJ99R29", garantia: "GARANTIA", causa: "CÂMERA COM FALHA", queixa: "Aparelho retornou da assistência com problema na câmera." });
   });
 
+  it("tolera texto colado com espaços especiais, CRLF, acentos e campos fora de ordem", () => {
+    const text = "Descrição：\u00a0Não liga após atualização de firmware.\r\nS/N - ABCD-12345\r\nGarantia: FORA DE GARANTIA\r\nProduto: POSITIVO / INFINIX SMART 10\r\nCausa: FALHA NO BOOT\r\nNúmero O.S.: 60006459999";
+    expect(parseCallText(text)).toEqual({ numeroOs: "60006459999", serial: "ABCD-12345", modelo: "INFINIX SMART 10", queixa: "Não liga após atualização de firmware.", garantia: "FORA DE GARANTIA", causa: "FALHA NO BOOT" });
+  });
+
+  it("preserva termos técnicos em inglês e caracteres especiais na queixa organizada", () => {
+    const text = "Chamado: 60006458888\nSerial: ZXCVB-98765\nModelo: VAIO FE14\nSintoma: USB-C/HDMI não reconhece; BIOS v2.1 retorna error code 0xA1.";
+    expect(parseCallText(text)).toEqual({ numeroOs: "60006458888", serial: "ZXCVB-98765", modelo: "VAIO FE14", queixa: "USB-C/HDMI não reconhece; BIOS v2.1 retorna error code 0xA1." });
+  });
+
   it.each([
     ["VAIO POSITIVO / TABLET VAIO TL12 VJTL21B0311B", "VAIO TL12 VJTL21B0311B"],
     ["POSITIVO / INFINIX SMART 10 PRATA PST", "INFINIX SMART 10 PRATA PST"],
