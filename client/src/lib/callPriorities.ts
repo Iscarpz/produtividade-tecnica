@@ -18,8 +18,8 @@ export function sortMyQueue<T extends OpenCall>(calls: T[], order: QueueOrder, n
 
 export function attentionGroups<T extends OpenCall>(calls: T[], now = new Date()) {
   const byOldest = (a: T, b: T) => callAgeInDays(b, now) - callAgeInDays(a, now);
-  const zurich = calls.filter((call) => call.status === "Zurich" && call.prioridadeZurich === true).sort(byOldest);
-  const andamento = calls.filter((call) => call.status === "EM ANDAMENTO");
+  const zurich = calls.filter((call) => call.status === "EM ANDAMENTO" && call.prioridadeZurich === true).sort(byOldest);
+  const andamento = calls.filter((call) => call.status === "EM ANDAMENTO" && call.prioridadeZurich !== true);
   return {
     zurich,
     nearTen: andamento.filter((call) => { const age = callAgeInDays(call, now); return age >= 7 && age < 10; }).sort(byOldest),

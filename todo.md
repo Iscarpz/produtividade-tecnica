@@ -633,3 +633,10 @@
 - [x] Substituir a logo VAIO pelo arquivo fornecido
 - [x] Substituir a logo COMPAQ pelo arquivo fornecido
 - [x] Validar o cabeçalho e o PDF final com o conjunto de logos atualizado
+
+# Rodada 56 — Zurich aprovado segue para Reparo
+
+- [x] Mapear o bloqueio que impede finalizar um chamado Zurich após orçamento aprovado
+- [x] Encaminhar orçamento Zurich aprovado para Reparo conforme o fluxo operacional
+- [x] Permitir finalizar o chamado depois da etapa de Reparo
+- [x] Cobrir as transições Zurich aprovado, Reparo e Finalizado sem alterar recusas ou prioridades

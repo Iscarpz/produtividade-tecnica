@@ -6,8 +6,8 @@ const ago = (days: number) => new Date(now.getTime() - days * 86_400_000);
 
 describe("prioridades de operação", () => {
   const calls = [
-    { id: 1, status: "Zurich", prioridadeZurich: true, dataEntrada: ago(3) },
-    { id: 2, status: "Zurich", prioridadeZurich: true, dataEntrada: ago(15) },
+    { id: 1, status: "EM ANDAMENTO", prioridadeZurich: true, dataEntrada: ago(3) },
+    { id: 2, status: "EM ANDAMENTO", prioridadeZurich: true, dataEntrada: ago(15) },
     { id: 10, status: "Zurich", prioridadeZurich: false, dataEntrada: ago(20) },
     { id: 3, status: "EM ANDAMENTO", dataEntrada: ago(9) },
     { id: 4, status: "EM ANDAMENTO", dataEntrada: ago(8) },
@@ -24,8 +24,8 @@ describe("prioridades de operação", () => {
     expect([...groups.zurich, ...groups.nearTen, ...groups.nearThirty]).not.toContainEqual(expect.objectContaining({ id: 7 }));
   });
   it("ordena Minha Fila por mais antigos ou mais recentes sem mudar status", () => {
-    expect(sortMyQueue(calls, "oldest", now).map((call) => call.id)).toEqual([5, 6, 3, 4]);
-    expect(sortMyQueue(calls, "newest", now).map((call) => call.id)).toEqual([4, 3, 6, 5]);
+    expect(sortMyQueue(calls, "oldest", now).map((call) => call.id)).toEqual([5, 6, 2, 3, 4, 1]);
+    expect(sortMyQueue(calls, "newest", now).map((call) => call.id)).toEqual([1, 4, 3, 2, 6, 5]);
   });
 
   it("mantém prioridade pelo recebimento mesmo quando o andamento começou depois", () => {

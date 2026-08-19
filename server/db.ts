@@ -47,7 +47,7 @@ async function withZurichPriority<T extends { id: number; status: string }>(rows
   const db = await getDb(); if (!db || !rows.length) return rows.map((row) => ({ ...row, prioridadeZurich: false }));
   const approvals = await db.select({ chamadoId: history.chamadoId }).from(history).where(and(inArray(history.chamadoId, rows.map((row) => row.id)), eq(history.evento, "Orçamento aprovado")));
   const approvedIds = new Set(approvals.map((item) => item.chamadoId));
-  return rows.map((row) => ({ ...row, prioridadeZurich: row.status === "Zurich" && approvedIds.has(row.id) }));
+  return rows.map((row) => ({ ...row, prioridadeZurich: row.status === "EM ANDAMENTO" && approvedIds.has(row.id) }));
 }
 export async function listTeamUsers() { const db = await getDb(); if (!db) return []; return db.select({ id: users.id, name: users.name, email: users.email, role: users.role, accountStatus: users.accountStatus, createdAt: users.createdAt }).from(users).where(ne(users.role, "admin")).orderBy(asc(users.name)); }
 export async function listTeamCalls(userId?: number) { const db = await getDb(); if (!db) return []; const team = await listTeamUsers(); const ids = userId ? team.filter((member) => member.id === userId).map((member) => member.id) : team.map((member) => member.id); if (!ids.length) return []; return withZurichPriority(await db.select().from(calls).where(inArray(calls.userId, ids)).orderBy(desc(calls.createdAt))); }
@@ -147,12 +147,14 @@ const transitions: Record<string, { status: any; event?: any; label: string; clo
   "Recusado": { status: "RECUSADO", label: "Chamado recusado", closed: true, from: ["AGUARDANDO ORÇAMENTO", "Zurich"] },
 };
 export function isAllowedTransition(currentStatus: string, action: string) { const transition = transitions[action]; return Boolean(transition && transition.from.includes(currentStatus)); }
+export function resolveNextCallStatus(currentStatus: string, action: string) { const transition = transitions[action]; return isAllowedTransition(currentStatus, action) ? transition.status : undefined; }
 export async function transitionCall(userId: number, id: number, action: string) {
   const db = await getDb(); if (!db) throw new Error("Banco indisponível");
   const call = await getCall(userId, id); if (!call) throw new Error("Chamado não encontrado");
   const transition = transitions[action]; if (!isAllowedTransition(call.status, action)) throw new Error("Ação não disponível para o status atual");
   const now = new Date();
-  const nextStatus = action === "Orçamento aprovado" && call.status === "Zurich" ? "Zurich" : transition.status;
+  const nextStatus = resolveNextCallStatus(call.status, action);
+  if (!nextStatus) throw new Error("Ação não disponível para o status atual");
   await db.update(calls).set({ status: nextStatus, dataInicioAndamento: transition.startsWork && !call.dataInicioAndamento ? now : call.dataInicioAndamento, dataFinalizacao: transition.closed ? now : null, updatedAt: now }).where(and(eq(calls.id, id), eq(calls.userId, userId)));
   await db.insert(history).values({ chamadoId: id, userId, evento: transition.label, statusAnterior: call.status, statusNovo: nextStatus, createdAt: now });
   if (transition.event) await db.insert(productivityEvents).values({ chamadoId: id, userId, tipoEvento: transition.event, createdAt: now });
