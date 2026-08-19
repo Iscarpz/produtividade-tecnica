@@ -661,3 +661,9 @@
 - [x] Auditar Dashboard, filtros, atualização sem F5, navegação, modais, estados vazios e responsividade
 - [x] Executar testes de falhas, valores extremos, repetição de ações, concorrência e regressão
 - [x] Corrigir somente falhas comprovadas, revalidar e consolidar relatório objetivo da auditoria
+
+# Documentação — Explicação institucional do TECBASE
+
+- [x] Consolidar a descrição técnica detalhada das funcionalidades, regras, dados e arquitetura
+- [x] Elaborar a apresentação acessível do TECBASE para público não técnico
+- [x] Revisar consistência entre as duas versões e entregar os documentos
