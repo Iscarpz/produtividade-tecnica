@@ -559,3 +559,11 @@
 - [x] Preservar a descrição bruta como referência sem substituí-la pela queixa organizada
 - [x] Cobrir extração, síntese, conferência e confirmação para evitar nova regressão
 - [x] Validar TypeScript, testes, build e o fluxo visual de abertura
+
+# Rodada 47 — Edição da queixa organizada
+
+- [x] Permitir editar a queixa organizada diretamente na conferência antes da confirmação
+- [x] Usar a versão editada como queixa do chamado criado
+- [x] Preservar a descrição original extraída apenas como referência expansível
+- [x] Manter validações de campos obrigatórios e todos os fluxos de criação existentes
+- [x] Cobrir edição, confirmação, TypeScript, testes e build
