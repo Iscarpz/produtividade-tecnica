@@ -2,9 +2,12 @@ import { and, desc, eq, like, or } from "drizzle-orm";
 import { laudoAuditLogs, laudos, laudoSettings, users } from "../drizzle/schema";
 import { getCall, getDb } from "./db";
 import { storageGetSignedUrl, storagePut } from "./storage";
+import sharp from "sharp";
 
 export const LAUDO_BRANDS = ["Positivo", "Infinix", "Vaio", "Compaq"] as const;
 export type LaudoBrand = (typeof LAUDO_BRANDS)[number];
+const PDF_PHOTO_MAX_BYTES = 84 * 1024;
+const PDF_LOGO_MAX_BYTES = 14 * 1024;
 export type LaudoInput = {
   chamadoId?: number | null; numeroChamado: string; dataEmissao: string; marca: LaudoBrand;
   nomeCliente: string; contato: string; enderecoCliente: string; cidadeCliente: string; estadoCliente: string;
@@ -107,10 +110,16 @@ export async function updateLaudoSettings(userId: number, data: { logoPositivo?:
 export async function uploadLaudoImage(userId: number, dataUrl: string, kind: "foto" | "logo") {
   const match = /^data:(image\/(?:jpeg|png|webp|gif|bmp));base64,(.+)$/i.exec(dataUrl);
   if (!match) throw new Error("Formato de imagem inválido");
-  const bytes = Buffer.from(match[2], "base64");
+  let bytes = Buffer.from(match[2], "base64");
   if (bytes.byteLength > 10 * 1024 * 1024) throw new Error("A imagem deve ter no máximo 10MB");
-  const extension = match[1].split("/")[1] === "jpeg" ? "jpg" : match[1].split("/")[1];
-  const stored = await storagePut(`laudos/${userId}/${kind}-${Date.now()}.${extension}`, bytes, match[1]);
+  let contentType = match[1];
+  let extension = contentType.split("/")[1] === "jpeg" ? "jpg" : contentType.split("/")[1];
+  if (kind === "foto") {
+    bytes = await sharp(bytes, { animated: false, failOn: "none" }).rotate().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+    contentType = "image/jpeg";
+    extension = "jpg";
+  }
+  const stored = await storagePut(`laudos/${userId}/${kind}-${Date.now()}.${extension}`, bytes, contentType);
   return stored.url;
 }
 
@@ -120,15 +129,39 @@ export function getLaudoImageStorageKey(userId: number, url: string) {
   return key;
 }
 
+function imageBytesFromDataUrl(source: string) {
+  const match = /^data:image\/(?:jpeg|png|webp|gif|bmp);base64,(.+)$/i.exec(source);
+  if (!match) throw new Error("Imagem inválida para o PDF.");
+  return Buffer.from(match[1], "base64");
+}
+
+async function compactJpegForPdf(source: string, maxBytes: number, maxWidth: number, maxHeight: number) {
+  const original = imageBytesFromDataUrl(source);
+  let best: Buffer | null = null;
+  for (const width of [maxWidth, Math.round(maxWidth * 0.82), Math.round(maxWidth * 0.68)]) {
+    for (const quality of [64, 54, 44, 36]) {
+      const encoded = await sharp(original, { animated: false, failOn: "none" }).rotate().resize({ width, height: Math.round(maxHeight * (width / maxWidth)), fit: "inside", withoutEnlargement: true }).flatten({ background: "#FFFFFF" }).jpeg({ quality, mozjpeg: true }).toBuffer();
+      if (!best || encoded.byteLength < best.byteLength) best = encoded;
+      if (encoded.byteLength <= maxBytes) return `data:image/jpeg;base64,${encoded.toString("base64")}`;
+    }
+  }
+  return `data:image/jpeg;base64,${best!.toString("base64")}`;
+}
+
 export async function prepareLaudoPhotosForPdf(userId: number, photoUrls: string[]) {
-  return Promise.all(photoUrls.map(async (url, index) => {
-    if (url.startsWith("data:image/")) return url;
-    const key = getLaudoImageStorageKey(userId, url);
-    const response = await fetch(await storageGetSignedUrl(key));
-    if (!response.ok) throw new Error(`Não foi possível preparar a foto ${index + 1} para o PDF.`);
-    const contentType = response.headers.get("content-type")?.split(";")[0] || "image/jpeg";
-    return `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
-  }));
+  const prepared: string[] = [];
+  for (const [index, url] of Array.from(photoUrls.entries())) {
+    let source = url;
+    if (!source.startsWith("data:image/")) {
+      const key = getLaudoImageStorageKey(userId, source);
+      const response = await fetch(await storageGetSignedUrl(key));
+      if (!response.ok) throw new Error(`Não foi possível preparar a foto ${index + 1} para o PDF.`);
+      const contentType = response.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+      source = `data:${contentType};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+    }
+    prepared.push(await compactJpegForPdf(source, PDF_PHOTO_MAX_BYTES, 900, 900));
+  }
+  return prepared;
 }
 
 async function storedImageAsDataUrl(url: string, index: number) {
@@ -143,7 +176,10 @@ async function storedImageAsDataUrl(url: string, index: number) {
 export async function prepareLaudoPdfAssets(userId: number, photoUrls: string[]) {
   const [fotos, settings] = await Promise.all([prepareLaudoPhotosForPdf(userId, photoUrls), getLaudoSettings()]);
   const logoUrls = [settings?.logoPositivo, settings?.logoInfinix, settings?.logoVaio, settings?.logoCompaq];
-  const preparedLogos = await Promise.all(logoUrls.map(async (url, index) => { try { return url ? await storedImageAsDataUrl(url, index) : null; } catch { return null; } }));
+  const preparedLogos: Array<string | null> = [];
+  for (const [index, url] of Array.from(logoUrls.entries())) {
+    try { preparedLogos.push(url ? await compactJpegForPdf(await storedImageAsDataUrl(url, index), PDF_LOGO_MAX_BYTES, 300, 160) : null); } catch { preparedLogos.push(null); }
+  }
   return { fotos, logos: { logoPositivo: preparedLogos[0], logoInfinix: preparedLogos[1], logoVaio: preparedLogos[2], logoCompaq: preparedLogos[3] } };
 }
 

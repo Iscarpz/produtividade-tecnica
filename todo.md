@@ -667,3 +667,11 @@
 - [x] Consolidar a descrição técnica detalhada das funcionalidades, regras, dados e arquitetura
 - [x] Elaborar a apresentação acessível do TECBASE para público não técnico
 - [x] Revisar consistência entre as duas versões e entregar os documentos
+
+# Rodada 59 — PDF leve e geração responsiva
+
+- [x] Medir tamanho e custo de processamento do PDF atual com fotos de alta resolução
+- [x] Reduzir o PDF final para menos de 600 KB sem comprometer a legibilidade das evidências
+- [x] Processar e comprimir fotos fora do caminho crítico de renderização do preview
+- [x] Exibir progresso não bloqueante e impedir múltiplas gerações simultâneas
+- [x] Validar tempo de emissão, download, fotos, anotações e integridade do PDF otimizado
