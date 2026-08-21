@@ -12,7 +12,7 @@ import { useLocation } from "wouter";
 
 const periodLabel: Record<string, string> = { hoje: "Hoje", semana: "Esta semana", mes: "Este mês", ano: "Este ano" };
 
-function rangeFor(period: string) {
+export function rangeFor(period: string) {
   const end = new Date();
   const from = new Date(end);
   if (period === "hoje") from.setHours(0, 0, 0, 0);

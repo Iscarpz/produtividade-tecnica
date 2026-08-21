@@ -12,6 +12,7 @@ import { usersRouter } from "./userRouter";
 import { createLaudo, deleteLaudo, duplicateLaudo, getLaudo, getLaudoPrefill, getLaudoSettings, LAUDO_BRANDS, listLaudoAudit, listLaudos, prepareLaudoPdfAssets, prepareLaudoPhotosForPdf, recordLaudoPdf, updateLaudoSettings, uploadLaudoImage } from "./laudoDb";
 
 const dateRange = z.object({ from: z.coerce.date(), to: z.coerce.date() });
+const callsListInput = z.object({ status: z.string().optional(), search: z.string().optional(), from: z.coerce.date().optional(), to: z.coerce.date().optional() }).refine((input) => (!input.from && !input.to) || Boolean(input.from && input.to), { message: "Informe a data inicial e final do período" });
 const imageBiosInput = z.object({ modelo: z.string().min(1).max(255), marca: z.string().min(1).max(120), tipo: z.enum(["IMAGEM", "BIOS"]), versao: z.string().min(1).max(3000), ativo: z.boolean().optional(), observacao: z.string().max(3000).optional() });
 const laudoInput = z.object({ chamadoId: z.number().optional().nullable(), numeroChamado: z.string().min(1).max(64), dataEmissao: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), marca: z.enum(LAUDO_BRANDS), nomeCliente: z.string().min(1).max(255), contato: z.string().min(1).max(255), enderecoCliente: z.string().min(1).max(3000), cidadeCliente: z.string().min(1).max(160), estadoCliente: z.string().length(2), produto: z.string().min(1).max(255), tipoProduto: z.string().min(1).max(160), numeroSerie: z.string().min(5).max(128), bilheteSeguro: z.string().max(128).optional(), defeitoReclamado: z.string().min(1).max(3000), avaliacaoTecnica: z.string().min(1).max(3000), conclusao: z.string().min(1).max(5000), mauUso: z.boolean(), responsavelTecnico: z.string().min(1).max(255), fotos: z.array(z.string().min(1)).min(2).max(4), status: z.enum(["rascunho", "finalizado"]) });
 export const appRouter = router({
@@ -25,7 +26,7 @@ export const appRouter = router({
   calls: router({
     extractFromImage: protectedProcedure.input(z.object({ imageDataUrl: z.string().min(32).max(12000000) })).mutation(({ input }) => extractCallFromImage(input.imageDataUrl)),
     formalizeComplaint: protectedProcedure.input(z.object({ queixaOriginal: z.string().min(1).max(3000) })).mutation(({ input }) => formalizeComplaint(input.queixaOriginal)),
-    list: protectedProcedure.input(z.object({ status: z.string().optional(), search: z.string().optional() }).optional()).query(({ ctx, input }) => listCalls(ctx.user.id, input?.status, input?.search)),
+    list: protectedProcedure.input(callsListInput.optional()).query(({ ctx, input }) => input?.from && input.to ? listCalls(ctx.user.id, input.status, input.search, input.from, input.to) : listCalls(ctx.user.id, input?.status, input?.search)),
     listTeam: teamManagerProcedure.input(z.object({ userId: z.number().int().positive().optional() }).optional()).query(({ input }) => listTeamCalls(input?.userId)),
     detail: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
       const bundle = await getCallBundle(ctx.user.id, input.id);

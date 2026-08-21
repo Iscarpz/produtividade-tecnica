@@ -675,3 +675,11 @@
 - [x] Processar e comprimir fotos fora do caminho crítico de renderização do preview
 - [x] Exibir progresso não bloqueante e impedir múltiplas gerações simultâneas
 - [x] Validar tempo de emissão, download, fotos, anotações e integridade do PDF otimizado
+
+# Rodada 60 — Atualização operacional, filtros e download do laudo
+
+- [x] Invalidar imediatamente indicadores e filas após qualquer ação que altere chamado ou status
+- [x] Aplicar filtro de período Hoje, Esta semana, Este mês, Este ano e Personalizado às categorias da barra lateral
+- [x] Manter o filtro lateral somente como visualização, sem alterar status ou dados operacionais
+- [x] Garantir que o PDF seja anexado ao chamado e baixado automaticamente no mesmo clique
+- [x] Validar ações de chamado, todos os períodos nas filas e emissão com anexo e download simultâneos

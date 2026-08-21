@@ -61,16 +61,18 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
   const refreshOperationalData = async () => {
     await Promise.all([
       utils.calls.list.invalidate(),
+      utils.calls.listTeam.invalidate(),
       utils.calls.detail.invalidate({ id }),
       utils.calls.generateScript.invalidate({ id }),
       utils.productivity.range.invalidate(),
+      utils.productivity.teamRange.invalidate(),
       utils.historical.troca.invalidate(),
       utils.historical.recusado.invalidate(),
     ]);
     onRefresh();
   };
   const transition = trpc.calls.transition.useMutation({ onSuccess: async (_result, variables) => { await refreshOperationalData(); toast.success(variables.action === "Reabrir chamado" ? "Chamado reaberto" : "Status atualizado"); if (["Finalizar", "Enviar para PP", "Enviar para Orçamento", "Enviar para Zurich"].includes(variables.action)) { onClose(); setLocation("/"); } }, onError: (error) => toast.error(error.message) });
-  const updateData = trpc.calls.updateData.useMutation({ onSuccess: () => { toast.success("Dados atualizados"); setEditing(false); onRefresh(); }, onError: (error) => toast.error(error.message) });
+  const updateData = trpc.calls.updateData.useMutation({ onSuccess: async () => { toast.success("Dados atualizados"); setEditing(false); await refreshOperationalData(); }, onError: (error) => toast.error(error.message) });
   const updateTechnicalData = trpc.calls.updateTechnicalData.useMutation({ onMutate: (variables) => { setTechnicalSaveState("saving"); if (variables.diagnostico !== undefined) setDiagnosticSaveState("saving"); if (variables.observacoes !== undefined) setObservationsSaveState("saving"); }, onSuccess: (_result, variables) => { if (variables.diagnostico !== undefined) { lastPersistedTechnical.current = { ...lastPersistedTechnical.current, diagnostico: variables.diagnostico }; setDiagnosticSaveState("saved"); } if (variables.observacoes !== undefined) { lastPersistedTechnical.current = { ...lastPersistedTechnical.current, observacoes: variables.observacoes }; setObservationsSaveState("saved"); } setTechnicalSaveState("saved"); utils.calls.generateScript.invalidate({ id }); utils.calls.detail.invalidate({ id }); onRefresh(); }, onError: (error, variables) => { if (variables.diagnostico !== undefined) setDiagnosticSaveState("error"); if (variables.observacoes !== undefined) setObservationsSaveState("error"); setTechnicalSaveState("error"); toast.error(error.message); } });
   const addRepair = trpc.calls.addRepair.useMutation({ onSuccess: async () => { setRepair(emptyRepair()); await refreshOperationalData(); toast.success("Peça adicionada e Script Técnico atualizado"); }, onError: (error) => toast.error(error.message) });
   const updateRepair = trpc.calls.updateRepair.useMutation({ onSuccess: async () => { setEditingRepairId(null); setRepair(emptyRepair()); await refreshOperationalData(); toast.success("Peça atualizada e Script Técnico atualizado"); }, onError: (error) => toast.error(error.message) });
@@ -82,7 +84,7 @@ export function CallDetail({ id, onClose, onRefresh }: { id: number; onClose: ()
     await queryClient.cancelQueries({ queryKey: detailQueryKey, exact: true });
     queryClient.removeQueries({ queryKey: detailQueryKey, exact: true });
     onClose();
-    await Promise.all([utils.calls.list.invalidate(), utils.productivity.range.invalidate(), utils.historical.troca.invalidate(), utils.historical.recusado.invalidate()]);
+    await Promise.all([utils.calls.list.invalidate(), utils.calls.listTeam.invalidate(), utils.productivity.range.invalidate(), utils.productivity.teamRange.invalidate(), utils.historical.troca.invalidate(), utils.historical.recusado.invalidate()]);
     onRefresh();
     toast.success("Chamado excluído permanentemente");
   }, onError: (error) => toast.error(error.message) });

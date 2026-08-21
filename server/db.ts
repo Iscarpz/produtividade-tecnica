@@ -36,11 +36,21 @@ export async function createInvitedUser(data: { invitationId: number; name: stri
 export async function setUserAccountStatus(userId: number, accountStatus: "ACTIVE" | "REFUSED" | "REVOKED") { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.update(users).set({ accountStatus }).where(eq(users.id, userId)); }
 export async function setUserRole(userId: number, role: "user" | "manager") { const db = await getDb(); if (!db) throw new Error("Banco indisponível"); await db.update(users).set({ role }).where(eq(users.id, userId)); }
 
-export async function listCalls(userId: number, status?: string, search?: string) {
+export async function listCalls(userId: number, status?: string, search?: string, statusFrom?: Date, statusTo?: Date) {
   const db = await getDb(); if (!db) return [];
   const filters = [eq(calls.userId, userId)];
   if (status) filters.push(eq(calls.status, status as any));
   if (search) filters.push(or(sql`${calls.numeroOs} like ${`%${search}%`}`, sql`${calls.serial} like ${`%${search}%`}`) as any);
+  if (status && statusFrom && statusTo) {
+    if (status === "RECEBIDO") {
+      filters.push(gte(calls.dataEntrada, statusFrom), lte(calls.dataEntrada, statusTo));
+    } else {
+      const movements = await db.select({ chamadoId: history.chamadoId }).from(history).where(and(eq(history.userId, userId), eq(history.statusNovo, status as any), gte(history.createdAt, statusFrom), lte(history.createdAt, statusTo)));
+      const calledIds = Array.from(new Set(movements.map((movement) => movement.chamadoId)));
+      if (!calledIds.length) return [];
+      filters.push(inArray(calls.id, calledIds));
+    }
+  }
   return withZurichPriority(await db.select().from(calls).where(and(...filters)).orderBy(desc(calls.createdAt)));
 }
 

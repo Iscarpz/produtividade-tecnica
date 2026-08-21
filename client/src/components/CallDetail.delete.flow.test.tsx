@@ -25,8 +25,8 @@ const mocked = vi.hoisted(() => ({
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     useUtils: () => ({
-      calls: { list: { invalidate: mocked.invalidate }, detail: { invalidate: mocked.invalidate }, generateScript: { invalidate: mocked.invalidate } },
-      productivity: { range: { invalidate: mocked.invalidate } },
+      calls: { list: { invalidate: mocked.invalidate }, listTeam: { invalidate: mocked.invalidate }, detail: { invalidate: mocked.invalidate }, generateScript: { invalidate: mocked.invalidate } },
+      productivity: { range: { invalidate: mocked.invalidate }, teamRange: { invalidate: mocked.invalidate } },
       historical: { troca: { invalidate: mocked.invalidate }, recusado: { invalidate: mocked.invalidate } },
     }),
     calls: {
